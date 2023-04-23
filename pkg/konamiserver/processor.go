@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"time"
 	"tx55/pkg/packet"
 )
 
@@ -16,6 +17,9 @@ func (s *Server) mainLoop() error {
 			return err
 		}
 		if err = conn.(*net.TCPConn).SetKeepAlive(true); err != nil {
+			return err
+		}
+		if err = conn.(*net.TCPConn).SetKeepAlivePeriod(time.Minute); err != nil {
 			return err
 		}
 
