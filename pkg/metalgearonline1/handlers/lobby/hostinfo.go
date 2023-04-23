@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"gorm.io/gorm/clause"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -39,7 +40,7 @@ func (h GetHostInfoHandler) HandleArgs(sess *session.Session, args *ArgsGetHostI
 
 	game := models.Game{}
 	game.ID = uint(args.GameID)
-	if tx := sess.DB.First(&game); tx.Error != nil {
+	if tx := sess.DB.Preload(clause.Associations).First(&game); tx.Error != nil {
 		out = append(out, ResponseGetHostInfo{ErrorCode: handlers.ErrDatabase.Code})
 		err = handlers.ErrDatabase
 		return
@@ -50,22 +51,14 @@ func (h GetHostInfoHandler) HandleArgs(sess *session.Session, args *ArgsGetHostI
 		return
 	}
 
-	hostConn := models.Connection{}
-	hostConn.ID = game.ConnectionID
-	if tx := sess.DB.First(&hostConn); tx.Error != nil {
-		out = append(out, ResponseGetHostInfo{ErrorCode: handlers.ErrDatabase.Code})
-		err = handlers.ErrDatabase
-		return
-	}
-
 	hostInfo := ResponseGetHostInfo{
 		ErrorCode:  0,
-		RemotePort: hostConn.RemotePort,
-		LocalPort:  hostConn.LocalPort,
+		RemotePort: game.Connection.RemotePort,
+		LocalPort:  game.Connection.LocalPort,
 	}
 
-	copy(hostInfo.RemoteAddr[:], hostConn.RemoteAddr)
-	copy(hostInfo.LocalAddr[:], hostConn.LocalAddr)
+	copy(hostInfo.RemoteAddr[:], game.Connection.RemoteAddr)
+	copy(hostInfo.LocalAddr[:], game.Connection.LocalAddr)
 
 	out = append(out, hostInfo)
 	return
