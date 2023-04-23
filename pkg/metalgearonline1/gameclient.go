@@ -24,11 +24,13 @@ func (c *GameClient) OnConnected(conn net.Conn, out chan packet.Packet) (err err
 }
 
 func (c *GameClient) OnDisconnected() {
-	c.Session.Log.WithFields(c.Session.LogFields()).Info("Disconnected")
+	if c.Session.User != nil {
+		c.Session.Log.WithFields(c.Session.LogFields()).Info("Disconnected")
+	}
 
 	if c.Session.IsHost() {
 		if game, err := c.Session.Game(); err == nil {
-			game.Stop(c.Session.DB)
+			_ = game.Stop(c.Session.DB)
 		} else {
 			c.Session.Log.WithFields(c.Session.LogFields()).WithError(err).Error("Failed to stop game")
 		}
@@ -45,7 +47,7 @@ func (c *GameClient) OnPacket(p *packet.Packet, out chan packet.Packet) error {
 	entry := c.Session.Log.WithFields(c.Session.LogFields()).WithField("cmd", cmd.String())
 
 	// Ping packets are too frequent to log
-	if cmd > 0x0010 && cmd != types.ClientHostPingInformation {
+	if cmd > 0x0010 && cmd != types.ClientHostPingInformation && c.Session.IP != "127.0.0.1" {
 		entry.Info("Received packet")
 	} else {
 		entry.Debug("Received packet")
@@ -77,7 +79,7 @@ func (c *GameClient) OnPacket(p *packet.Packet, out chan packet.Packet) error {
 					"len":         p.Length(),
 				}).WithFields(c.Session.LogFields()).WithError(err).Error("failed to marshal reply")
 			} else {
-				if cmd > 0x100 {
+				if cmd > 0x100 && c.Session.IP != "127.0.0.1" {
 					c.Session.Log.WithFields(log.Fields{
 						"cmd":         types.PacketType(p.Type()).String(),
 						"reply":       i,
