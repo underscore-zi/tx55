@@ -55,9 +55,10 @@ func (c *client) reader() {
 	var lookAside *packet.Packet
 	for {
 		buf := make([]byte, 1024)
-		n, connError := c.conn.Read(buf)
-		if n > 0 {
-			p, err := packet.Unmarshal(c.server.Config.Key, buf[:n])
+		bytesLeft, connError := c.conn.Read(buf)
+		for bytesLeft > 0 && len(buf) > 0 {
+			buf = buf[:bytesLeft]
+			consumed, p, err := packet.Unmarshal(c.server.Config.Key, buf)
 
 			if p.Sequence() == c.seq.in {
 				c.seq.in++
@@ -75,15 +76,20 @@ func (c *client) reader() {
 				// finally nil the lookAside buffer, if we need it again it'll get set again
 				if (*lookAside).Type() != p.Type() {
 					c.server.Log.WithFields(log.Fields{
-						"lookaside_type": asHex((*lookAside).Type()),
-						"packet_type":    asHex(p.Type()),
-					}).Error("lookaside type mismatch")
+						"look-aside_type": asHex((*lookAside).Type()),
+						"packet_type":     asHex(p.Type()),
+					}).Error("look-aside type mismatch")
 				} else {
 					(*lookAside).SetData(append((*lookAside).Data(), p.Data()...))
-					err = p.Unmarshal(c.server.Config.Key, (*lookAside).Marshal(c.server.Config.Key))
+					consumed, err = p.Unmarshal(c.server.Config.Key, (*lookAside).Marshal(c.server.Config.Key))
+					consumed -= len((*lookAside).Data())
 				}
 				lookAside = nil
 			}
+
+			// Consuming after the look-aside is processed to allow it to be accounted for
+			buf = buf[consumed:]
+			bytesLeft -= consumed
 
 			if err == packet.ErrPacketTooShort {
 				lookAside = &p

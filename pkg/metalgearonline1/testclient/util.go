@@ -59,6 +59,6 @@ func (c *TestClient) Receive() (*packet.Packet, error) {
 		return nil, err
 	}
 
-	p, err := packet.Unmarshal(c.Key, bs[:n])
+	_, p, err := packet.Unmarshal(c.Key, bs[:n])
 	return &p, err
 }

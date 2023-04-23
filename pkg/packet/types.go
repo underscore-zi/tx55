@@ -4,7 +4,6 @@ import (
 	"errors"
 )
 
-var ErrPacketTooLong = errors.New("packet too long")
 var ErrPacketTooShort = errors.New("packet too short")
 var ErrPacketHashMismatch = errors.New("packet hash mismatch")
 
@@ -16,7 +15,7 @@ type RawHeader struct {
 }
 
 type Packet interface {
-	Unmarshal(key []byte, data []byte) error
+	Unmarshal(key []byte, data []byte) (int, error)
 	Marshal(key []byte) []byte
 
 	SetType(uint16)

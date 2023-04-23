@@ -57,38 +57,45 @@ func (p *packet) Hash() [16]byte {
 	return result
 }
 
-func (p *packet) Unmarshal(key []byte, data []byte) error {
+func (p *packet) Unmarshal(key []byte, data []byte) (consumed int, err error) {
 	if len(data) < 24 {
-		return ErrPacketTooShort
+		err = ErrPacketTooShort
+		return
 	}
 
-	// decrypt data
+	decrypted := make([]byte, len(data))
 	for i := 0; i < len(data); i++ {
-		data[i] ^= key[i%len(key)]
+		decrypted[i] = data[i] ^ key[i%len(key)]
 	}
 
-	err := binary.Read(bytes.NewBuffer(data), binary.BigEndian, &p.RawHeader)
+	err = binary.Read(bytes.NewBuffer(decrypted), binary.BigEndian, &p.RawHeader)
 	if err != nil {
-		return err
+		return
 	}
-	p.Payload = data[24:]
+	consumed += binary.Size(p.RawHeader)
+	p.Payload = decrypted[consumed:]
 
 	// Check Length
 	if uint16(len(p.Payload)) < p.RawHeader.Len {
-		return ErrPacketTooShort
+		consumed = 0
+		err = ErrPacketTooShort
+		return
 	} else if uint16(len(p.Payload)) > p.RawHeader.Len {
-		// TODO: This tends to happen when we have multiple packets at once, should handle that better
-		return ErrPacketTooLong
+		p.Payload = p.Payload[:p.RawHeader.Len]
 	}
 
 	// Check hash
 	var hash [16]byte
-	copy(hash[:], data[8:24])
+	copy(hash[:], decrypted[8:24])
 	if p.Hash() != hash {
-		return ErrPacketHashMismatch
+		consumed = 0
+		err = ErrPacketHashMismatch
+		return
 	}
 
-	return nil
+	consumed = binary.Size(p.RawHeader) + len(p.Payload)
+	err = nil
+	return
 }
 
 func (p *packet) Marshal(key []byte) []byte {
@@ -100,13 +107,13 @@ func (p *packet) Marshal(key []byte) []byte {
 	buf.Write(p.RawHeader.Bytes())
 	buf.Write(p.Payload)
 
-	bytes := buf.Bytes()
+	bs := buf.Bytes()
 
-	for i := 0; i < len(bytes); i++ {
-		bytes[i] ^= key[i%len(key)]
+	for i := 0; i < len(bs); i++ {
+		bs[i] ^= key[i%len(key)]
 	}
 
-	return bytes
+	return bs
 }
 
 func (p *packet) Header() RawHeader {
@@ -195,8 +202,8 @@ func New() Packet {
 	return &packet{}
 }
 
-func Unmarshal(key, data []byte) (Packet, error) {
+func Unmarshal(key, data []byte) (int, Packet, error) {
 	p := &packet{}
-	err := p.Unmarshal(key, data)
-	return p, err
+	consumed, err := p.Unmarshal(key, data)
+	return consumed, p, err
 }
