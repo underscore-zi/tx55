@@ -24,7 +24,7 @@ func (h HostPlayerJoinHandler) ArgumentTypes() (out []reflect.Type) {
 	return
 }
 
-func (h HostPlayerJoinHandler) Handle(sess *session.Session, packet *packet.Packet) (out []types.Response, err error) {
+func (h HostPlayerJoinHandler) Handle(_ *session.Session, _ *packet.Packet) (out []types.Response, err error) {
 	out = append(out, ResponseHostPlayerJoin{ErrorCode: handlers.ErrNotImplemented.Code})
 	err = handlers.ErrNotImplemented
 	return
@@ -43,6 +43,7 @@ func (h HostPlayerJoinHandler) HandleArgs(sess *session.Session, args *ArgsHostP
 	} else if err = game.AddPlayer(sess.DB, uint(args.UserID)); err != nil {
 		out = append(out, ResponseHostPlayerJoin{ErrorCode: handlers.ErrDatabase.Code})
 	} else {
+		sess.GameState.AddPlayer(args.UserID)
 		out = append(out, ResponseHostPlayerJoin{ErrorCode: 0, UserID: args.UserID})
 	}
 	return

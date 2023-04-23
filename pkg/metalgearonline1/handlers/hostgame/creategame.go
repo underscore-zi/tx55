@@ -25,7 +25,7 @@ func (h CreateGameHandler) ArgumentTypes() []reflect.Type {
 	}
 }
 
-func (h CreateGameHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h CreateGameHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, handlers.ErrNotImplemented
 }
 
@@ -63,7 +63,7 @@ func (h CreateGameHandler) HandleArgs(s *session.Session, args *types.CreateGame
 		return []types.Response{ResponseCreateGame{ErrorCode: handlers.ErrDatabase.Code}}, err
 	}
 
-	s.StartHosting(types.GameID(newGame.ID))
+	s.StartHosting(types.GameID(newGame.ID), args.Rules)
 
 	return []types.Response{ResponseCreateGame{ErrorCode: 0}}, nil
 }

@@ -3,21 +3,30 @@ package session
 import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"sync"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
 )
 
+type HostSession struct {
+	GameID       types.GameID
+	Rules        [15]types.GameRules
+	CurrentRound byte
+	Players      map[types.UserID]bool
+	Lock         sync.Mutex
+}
+
 type Session struct {
-	ID   string
-	User *models.User
-	DB   *gorm.DB
-	IP   string
+	ID        string
+	User      *models.User
+	GameState *HostSession
+	DB        *gorm.DB
+	IP        string
 	//ActiveConnection gets filled in with user controlled data when they first connect to a game lobby
 	ActiveConnection models.Connection
 
 	isHost  bool
 	LobbyID types.LobbyID
-	GameID  types.GameID
 	Log     logrus.FieldLogger
 }
 
@@ -26,7 +35,7 @@ func (s *Session) IsLoggedIn() bool {
 }
 
 func (s *Session) IsHost() bool {
-	return s.isHost && s.GameID > 0
+	return s.GameState != nil && s.GameState.GameID > 0
 }
 
 func (s *Session) LogFields() logrus.Fields {
@@ -45,7 +54,7 @@ func (s *Session) LogFields() logrus.Fields {
 
 	if s.IsHost() {
 		f["state"] = "hosting"
-		f["game"] = s.GameID
+		f["game"] = s.GameState.GameID
 	}
 	return f
 }

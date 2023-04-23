@@ -42,7 +42,7 @@ func (h HostPingInfoHandler) Handle(sess *session.Session, packet *packet.Packet
 		if ping.UserID == 0 {
 			break
 		}
-		tx := sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameID, ping.UserID).Update("ping", ping.Ping)
+		tx := sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, ping.UserID).Update("ping", ping.Ping)
 		if tx.Error != nil {
 			out = append(out, ResponseHostPingInfo{ErrorCode: handlers.ErrDatabase.Code})
 			err = tx.Error
