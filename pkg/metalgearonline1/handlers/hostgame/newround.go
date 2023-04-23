@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"gorm.io/gorm"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -37,19 +38,15 @@ func (h HostNewRoundHandler) HandleArgs(sess *session.Session, args *ArgsHostNew
 		return
 	}
 
-	var game *models.Game
-	if game, err = sess.Game(); err != nil {
+	game := &models.Game{Model: gorm.Model{ID: uint(sess.GameState.GameID)}}
+	tx := sess.DB.Model(game).Update("current_round", args.RoundID)
+	if tx != nil {
 		out = append(out, ResponseHostNewRound{ErrorCode: handlers.ErrDatabase.Code})
 		err = handlers.ErrDatabase
 		return
-	} else {
-		game.CurrentRound = args.RoundID
-		if tx := sess.DB.Save(game); tx.Error != nil {
-			out = append(out, ResponseHostNewRound{ErrorCode: handlers.ErrDatabase.Code})
-			err = handlers.ErrDatabase
-			return
-		}
 	}
+
+	sess.GameState.CurrentRound = args.RoundID
 	out = append(out, ResponseHostNewRound{ErrorCode: 0})
 	return
 }

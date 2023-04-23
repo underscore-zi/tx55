@@ -43,6 +43,7 @@ func (h HostPlayerLeaveHandler) HandleArgs(sess *session.Session, args *ArgsHost
 	} else if err = game.RemovePlayer(sess.DB, uint(args.UserID)); err != nil {
 		out = append(out, ResponseHostPlayerLeave{ErrorCode: handlers.ErrDatabase.Code})
 	} else {
+		sess.GameState.RemovePlayer(args.UserID)
 		out = append(out, ResponseHostPlayerLeave{ErrorCode: 0, UserID: args.UserID})
 	}
 	return
