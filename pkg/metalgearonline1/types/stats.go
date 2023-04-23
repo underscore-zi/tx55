@@ -51,6 +51,46 @@ type HostReportedStats struct {
 	Unknown3           uint32 `json:"unknown3"`
 }
 
+func (s *HostReportedStats) AddStats(stats HostReportedStats) {
+	s.Kills += stats.Kills
+	s.Deaths += stats.Deaths
+
+	if s.KillStreak < stats.KillStreak {
+		s.KillStreak = stats.KillStreak
+	}
+
+	if s.DeathStreak < stats.DeathStreak {
+		s.DeathStreak = stats.DeathStreak
+	}
+
+	s.Stuns += stats.Stuns
+	s.StunsReceived += stats.StunsReceived
+	s.SnakeFrags += stats.SnakeFrags
+	s.Points += stats.Points
+	s.Unknown1 += stats.Unknown1
+	s.Unknown2 += stats.Unknown2
+	s.TeamKills += stats.TeamKills
+	s.TeamStuns += stats.TeamStuns
+	s.RoundsPlayed += stats.RoundsPlayed
+	s.RoundsNoDeath += stats.RoundsNoDeath
+	s.KerotansForWin += stats.KerotansForWin
+	s.KerotansPlaced += stats.KerotansPlaced
+	s.RadioUses += stats.RadioUses
+	s.TextChatUses += stats.TextChatUses
+	s.CQCAttacks += stats.CQCAttacks
+	s.CQCAttacksReceived += stats.CQCAttacksReceived
+	s.HeadShots += stats.HeadShots
+	s.HeadShotsReceived += stats.HeadShotsReceived
+	s.TeamWins += stats.TeamWins
+	s.KillsWithScorpion += stats.KillsWithScorpion
+	s.KillsWithKnife += stats.KillsWithKnife
+	s.TimesEaten += stats.TimesEaten
+	s.Rolls += stats.Rolls
+	s.InfraredGoggleUses += stats.InfraredGoggleUses
+	s.PlayTime += stats.PlayTime
+	s.Unknown3 += stats.Unknown3
+}
+
 type GameTypeStatsWithRank struct {
 	Stats HostReportedStats `json:"stats"`
 	Rank  uint32            `json:"rank"`

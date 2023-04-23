@@ -51,36 +51,9 @@ type PlayerStats struct {
 }
 
 func (s *PlayerStats) AddStats(stats types.HostReportedStats) {
-	s.Kills += stats.Kills
-	s.Deaths += stats.Deaths
-	s.KillStreak += stats.KillStreak
-	s.DeathStreak += stats.DeathStreak
-	s.Stuns += stats.Stuns
-	s.StunsReceived += stats.StunsReceived
-	s.SnakeFrags += stats.SnakeFrags
-	s.Points += stats.Points
-	s.Unknown1 += stats.Unknown1
-	s.Unknown2 += stats.Unknown2
-	s.TeamKills += stats.TeamKills
-	s.TeamStuns += stats.TeamStuns
-	s.RoundsPlayed += stats.RoundsPlayed
-	s.RoundsNoDeath += stats.RoundsNoDeath
-	s.KerotansForWin += stats.KerotansForWin
-	s.KerotansPlaced += stats.KerotansPlaced
-	s.RadioUses += stats.RadioUses
-	s.TextChatUses += stats.TextChatUses
-	s.CQCAttacks += stats.CQCAttacks
-	s.CQCAttacksReceived += stats.CQCAttacksReceived
-	s.HeadShots += stats.HeadShots
-	s.HeadShotsReceived += stats.HeadShotsReceived
-	s.TeamWins += stats.TeamWins
-	s.KillsWithScorpion += stats.KillsWithScorpion
-	s.KillsWithKnife += stats.KillsWithKnife
-	s.TimesEaten += stats.TimesEaten
-	s.Rolls += stats.Rolls
-	s.InfraredGoggleUses += stats.InfraredGoggleUses
-	s.PlayTime += stats.PlayTime
-	s.Unknown3 += stats.Unknown3
+	dest := s.ToHostReportedStats()
+	dest.AddStats(stats)
+	s.FromHostReportedStats(dest)
 }
 
 func (s *PlayerStats) ToHostReportedStats() (out types.HostReportedStats) {
@@ -114,5 +87,39 @@ func (s *PlayerStats) ToHostReportedStats() (out types.HostReportedStats) {
 	out.InfraredGoggleUses = s.InfraredGoggleUses
 	out.PlayTime = s.PlayTime
 	out.Unknown3 = s.Unknown3
+	return
+}
+
+func (s *PlayerStats) FromHostReportedStats(in types.HostReportedStats) {
+	s.Kills = in.Kills
+	s.Deaths = in.Deaths
+	s.KillStreak = in.KillStreak
+	s.DeathStreak = in.DeathStreak
+	s.Stuns = in.Stuns
+	s.StunsReceived = in.StunsReceived
+	s.SnakeFrags = in.SnakeFrags
+	s.Points = in.Points
+	s.Unknown1 = in.Unknown1
+	s.Unknown2 = in.Unknown2
+	s.TeamKills = in.TeamKills
+	s.TeamStuns = in.TeamStuns
+	s.RoundsPlayed = in.RoundsPlayed
+	s.RoundsNoDeath = in.RoundsNoDeath
+	s.KerotansForWin = in.KerotansForWin
+	s.KerotansPlaced = in.KerotansPlaced
+	s.RadioUses = in.RadioUses
+	s.TextChatUses = in.TextChatUses
+	s.CQCAttacks = in.CQCAttacks
+	s.CQCAttacksReceived = in.CQCAttacksReceived
+	s.HeadShots = in.HeadShots
+	s.HeadShotsReceived = in.HeadShotsReceived
+	s.TeamWins = in.TeamWins
+	s.KillsWithScorpion = in.KillsWithScorpion
+	s.KillsWithKnife = in.KillsWithKnife
+	s.TimesEaten = in.TimesEaten
+	s.Rolls = in.Rolls
+	s.InfraredGoggleUses = in.InfraredGoggleUses
+	s.PlayTime = in.PlayTime
+	s.Unknown3 = in.Unknown3
 	return
 }

@@ -8,7 +8,7 @@ import (
 	"tx55/pkg/metalgearonline1/types"
 )
 
-func addMatchingFields(dest, src interface{}) error {
+func addMatchingFields(dest, src interface{}, blacklist []string) error {
 	destVal := reflect.ValueOf(dest)
 	if destVal.Kind() != reflect.Ptr || destVal.IsNil() {
 		return errors.New("dest must be a non-nil pointer")
@@ -24,6 +24,11 @@ func addMatchingFields(dest, src interface{}) error {
 	for i := 0; i < srcVal.NumField(); i++ {
 		srcField := srcVal.Type().Field(i)
 		srcFieldName := srcField.Name
+		for _, blacklisted := range blacklist {
+			if blacklisted == srcFieldName {
+				continue
+			}
+		}
 
 		if strings.HasSuffix(srcFieldName, "ID") {
 			continue
@@ -83,9 +88,17 @@ func GetPlayerStats(db *gorm.DB, UserID types.UserID) (allTimeStats, weeklyStats
 			panic("Invalid mode")
 		}
 
-		if err = addMatchingFields(&targetMode.Stats, &stat); err != nil {
+		if err = addMatchingFields(&targetMode.Stats, &stat, []string{"DeathStreak", "KillStreak"}); err != nil {
 			return
 		}
+
+		if stat.KillStreak > targetMode.Stats.KillStreak {
+			targetMode.Stats.KillStreak = stat.KillStreak
+		}
+		if stat.DeathStreak > targetMode.Stats.DeathStreak {
+			targetMode.Stats.DeathStreak = stat.DeathStreak
+		}
+
 	}
 
 	return
