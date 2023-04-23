@@ -37,7 +37,7 @@ func (g *Game) AddPlayer(db *gorm.DB, UserID uint) error {
 
 func (g *Game) RemovePlayer(db *gorm.DB, UserID uint) error {
 	if player, found := g.FindPlayer(db, UserID); found && !player.DeletedAt.Valid {
-		tx := db.Delete(player)
+		tx := db.Delete(&GamePlayers{}, player.ID)
 		return tx.Error
 	}
 	return ErrNotFound
@@ -69,7 +69,7 @@ func (g *Game) FindPlayer(db *gorm.DB, UserID uint) (*GamePlayers, bool) {
 
 func (g *Game) Stop(db *gorm.DB) error {
 	db.Model(&GamePlayers{}).Where("game_id = ?", g.ID).Delete(&GamePlayers{})
-	tx := db.Model(g).Delete(g)
+	tx := db.Delete(&Game{}, g.ID)
 	return tx.Error
 }
 

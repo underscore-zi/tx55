@@ -87,28 +87,6 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 		return
 	}
 
-	/*
-		// Weekly, all maps
-		stats = models.PlayerStats{}
-		if tx := sess.DB.FirstOrInit(&stats, map[string]interface{}{
-			"user_id": uint(args.UserID),
-			"period":  types.PeriodWeekly,
-			"mode":    rules.Mode,
-			"map":     types.MapAll,
-		}); tx.Error != nil {
-			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
-			err = tx.Error
-			return
-		}
-		stats.AddStats(args.Stats)
-		if tx := sess.DB.Save(&stats); tx.Error != nil {
-			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
-			err = tx.Error
-			return
-		}
-
-	*/
-
 	// All time, map specific
 	stats = models.PlayerStats{}
 	if tx := sess.DB.FirstOrInit(&stats, map[string]interface{}{
@@ -127,28 +105,6 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 		err = tx.Error
 		return
 	}
-
-	/*
-		// All time, all maps
-		stats = models.PlayerStats{}
-		if tx := sess.DB.FirstOrInit(&stats, map[string]interface{}{
-			"user_id": uint(args.UserID),
-			"period":  types.PeriodAllTime,
-			"mode":    rules.Mode,
-			"map":     types.MapAll,
-		}); tx.Error != nil {
-			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
-			err = tx.Error
-			return
-		}
-		stats.AddStats(args.Stats)
-		if tx := sess.DB.Save(&stats); tx.Error != nil {
-			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
-			err = tx.Error
-			return
-		}
-
-	*/
 
 	// Also need to track it in the game player stats
 	out = append(out, ResponseHostPlayerStats{ErrorCode: 0})
