@@ -147,12 +147,14 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 		u.PlayerSettings = *ps
 
 		// Create Game Settings
-		gameOpts, err := b64ToGameOptions(gameSettings)
-		if err != nil {
-			l.WithError(err).Error("Failed parsing game settings")
-			return konamiserver.HookResultContinue
+		if gameSettings != "" {
+			gameOpts, err := b64ToGameOptions(gameSettings)
+			if err != nil {
+				l.WithError(err).Error("Failed parsing game settings")
+				return konamiserver.HookResultContinue
+			}
+			gs.FromCreateGameOptions(&gameOpts)
 		}
-		gs.FromCreateGameOptions(&gameOpts)
 	}
 
 	_ = GormDb.Transaction(func(tx *gorm.DB) error {
@@ -161,12 +163,15 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 			return tx.Error
 		}
 
-		gs.UserID = u.ID
-		s.UserID = u.ID
+		if gameSettings != "" {
+			gs.UserID = u.ID
+			if tx = GormDb.Save(gs); tx.Error != nil {
+				l.WithError(tx.Error).Error("Failed saving game settings")
+			}
+		}
 
-		if tx = GormDb.Save(gs); tx.Error != nil {
-			l.WithError(tx.Error).Error("Failed saving game settings")
-		} else if tx = GormDb.Save(s); tx.Error != nil {
+		s.UserID = u.ID
+		if tx = GormDb.Save(s); tx.Error != nil {
 			l.WithError(tx.Error).Error("Failed saving session")
 		}
 		return tx.Error
