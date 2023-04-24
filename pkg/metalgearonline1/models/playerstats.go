@@ -18,14 +18,14 @@ type PlayerStats struct {
 	Period types.PlayerStatsPeriod
 
 	Rank               uint32 `json:"rank"`
-	Kills              uint32 `json:"kills"`
-	Deaths             uint32 `json:"deaths"`
+	Kills              int32  `json:"kills"`
+	Deaths             int32  `json:"deaths"`
 	KillStreak         uint16 `json:"kill_streak"`
 	DeathStreak        uint16 `json:"death_streak"`
 	Stuns              uint32 `json:"stuns"`
 	StunsReceived      uint32 `json:"stuns_received"`
 	SnakeFrags         uint32 `json:"snake_frags"`
-	Points             uint32 `json:"points"`
+	Points             int32  `json:"points"`
 	Unknown1           uint32 `json:"unknown1"`
 	Unknown2           uint32 `json:"unknown2"`
 	TeamKills          uint32 `json:"team_kills"`
