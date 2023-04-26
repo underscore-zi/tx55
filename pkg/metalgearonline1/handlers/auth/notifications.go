@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"reflect"
 	"time"
 	"tx55/pkg/metalgearonline1/handlers"
@@ -40,7 +39,6 @@ func (h GetNotificationsHandler) Handle(sess *session.Session, packet *packet.Pa
 	copy(notif.Body[:], []byte("This is a test notification."))
 	//out = append(out, notif)
 	out = append(out, ResponseNotificationsEnd{})
-	fmt.Println("sending notf")
 	return out, nil
 }
 
