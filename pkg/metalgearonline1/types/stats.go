@@ -48,7 +48,9 @@ type HostReportedStats struct {
 	Rolls              uint32
 	InfraredGoggleUses uint32
 	PlayTime           uint32
-	Unknown3           uint32
+	// Unknown3 on the Java server was labeled VSRating but that is unconfirmed since VSRating is sent in the overview
+	// packet and is not ever shown to be game-mode specific
+	Unknown3 uint32
 }
 
 func (s *HostReportedStats) AddStats(stats HostReportedStats) {
