@@ -64,6 +64,8 @@ func GetPlayerStats(db *gorm.DB, UserID types.UserID) (allTimeStats, weeklyStats
 		var target *types.PeriodStats
 		var targetMode *types.GameTypeStatsWithRank
 		switch stat.Period {
+		case types.PeriodArchive:
+			fallthrough
 		case types.PeriodAllTime:
 			target = &allTimeStats
 		case types.PeriodWeekly:

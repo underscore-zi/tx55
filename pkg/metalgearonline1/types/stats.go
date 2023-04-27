@@ -7,6 +7,7 @@ type PlayerStatsPeriod uint32
 const (
 	PeriodAllTime PlayerStatsPeriod = 0
 	PeriodWeekly  PlayerStatsPeriod = 1
+	PeriodArchive PlayerStatsPeriod = 2
 )
 
 type PeriodStats struct {
