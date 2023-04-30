@@ -9,7 +9,7 @@ import (
 // GET /api/v1/lobby/list => []LobbyJSON
 // GET /api/v1/game/list => []GameJSON
 // GET /api/v1/game/:game_id => GameJSON
-// GET /api/v1/stats/:user_id => []GamePlayerStats
+// GET /api/v1/stats/:user_id => []PlayerStatsJSON
 
 type UserJSON struct {
 	ID        uint      `json:"id"`
