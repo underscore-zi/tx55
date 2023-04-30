@@ -22,6 +22,8 @@ type User struct {
 	Password       string `gorm:"type:varchar(128)"`
 	HasEmblem      bool
 	EmblemText     []byte `gorm:"size:16"`
+	OverallRank    uint
+	WeeklyRank     uint
 	Sessions       []Session
 	PlayerSettings PlayerSettings
 	Connections    []Connection
