@@ -11,6 +11,11 @@ import (
 // GET /api/v1/game/:game_id => GameJSON
 // GET /api/v1/stats/:user_id => []PlayerStatsJSON
 
+type ResponseJSON struct {
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data"`
+}
+
 type UserJSON struct {
 	ID        uint      `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
