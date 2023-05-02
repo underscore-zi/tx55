@@ -92,6 +92,32 @@ const (
 	TeamSpectator = 0xFE
 )
 
+func (t Team) UniformString() string {
+	switch t {
+	case TeamGRU:
+		return "GRU"
+	case TeamKGB:
+		return "KGB"
+	case TeamOcelot:
+		return "Ocelot"
+	default:
+		return "Unknown"
+	}
+}
+
+func (t Team) ColorString() string {
+	switch t {
+	case TeamRed:
+		return "Red"
+	case TeamBlue:
+		return "Blue"
+	case TeamSpectator:
+		return "Spectator"
+	default:
+		return "Unknown"
+	}
+}
+
 type WeaponRestrictions byte
 
 const (
@@ -105,6 +131,29 @@ const (
 	WeaponRestrictionsKnifeOnly
 )
 
+func (w WeaponRestrictions) String() string {
+	switch w {
+	case WeaponRestrictionsNone:
+		return "None"
+	case WeaponRestrictionsNoPrimary:
+		return "No Primary"
+	case WeaponRestrictionsNoSecondary:
+		return "No Secondary"
+	case WeaponRestrictionsNoSupport:
+		return "No Support"
+	case WeaponRestrictionsPrimaryOnly:
+		return "Primary Only"
+	case WeaponRestrictionsSecondaryOnly:
+		return "Secondary Only"
+	case WeaponRestrictionsSupportOnly:
+		return "Support Only"
+	case WeaponRestrictionsKnifeOnly:
+		return "Knife Only"
+	default:
+		return "Unknown"
+	}
+}
+
 type VSRatingRestriction byte
 
 const (
@@ -112,6 +161,19 @@ const (
 	VSRatingRestrictionBelow VSRatingRestriction = 2
 	VSRatingRestrictionAbove VSRatingRestriction = 1
 )
+
+func (v VSRatingRestriction) String() string {
+	switch v {
+	case VSRatingRestrictionNone:
+		return "None"
+	case VSRatingRestrictionBelow:
+		return "Below"
+	case VSRatingRestrictionAbove:
+		return "Above"
+	default:
+		return "Unknown"
+	}
+}
 
 type GameRules struct {
 	Mode GameMode
