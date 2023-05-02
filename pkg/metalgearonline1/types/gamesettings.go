@@ -12,6 +12,23 @@ const (
 	ModeSneaking
 )
 
+func (g GameMode) String() string {
+	switch g {
+	case ModeDeathmatch:
+		return "Deathmatch"
+	case ModeTeamDeathmatch:
+		return "Team Deathmatch"
+	case ModeRescue:
+		return "Rescue"
+	case ModeCapture:
+		return "Capture"
+	case ModeSneaking:
+		return "Sneaking"
+	default:
+		return "Unknown"
+	}
+}
+
 type GameMap byte
 
 const (
@@ -29,6 +46,37 @@ const (
 	MapBrownTown
 	MapAll = 0xFF
 )
+
+func (g GameMap) String() string {
+	switch g {
+	case MapLostForest:
+		return "Lost Forest"
+	case MapGhostFactory:
+		return "Ghost Factory"
+	case MapCityUnderSiege:
+		return "City Under Siege"
+	case MapKillhouseA:
+		return "Killhouse A"
+	case MapKillhouseB:
+		return "Killhouse B"
+	case MapKillhouseC:
+		return "Killhouse C"
+	case MapSvyatogornyjEast:
+		return "Svyatogornyj East"
+	case MapMountaintop:
+		return "Mountaintop"
+	case MapGraninyGorkiLab:
+		return "Graniny Gorki Lab"
+	case MapPillboxPurgatory:
+		return "Pillbox Purgatory"
+	case MapHighIce:
+		return "High Ice"
+	case MapBrownTown:
+		return "Brown Town"
+	default:
+		return "Unknown"
+	}
+}
 
 type Team byte
 
