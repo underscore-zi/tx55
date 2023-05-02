@@ -6,10 +6,10 @@ import (
 )
 
 // GET /api/v1/user/:user_id => UserJSON
+// GET /api/v1/user/:user_id/stats => []PlayerStatsJSON
 // GET /api/v1/lobby/list => []LobbyJSON
 // GET /api/v1/game/list => []GameJSON
 // GET /api/v1/game/:game_id => GameJSON
-// GET /api/v1/stats/:user_id => []PlayerStatsJSON
 
 type ResponseJSON struct {
 	Success bool        `json:"success"`
@@ -61,12 +61,12 @@ type GamePlayersJSON struct {
 	DeletedAt time.Time `json:"deleted_at"`
 
 	UserID     uint       `json:"user_id"`
+	User       *UserJSON  `json:"user"`
 	Team       types.Team `json:"team"`
 	TeamString string     `json:"team_string"`
 	Kills      uint32     `json:"kills"`
 	Deaths     uint32     `json:"deaths"`
 	Score      uint32     `json:"score"`
-	Seconds    uint32     `json:"seconds"`
 	Ping       uint32     `json:"ping"`
 	WasKicked  bool       `json:"was_kicked"`
 }
@@ -108,11 +108,14 @@ type GameOptionsJSON struct {
 }
 
 type PlayerStatsJSON struct {
-	UserID    uint                    `json:"user_id"`
-	UpdatedAt time.Time               `json:"updated_at"`
-	Period    types.PlayerStatsPeriod `json:"period"`
-	Mode      types.GameMode          `json:"mode"`
-	Map       types.GameMap           `json:"map"`
+	UserID       uint                    `json:"user_id"`
+	UpdatedAt    time.Time               `json:"updated_at"`
+	Period       types.PlayerStatsPeriod `json:"period"`
+	PeriodString string                  `json:"period_string"`
+	Mode         types.GameMode          `json:"mode"`
+	ModeString   string                  `json:"mode_string"`
+	Map          types.GameMap           `json:"map"`
+	MapString    string                  `json:"map_string"`
 
 	// Rank will be the rank in the mode for the period. Though stats are broken down by map also, the rank value will only consider mode.
 	Rank uint32 `json:"rank"`
@@ -135,17 +138,17 @@ type PlayerStatsJSON struct {
 	// KerotansPlaced is the number of goals as snake when Mode is sneaking
 	KerotansPlaced uint32 `json:"kerotans_placed"`
 
-	RadioUses          uint32 `json:"radio_uses"`
-	TextChatUses       uint32 `json:"text_chat_uses"`
-	CQCAttacks         uint32 `json:"cqc_attacks"`
-	CQCAttacksReceived uint32 `json:"cqc_attacks_received"`
-	HeadShots          uint32 `json:"head_shots"`
-	HeadShotsReceived  uint32 `json:"head_shots_received"`
-	TeamWins           uint32 `json:"team_wins"`
-	KillsWithScorpion  uint32 `json:"kills_with_scorpion"`
-	KillsWithKnife     uint32 `json:"kills_with_knife"`
-	TimesEaten         uint32 `json:"times_eaten"`
-	Rolls              uint32 `json:"rolls"`
-	InfraredGoggleUses uint32 `json:"infrared_goggle_uses"`
-	PlayTime           uint32 `json:"play_time"`
+	RadioUses          uint32        `json:"radio_uses"`
+	TextChatUses       uint32        `json:"text_chat_uses"`
+	CQCAttacks         uint32        `json:"cqc_attacks"`
+	CQCAttacksReceived uint32        `json:"cqc_attacks_received"`
+	HeadShots          uint32        `json:"head_shots"`
+	HeadShotsReceived  uint32        `json:"head_shots_received"`
+	TeamWins           uint32        `json:"team_wins"`
+	KillsWithScorpion  uint32        `json:"kills_with_scorpion"`
+	KillsWithKnife     uint32        `json:"kills_with_knife"`
+	TimesEaten         uint32        `json:"times_eaten"`
+	Rolls              uint32        `json:"rolls"`
+	InfraredGoggleUses time.Duration `json:"infrared_goggle_uses"`
+	PlayTime           time.Duration `json:"play_time"`
 }
