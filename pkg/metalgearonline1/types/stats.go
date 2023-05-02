@@ -10,6 +10,19 @@ const (
 	PeriodArchive PlayerStatsPeriod = 2
 )
 
+func (p PlayerStatsPeriod) String() string {
+	switch p {
+	case PeriodAllTime:
+		return "All Time"
+	case PeriodWeekly:
+		return "Weekly"
+	case PeriodArchive:
+		return "Archive"
+	default:
+		return "Unknown"
+	}
+}
+
 type PeriodStats struct {
 	Period         PlayerStatsPeriod
 	Deathmatch     GameTypeStatsWithRank
