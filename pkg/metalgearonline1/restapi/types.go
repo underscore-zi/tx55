@@ -48,19 +48,27 @@ type GameJSON struct {
 	CurrentRound byte              `json:"current_round"`
 }
 
+type GameRuleJSON struct {
+	Map        types.GameMap  `json:"map"`
+	MapString  string         `json:"map_string"`
+	Mode       types.GameMode `json:"mode"`
+	ModeString string         `json:"mode_string"`
+}
+
 type GamePlayersJSON struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt time.Time `json:"deleted_at"`
 
-	UserID    uint       `json:"user_id"`
-	Team      types.Team `json:"team"`
-	Kills     uint32     `json:"kills"`
-	Deaths    uint32     `json:"deaths"`
-	Score     uint32     `json:"score"`
-	Seconds   uint32     `json:"seconds"`
-	Ping      uint32     `json:"ping"`
-	WasKicked bool       `json:"was_kicked"`
+	UserID     uint       `json:"user_id"`
+	Team       types.Team `json:"team"`
+	TeamString string     `json:"team_string"`
+	Kills      uint32     `json:"kills"`
+	Deaths     uint32     `json:"deaths"`
+	Score      uint32     `json:"score"`
+	Seconds    uint32     `json:"seconds"`
+	Ping       uint32     `json:"ping"`
+	WasKicked  bool       `json:"was_kicked"`
 }
 
 type GameOptionsJSON struct {
@@ -68,7 +76,7 @@ type GameOptionsJSON struct {
 	Description       string                    `json:"description"`
 	HasPassword       bool                      `json:"has_password"`
 	IsHostOnly        bool                      `json:"is_host_only"`
-	Rules             []types.GameRules         `json:"rules"`
+	Rules             []GameRuleJSON            `json:"rules"`
 	RedTeam           types.Team                `json:"red_team"`
 	BlueTeam          types.Team                `json:"blue_team"`
 	WeaponRestriction types.WeaponRestrictions  `json:"weapon_restriction"`
