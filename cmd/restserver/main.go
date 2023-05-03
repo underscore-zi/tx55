@@ -3,12 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/go-co-op/gocron"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
+	"time"
 	"tx55/pkg/configurations"
+	"tx55/pkg/metalgearonline1/crons"
 	"tx55/pkg/metalgearonline1/restapi"
 )
 
@@ -40,8 +43,16 @@ func main() {
 		return
 	}
 
-	server := restapi.NewServer(db)
+	scheduler := gocron.NewScheduler(time.UTC)
+	if err = crons.Schedule(scheduler, db); err != nil {
+		l.WithError(err).Error("Unable to schedule crons")
+		l.Error("Not starting scheduler")
+	} else {
+		l.Info("Starting scheduler")
+		scheduler.StartAsync()
+	}
 
+	server := restapi.NewServer(db)
 	if err := server.Engine.Run(fmt.Sprintf(":%d", *port)); err != nil {
 		panic(err)
 	}
