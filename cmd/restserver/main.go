@@ -19,6 +19,7 @@ var l = logrus.StandardLogger()
 
 func main() {
 	port := flag.Int("port", 8888, "Port to listen on")
+	noCrons := flag.Bool("no-crons", false, "Disable scheduled tasks")
 	configFile := flag.String("config", "", "Path to config file")
 	flag.Parse()
 
@@ -43,13 +44,15 @@ func main() {
 		return
 	}
 
-	scheduler := gocron.NewScheduler(time.UTC)
-	if err = crons.Schedule(scheduler, db); err != nil {
-		l.WithError(err).Error("Unable to schedule crons")
-		l.Error("Not starting scheduler")
-	} else {
-		l.Info("Starting scheduler")
-		scheduler.StartAsync()
+	if !*noCrons {
+		scheduler := gocron.NewScheduler(time.UTC)
+		if err = crons.Schedule(scheduler, db); err != nil {
+			l.WithError(err).Error("Unable to schedule crons")
+			return
+		} else {
+			l.Info("Starting scheduler")
+			scheduler.StartAsync()
+		}
 	}
 
 	server := restapi.NewServer(db)
