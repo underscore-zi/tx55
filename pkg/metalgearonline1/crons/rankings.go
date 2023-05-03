@@ -90,8 +90,6 @@ func UpdateRankings(db *gorm.DB) {
 	updateQuery := "UPDATE player_stats SET `rank` = (" + selectorQuery + ")"
 	if tx := db.Exec(updateQuery); tx.Error != nil {
 		l.WithError(tx.Error).Error("failed to update rankings")
-	} else if tx.RowsAffected == 0 {
-		l.Error("no rows affected")
 	}
 
 	// Update the Overall period(0) ranks in the users table
@@ -100,8 +98,6 @@ func UpdateRankings(db *gorm.DB) {
 	updateQuery = "UPDATE users SET overall_rank = (" + selectorQuery + ")"
 	if tx := db.Exec(updateQuery); tx.Error != nil {
 		l.WithError(tx.Error).Error("failed to update overall rankings")
-	} else if tx.RowsAffected == 0 {
-		l.Error("no rows affected")
 	}
 
 	// Update the Weekly period(1) ranks in the users table
@@ -109,7 +105,5 @@ func UpdateRankings(db *gorm.DB) {
 	updateQuery = "UPDATE users SET weekly_rank = (" + selectorQuery + ")"
 	if tx := db.Exec(updateQuery); tx.Error != nil {
 		l.WithError(tx.Error).Error("failed to update weekly rankings")
-	} else if tx.RowsAffected == 0 {
-		l.Error("no rows affected")
 	}
 }
