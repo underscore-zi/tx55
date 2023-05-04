@@ -3,6 +3,7 @@ package restapi
 import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"strconv"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
 )
@@ -35,14 +36,20 @@ func getUserStats(c *gin.Context) {
 
 func getUserGames(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
-	userId := c.Param("user_id")
+	userIdParam := c.Param("user_id")
+
+	userId, err := strconv.Atoi(userIdParam)
+	if err != nil {
+		Error(c, 400, "Invalid user id")
+		return
+	}
 
 	// I didn't want to dive into writing a query here but Gorm doesn't support nesting Joins
 	// so using preload this would give us three queries, or I could split it into 2 (player entries, and a game JOIN game_options)
 	// or write the fairly simple query myself and get it done in one
 
 	var gamesPlayed []GamePlayedJSON
-	query := "SELECT p.game_id, go.name as game_name, go.has_password as game_has_password, p.created_at, p.deleted_at, p.was_kicked, p.score as points, p.kills, p.deaths FROM game_players p JOIN games g ON p.game_id = g.id JOIN game_options go ON g.game_options_id = go.id WHERE p.user_id = ? ORDER BY p.deleted_at DESC"
+	query := "SELECT p.game_id, go.name as game_name, go.has_password as game_has_password, go.user_id as game_host_id, p.created_at, p.deleted_at, p.was_kicked, p.score as points, p.kills, p.deaths FROM game_players p JOIN games g ON p.game_id = g.id JOIN game_options go ON g.game_options_id = go.id WHERE p.user_id = ? ORDER BY p.deleted_at DESC"
 	if err := db.Debug().Raw(query, userId).Scan(&gamesPlayed).Error; err != nil {
 		Error(c, 500, "Database error")
 		l.WithError(err).Error("Error getting user's games")
@@ -51,6 +58,7 @@ func getUserGames(c *gin.Context) {
 
 	for i := 0; i < len(gamesPlayed); i++ {
 		gamesPlayed[i].GameName = types.BytesToString([]byte(gamesPlayed[i].GameName))
+		gamesPlayed[i].WasHost = gamesPlayed[i].GameHostID == uint(userId)
 	}
 	success(c, gamesPlayed)
 }

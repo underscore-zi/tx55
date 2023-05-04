@@ -170,6 +170,8 @@ type GamePlayedJSON struct {
 	GameID          uint   `json:"game_id"`
 	GameName        string `json:"game_name"`
 	GameHasPassword bool   `json:"game_has_password"`
+	GameHostID      uint   `json:"game_host_id"`
+	WasHost         bool   `json:"was_host"`
 
 	CreatedAt time.Time `json:"created_at"`
 	DeletedAt time.Time `json:"deleted_at"`
