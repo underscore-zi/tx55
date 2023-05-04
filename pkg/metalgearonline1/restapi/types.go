@@ -181,6 +181,12 @@ type GamePlayedJSON struct {
 	Deaths    uint32    `json:"deaths"`
 }
 
+type NewsJSON struct {
+	CreatedAt time.Time `json:"created_at"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+}
+
 // Params
 
 type GameModeParam string
