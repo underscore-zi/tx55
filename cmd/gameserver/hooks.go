@@ -111,6 +111,7 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 	gs := &models.GameOptions{}
 	u := &models.User{}
 	tx := GormDb.Where("username = ?", username).First(u)
+	saveGameSettings := false
 
 	if tx.Error == gorm.ErrRecordNotFound {
 		// New user time!
@@ -154,16 +155,18 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 				return konamiserver.HookResultContinue
 			}
 			gs.FromCreateGameOptions(&gameOpts)
+			saveGameSettings = true
 		}
 	}
 
 	_ = GormDb.Transaction(func(tx *gorm.DB) error {
+
 		if tx = GormDb.Save(u); tx.Error != nil {
 			l.WithError(tx.Error).Error("Failed saving user")
 			return tx.Error
 		}
 
-		if gameSettings != "" {
+		if saveGameSettings {
 			gs.UserID = u.ID
 			if tx = GormDb.Save(gs); tx.Error != nil {
 				l.WithError(tx.Error).Error("Failed saving game settings")
@@ -177,5 +180,12 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 		return tx.Error
 	})
 
+	return konamiserver.HookResultContinue
+}
+
+func hookConnectionInfo(p, req *packet.Packet, out chan packet.Packet) konamiserver.HookResult {
+	data := (*p).Data()
+	copy(data[4:], "69.11.34.177\x00")
+	(*p).SetData(data)
 	return konamiserver.HookResultContinue
 }
