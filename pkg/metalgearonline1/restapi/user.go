@@ -37,7 +37,7 @@ func getUserStats(c *gin.Context) {
 func getUserGames(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	userIdParam := c.Param("user_id")
-	limit := 5
+	limit := 50
 
 	userId, err := strconv.Atoi(userIdParam)
 	if err != nil {
