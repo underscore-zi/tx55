@@ -39,7 +39,7 @@ const (
 	MapKillhouseB
 	MapKillhouseC
 	MapSvyatogornyjEast
-	MapMountaintop
+	MapMountainTop
 	MapGraninyGorkiLab
 	MapPillboxPurgatory
 	MapHighIce
@@ -63,7 +63,7 @@ func (g GameMap) String() string {
 		return "Killhouse C"
 	case MapSvyatogornyjEast:
 		return "Svyatogornyj East"
-	case MapMountaintop:
+	case MapMountainTop:
 		return "Mountaintop"
 	case MapGraninyGorkiLab:
 		return "Graniny Gorki Lab"

@@ -30,6 +30,8 @@ func NewServer(db *gorm.DB) *Server {
 	_ = s.Engine.SetTrustedProxies([]string{"127.0.0.1", "::1"})
 
 	s.Engine.GET("/api/v1/lobby/list", getLobbyList)
+	s.Engine.GET("/api/v1/rankings/:period", getRankings)
+	s.Engine.GET("/api/v1/rankings/:period/:page", getRankings)
 	s.Engine.GET("/api/v1/user/:user_id", getUser)
 	s.Engine.GET("/api/v1/user/:user_id/stats", getUserStats)
 	s.Engine.GET("/api/v1/game/list", getGamesList)

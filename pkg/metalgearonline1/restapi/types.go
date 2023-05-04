@@ -1,6 +1,7 @@
 package restapi
 
 import (
+	"strings"
 	"time"
 	"tx55/pkg/metalgearonline1/types"
 )
@@ -10,6 +11,10 @@ import (
 // GET /api/v1/lobby/list => []LobbyJSON
 // GET /api/v1/game/list => []GameJSON
 // GET /api/v1/game/:game_id => GameJSON
+
+// See `PeriodParam` for :period values and `GameModeParam` for optional mode values
+// GET /api/v1/rankings/:period?mode=GameModeParam => []RankingEntryJSON
+// GET /api/v1/ranking/:period/:page?mode=GameModeParam => []RankingEntryJSON
 
 type ResponseJSON struct {
 	Success bool        `json:"success"`
@@ -151,4 +156,83 @@ type PlayerStatsJSON struct {
 	Rolls              uint32        `json:"rolls"`
 	InfraredGoggleUses time.Duration `json:"infrared_goggle_uses"`
 	PlayTime           time.Duration `json:"play_time"`
+}
+
+type RankingEntryJSON struct {
+	Rank        uint   `json:"rank"`
+	UserID      uint   `json:"user_id"`
+	DisplayName string `json:"display_name"`
+	Points      uint   `json:"points"`
+}
+
+// Params
+
+type GameModeParam string
+
+var GameModeParams = map[string]types.GameMode{
+	"deathmatch":      types.ModeDeathmatch,
+	"dm":              types.ModeDeathmatch,
+	"team-deathmatch": types.ModeTeamDeathmatch,
+	"tdm":             types.ModeTeamDeathmatch,
+	"capture":         types.ModeCapture,
+	"cap":             types.ModeCapture,
+	"rescue":          types.ModeRescue,
+	"res":             types.ModeRescue,
+	"sneaking":        types.ModeSneaking,
+	"sne":             types.ModeSneaking,
+}
+
+func (m GameModeParam) GameMode() (types.GameMode, bool) {
+	v, found := GameModeParams[strings.ToLower(string(m))]
+	return v, found
+}
+
+type PeriodParam string
+
+var PeriodParams = map[string]types.PlayerStatsPeriod{
+	"weekly":   types.PeriodWeekly,
+	"week":     types.PeriodWeekly,
+	"all-time": types.PeriodAllTime,
+	"all":      types.PeriodAllTime,
+	"archive":  types.PeriodArchive,
+}
+
+func (s PeriodParam) PlayerStatsPeriod() (types.PlayerStatsPeriod, bool) {
+	v, found := PeriodParams[strings.ToLower(string(s))]
+	return v, found
+}
+
+type GameMapParam string
+
+var GameMapParams = map[string]types.GameMap{
+	"lost-forest":       types.MapLostForest,
+	"lfor":              types.MapLostForest,
+	"ghost-factory":     types.MapGhostFactory,
+	"gfact":             types.MapGhostFactory,
+	"cus":               types.MapCityUnderSiege,
+	"city-under-siege":  types.MapCityUnderSiege,
+	"kha":               types.MapKillhouseA,
+	"killhouse-a":       types.MapKillhouseA,
+	"khb":               types.MapKillhouseB,
+	"killhouse-b":       types.MapKillhouseB,
+	"khc":               types.MapKillhouseC,
+	"killhouse-c":       types.MapKillhouseC,
+	"seast":             types.MapSvyatogornyjEast,
+	"svyatogornyj-east": types.MapSvyatogornyjEast,
+	"mtn":               types.MapMountainTop,
+	"mtop:":             types.MapMountainTop,
+	"mountain-top":      types.MapMountainTop,
+	"ggl":               types.MapGraninyGorkiLab,
+	"graniny-gorki-lab": types.MapGraninyGorkiLab,
+	"pbp":               types.MapPillboxPurgatory,
+	"pillbox-purgatory": types.MapPillboxPurgatory,
+	"hice":              types.MapHighIce,
+	"high-ice":          types.MapHighIce,
+	"btown":             types.MapBrownTown,
+	"brown-town":        types.MapBrownTown,
+}
+
+func (m GameMapParam) GameMap() (types.GameMap, bool) {
+	v, found := GameMapParams[strings.ToLower(string(m))]
+	return v, found
 }
