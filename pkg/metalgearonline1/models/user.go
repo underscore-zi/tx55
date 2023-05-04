@@ -71,7 +71,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 func (u *User) PlayerOverview() *types.PlayerOverview {
 	o := types.PlayerOverview{
 		UserID:      types.UserID(u.ID),
-		VSRating:    0,
+		VSRating:    1000,
 		CurrentTime: uint32(time.Now().Unix()),
 		LastLogin:   uint32(time.Now().Add(-time.Hour * 24 * 31).Unix()),
 	}

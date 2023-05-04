@@ -86,7 +86,8 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		"rolls":                gorm.Expr("rolls + ?", stats.Rolls),
 		"infrared_goggle_uses": gorm.Expr("infrared_goggle_uses + ?", stats.InfraredGoggleUses),
 		"play_time":            gorm.Expr("play_time + ?", stats.PlayTime),
-		"unknown3":             gorm.Expr("unknown3 + ?", stats.Unknown3),
+		// I suspect Unknown3 is the player's new VSRating, so I want to check that by just storing it plainly
+		"unknown3": stats.Unknown3,
 	}
 
 	// sqlite uses MAX(...) whereas others reserve MAX(...) for aggregates
