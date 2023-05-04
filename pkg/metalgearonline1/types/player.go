@@ -1,6 +1,9 @@
 package types
 
-import "tx55/pkg/metalgearonline1/types/bitfield"
+import (
+	"fmt"
+	"tx55/pkg/metalgearonline1/types/bitfield"
+)
 
 type PingInfo struct {
 	UserID UserID
@@ -58,4 +61,43 @@ type PlayerSpecificSettings struct {
 	// Settings is a bitfield
 	Settings bitfield.PlayerSettings
 	FKeys    [12][26]byte
+}
+
+type SwitchOrientation bool
+
+const (
+	PlayerOrientation SwitchOrientation = false
+	CameraOrientation SwitchOrientation = true
+)
+
+func (s SwitchOrientation) String() string {
+	switch s {
+	case PlayerOrientation:
+		return "Player Orientation"
+	case CameraOrientation:
+		return "Camera Orientation"
+	default:
+		return fmt.Sprintf("Unknown (%t)", s)
+	}
+}
+
+type GearSwitchMode byte
+
+const (
+	GearSwitchToggle    GearSwitchMode = 0
+	GearSwitchFlashback GearSwitchMode = 1
+	GearSwitchCycle     GearSwitchMode = 2
+)
+
+func (g GearSwitchMode) String() string {
+	switch g {
+	case GearSwitchToggle:
+		return "Equipped/Unequipped"
+	case GearSwitchFlashback:
+		return "Flashback"
+	case GearSwitchCycle:
+		return "Cycle"
+	default:
+		return fmt.Sprintf("Unknown (%d)", g)
+	}
 }

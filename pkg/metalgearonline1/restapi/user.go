@@ -62,3 +62,16 @@ func getUserGames(c *gin.Context) {
 	}
 	success(c, gamesPlayed)
 }
+
+func getUserOptions(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	userID := c.Param("user_id")
+
+	var options models.PlayerSettings
+	if err := db.First(&options, "user_id = ?", userID).Error; err != nil {
+		Error(c, 404, "User not found")
+	} else {
+		success(c, toUserSettingsJSON(options))
+	}
+
+}

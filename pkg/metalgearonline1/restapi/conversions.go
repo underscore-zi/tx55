@@ -169,3 +169,34 @@ func toGameOptionsJSON(opts models.GameOptions) GameOptionsJSON {
 	}
 	return out
 }
+
+func toUserSettingsJSON(settings models.PlayerSettings) UserSettingsJSON {
+	return UserSettingsJSON{
+		ShowNameTags:         settings.ShowNameTags,
+		SwitchSpeed:          uint(settings.SwitchSpeed + 1),
+		FPVVertical:          settings.FPVVertical,
+		FPVHorizontal:        settings.FPVHorizontal,
+		FPVSwitchOrientation: types.SwitchOrientation(settings.FPVSwitchOrientation).String(),
+		TPVVertical:          settings.TPVVertical,
+		TPVHorizontal:        settings.TPVHorizontal,
+		TPVChase:             settings.TPVChase,
+		FPVRotationSpeed:     uint(settings.FPVRotationSpeed + 1),
+		EquipmentSwitchStyle: types.GearSwitchMode(settings.EquipmentSwitchStyle).String(),
+		TPVRotationSpeed:     uint(settings.TPVRotationSpeed + 1),
+		WeaponSwitchStyle:    types.GearSwitchMode(settings.WeaponSwitchStyle).String(),
+		FKeys: [12]string{
+			types.BytesToString(settings.FKey0),
+			types.BytesToString(settings.FKey1),
+			types.BytesToString(settings.FKey2),
+			types.BytesToString(settings.FKey3),
+			types.BytesToString(settings.FKey4),
+			types.BytesToString(settings.FKey5),
+			types.BytesToString(settings.FKey6),
+			types.BytesToString(settings.FKey7),
+			types.BytesToString(settings.FKey8),
+			types.BytesToString(settings.FKey9),
+			types.BytesToString(settings.FKey10),
+			types.BytesToString(settings.FKey11),
+		},
+	}
+}

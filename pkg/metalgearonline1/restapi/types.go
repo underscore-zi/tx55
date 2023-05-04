@@ -35,6 +35,22 @@ type UserJSON struct {
 	WeeklyRank  uint   `json:"weekly_rank"`
 }
 
+type UserSettingsJSON struct {
+	ShowNameTags         bool   `json:"show_name_tags"`
+	SwitchSpeed          uint   `json:"switch_speed"`
+	FPVVertical          bool   `json:"fpv_invert_vertical"`
+	FPVHorizontal        bool   `json:"fpv_invert_horizontal"`
+	FPVSwitchOrientation string `json:"fpv_switch_orientation"`
+	TPVVertical          bool   `json:"tpv_invert_vertical"`
+	TPVHorizontal        bool   `json:"tpv_invert_horizontal"`
+	TPVChase             bool   `json:"tpv_chase_camera"`
+	FPVRotationSpeed     uint   `json:"fpv_rotation_speed"`
+	EquipmentSwitchStyle string `json:"equipment_switch_style"`
+	TPVRotationSpeed     uint   `json:"tpv_rotation_speed"`
+	WeaponSwitchStyle    string `json:"weapon_switch_style"`
+	FKeys                [12]string
+}
+
 type LobbyJSON struct {
 	ID      uint32 `json:"id"`
 	Name    string `json:"name"`
