@@ -100,6 +100,8 @@ func (t Team) UniformString() string {
 		return "KGB"
 	case TeamOcelot:
 		return "Ocelot"
+	case TeamSpectator:
+		return "Spectator"
 	default:
 		return "Unknown"
 	}
