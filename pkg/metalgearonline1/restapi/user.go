@@ -37,10 +37,21 @@ func getUserStats(c *gin.Context) {
 func getUserGames(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	userIdParam := c.Param("user_id")
+	limit := 5
 
 	userId, err := strconv.Atoi(userIdParam)
 	if err != nil {
 		Error(c, 400, "Invalid user id")
+		return
+	}
+
+	pageParam, found := c.Params.Get("page")
+	if !found {
+		pageParam = "1"
+	}
+	page, err := strconv.Atoi(pageParam)
+	if err != nil {
+		Error(c, 400, "Invalid page")
 		return
 	}
 
@@ -49,8 +60,8 @@ func getUserGames(c *gin.Context) {
 	// or write the fairly simple query myself and get it done in one
 
 	var gamesPlayed []GamePlayedJSON
-	query := "SELECT p.game_id, go.name as game_name, go.has_password as game_has_password, go.user_id as game_host_id, p.created_at, p.deleted_at, p.was_kicked, p.score as points, p.kills, p.deaths FROM game_players p JOIN games g ON p.game_id = g.id JOIN game_options go ON g.game_options_id = go.id WHERE p.user_id = ? ORDER BY p.updated_at DESC"
-	if err := db.Raw(query, userId).Scan(&gamesPlayed).Error; err != nil {
+	query := "SELECT p.game_id, go.name as game_name, go.has_password as game_has_password, go.user_id as game_host_id, p.created_at, p.deleted_at, p.was_kicked, p.score as points, p.kills, p.deaths FROM game_players p JOIN games g ON p.game_id = g.id JOIN game_options go ON g.game_options_id = go.id WHERE p.user_id = ? ORDER BY p.updated_at DESC LIMIT ? OFFSET ?"
+	if err := db.Raw(query, userId, limit, (page-1)*limit).Scan(&gamesPlayed).Error; err != nil {
 		Error(c, 500, "Database error")
 		l.WithError(err).Error("Error getting user's games")
 		return
