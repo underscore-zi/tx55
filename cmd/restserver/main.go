@@ -11,8 +11,8 @@ import (
 	"os"
 	"time"
 	"tx55/pkg/configurations"
-	"tx55/pkg/metalgearonline1/crons"
-	"tx55/pkg/metalgearonline1/restapi"
+	"tx55/pkg/restapi"
+	"tx55/pkg/restapi/crons"
 )
 
 var l = logrus.StandardLogger()
