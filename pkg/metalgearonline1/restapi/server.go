@@ -34,6 +34,7 @@ func NewServer(db *gorm.DB) *Server {
 	s.Engine.GET("/api/v1/rankings/:period/:page", getRankings)
 	s.Engine.GET("/api/v1/user/:user_id", getUser)
 	s.Engine.GET("/api/v1/user/:user_id/stats", getUserStats)
+	s.Engine.GET("/api/v1/user/:user_id/games", getUserGames)
 	s.Engine.GET("/api/v1/game/list", getGamesList)
 	s.Engine.GET("/api/v1/game/:game_id", getGame)
 

@@ -8,6 +8,7 @@ import (
 
 // GET /api/v1/user/:user_id => UserJSON
 // GET /api/v1/user/:user_id/stats => []PlayerStatsJSON
+// GET /api/v1/user/:user_id/games => []GamePlayedJSON
 // GET /api/v1/lobby/list => []LobbyJSON
 // GET /api/v1/game/list => []GameJSON
 // GET /api/v1/game/:game_id => GameJSON
@@ -163,6 +164,19 @@ type RankingEntryJSON struct {
 	UserID      uint   `json:"user_id"`
 	DisplayName string `json:"display_name"`
 	Points      uint   `json:"points"`
+}
+
+type GamePlayedJSON struct {
+	GameID          uint   `json:"game_id"`
+	GameName        string `json:"game_name"`
+	GameHasPassword bool   `json:"game_has_password"`
+
+	CreatedAt time.Time `json:"created_at"`
+	DeletedAt time.Time `json:"deleted_at"`
+	WasKicked bool      `json:"was_kicked"`
+	Points    uint32    `json:"points"`
+	Kills     uint32    `json:"kills"`
+	Deaths    uint32    `json:"deaths"`
 }
 
 // Params
