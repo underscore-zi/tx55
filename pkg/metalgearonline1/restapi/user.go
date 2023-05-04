@@ -50,7 +50,7 @@ func getUserGames(c *gin.Context) {
 
 	var gamesPlayed []GamePlayedJSON
 	query := "SELECT p.game_id, go.name as game_name, go.has_password as game_has_password, go.user_id as game_host_id, p.created_at, p.deleted_at, p.was_kicked, p.score as points, p.kills, p.deaths FROM game_players p JOIN games g ON p.game_id = g.id JOIN game_options go ON g.game_options_id = go.id WHERE p.user_id = ? ORDER BY p.deleted_at DESC"
-	if err := db.Debug().Raw(query, userId).Scan(&gamesPlayed).Error; err != nil {
+	if err := db.Raw(query, userId).Scan(&gamesPlayed).Error; err != nil {
 		Error(c, 500, "Database error")
 		l.WithError(err).Error("Error getting user's games")
 		return
