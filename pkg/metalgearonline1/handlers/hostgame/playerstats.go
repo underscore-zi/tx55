@@ -48,9 +48,18 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 	}
 
 	// Do the update, or create the stats as needed
-	if err = h.updatePlayerStats(sess, uint(args.UserID), args.Stats); err != nil {
-		out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
-		return
+	if args.Stats.Points < 0 || args.Stats.Kills < 0 || args.Stats.Deaths < 0 {
+		if err = h.updatePlayerStats(sess, uint(args.UserID), args.Stats); err != nil {
+			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
+			return
+		}
+	} else {
+		sess.Log.WithFields(logrus.Fields{
+			"StatsUserID": args.UserID,
+			"Kills":       args.Stats.Kills,
+			"Deaths":      args.Stats.Deaths,
+			"Points":      args.Stats.Points,
+		}).Info("Stats with negative values!")
 	}
 
 	out = append(out, ResponseHostPlayerStats{ErrorCode: 0})
@@ -58,6 +67,7 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 }
 
 func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID uint, stats types.HostReportedStats) error {
+
 	updates := map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),
 		"deaths":               gorm.Expr("deaths + ?", stats.Deaths),
