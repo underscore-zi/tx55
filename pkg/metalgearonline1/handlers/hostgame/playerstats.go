@@ -67,6 +67,7 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 }
 
 func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID uint, stats types.HostReportedStats) error {
+	sess.DB.Model(sess.User).Update("vs_rating", stats.VsRating)
 
 	updates := map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),
@@ -96,8 +97,6 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		"rolls":                gorm.Expr("rolls + ?", stats.Rolls),
 		"infrared_goggle_uses": gorm.Expr("infrared_goggle_uses + ?", stats.InfraredGoggleUses),
 		"play_time":            gorm.Expr("play_time + ?", stats.PlayTime),
-		// I suspect Unknown3 is the player's new VSRating, so I want to check that by just storing it plainly
-		"unknown3": stats.Unknown3,
 	}
 
 	// sqlite uses MAX(...) whereas others reserve MAX(...) for aggregates

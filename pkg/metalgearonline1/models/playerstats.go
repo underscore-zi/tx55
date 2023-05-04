@@ -47,7 +47,6 @@ type PlayerStats struct {
 	Rolls              uint32
 	InfraredGoggleUses uint32
 	PlayTime           uint32
-	Unknown3           uint32
 }
 
 func (s *PlayerStats) AddStats(stats types.HostReportedStats) {
@@ -86,7 +85,6 @@ func (s *PlayerStats) ToHostReportedStats() (out types.HostReportedStats) {
 	out.Rolls = s.Rolls
 	out.InfraredGoggleUses = s.InfraredGoggleUses
 	out.PlayTime = s.PlayTime
-	out.Unknown3 = s.Unknown3
 	return
 }
 
@@ -120,6 +118,5 @@ func (s *PlayerStats) FromHostReportedStats(in types.HostReportedStats) {
 	s.Rolls = in.Rolls
 	s.InfraredGoggleUses = in.InfraredGoggleUses
 	s.PlayTime = in.PlayTime
-	s.Unknown3 = in.Unknown3
 	return
 }

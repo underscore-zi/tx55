@@ -62,9 +62,7 @@ type HostReportedStats struct {
 	Rolls              uint32
 	InfraredGoggleUses uint32
 	PlayTime           uint32
-	// Unknown3 on the Java server was labeled VSRating but that is unconfirmed since VSRating is sent in the overview
-	// packet and is not ever shown to be game-mode specific
-	Unknown3 uint32
+	VsRating           uint32
 }
 
 func (s *HostReportedStats) AddStats(stats HostReportedStats) {
@@ -104,7 +102,6 @@ func (s *HostReportedStats) AddStats(stats HostReportedStats) {
 	s.Rolls += stats.Rolls
 	s.InfraredGoggleUses += stats.InfraredGoggleUses
 	s.PlayTime += stats.PlayTime
-	s.Unknown3 += stats.Unknown3
 }
 
 type GameTypeStatsWithRank struct {
@@ -119,7 +116,7 @@ type PlayerOverview struct {
 	U1          uint16
 	EmblemText  [16]byte
 	U2          [4]uint16
-	VSRating    uint32
+	VsRating    uint32
 	CurrentTime uint32
 	LastLogin   uint32
 }
