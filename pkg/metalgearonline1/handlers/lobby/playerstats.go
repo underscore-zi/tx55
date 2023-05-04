@@ -52,8 +52,8 @@ func (h PlayerStatsHandler) playerOverview(sess *session.Session, args *ArgsGetP
 	overview := ResponsePlayerStatsOverview{
 		ErrorCode:     0,
 		Overview:      *user.PlayerOverview(),
-		OverallRank:   0,
-		WeeklyRank:    0,
+		OverallRank:   uint32(user.OverallRank),
+		WeeklyRank:    uint32(user.WeeklyRank),
 		OverallVSRank: 0,
 	}
 

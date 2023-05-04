@@ -40,6 +40,8 @@ func (h JoinHandler) overviewPacket(sess *session.Session) types.Response {
 		Options:     sess.User.PlayerSettings.PlayerSpecificSettings(),
 		FriendsList: [16]types.UserID{},
 		BlockList:   [16]types.UserID{},
+		OverallRank: uint32(sess.User.OverallRank),
+		WeeklyRank:  uint32(sess.User.WeeklyRank),
 	}
 	return out
 }
