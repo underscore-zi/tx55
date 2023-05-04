@@ -41,8 +41,8 @@ type HostReportedStats struct {
 	StunsReceived      uint32
 	SnakeFrags         uint32
 	Points             int32
-	Unknown1           uint32
-	Unknown2           uint32
+	Suicides           uint32
+	SelfStuns          uint32
 	TeamKills          uint32
 	TeamStuns          uint32
 	RoundsPlayed       uint32
@@ -83,8 +83,8 @@ func (s *HostReportedStats) AddStats(stats HostReportedStats) {
 	s.StunsReceived += stats.StunsReceived
 	s.SnakeFrags += stats.SnakeFrags
 	s.Points += stats.Points
-	s.Unknown1 += stats.Unknown1
-	s.Unknown2 += stats.Unknown2
+	s.Suicides += stats.Suicides
+	s.SelfStuns += stats.SelfStuns
 	s.TeamKills += stats.TeamKills
 	s.TeamStuns += stats.TeamStuns
 	s.RoundsPlayed += stats.RoundsPlayed

@@ -48,6 +48,8 @@ func toPlayerStatsJSON(stats models.PlayerStats) PlayerStatsJSON {
 		Deaths:             stats.Deaths,
 		KillStreak:         stats.KillStreak,
 		DeathStreak:        stats.DeathStreak,
+		Suicides:           stats.Suicides,
+		SelfStuns:          stats.SelfStuns,
 		Stuns:              stats.Stuns,
 		StunsReceived:      stats.StunsReceived,
 		SnakeFrags:         stats.SnakeFrags,

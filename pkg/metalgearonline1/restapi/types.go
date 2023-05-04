@@ -146,6 +146,8 @@ type PlayerStatsJSON struct {
 	Deaths        int32  `json:"deaths"`
 	KillStreak    uint16 `json:"kill_streak"`
 	DeathStreak   uint16 `json:"death_streak"`
+	Suicides      uint32 `json:"suicides"`
+	SelfStuns     uint32 `json:"self_stuns"`
 	Stuns         uint32 `json:"stuns"`
 	StunsReceived uint32 `json:"stuns_received"`
 	SnakeFrags    uint32 `json:"snake_frags"`

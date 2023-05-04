@@ -26,8 +26,8 @@ type PlayerStats struct {
 	StunsReceived      uint32
 	SnakeFrags         uint32
 	Points             int32
-	Unknown1           uint32
-	Unknown2           uint32
+	Suicides           uint32
+	SelfStuns          uint32
 	TeamKills          uint32
 	TeamStuns          uint32
 	RoundsPlayed       uint32
@@ -65,8 +65,8 @@ func (s *PlayerStats) ToHostReportedStats() (out types.HostReportedStats) {
 	out.StunsReceived = s.StunsReceived
 	out.SnakeFrags = s.SnakeFrags
 	out.Points = s.Points
-	out.Unknown1 = s.Unknown1
-	out.Unknown2 = s.Unknown2
+	out.Suicides = s.Suicides
+	out.SelfStuns = s.SelfStuns
 	out.TeamKills = s.TeamKills
 	out.TeamStuns = s.TeamStuns
 	out.RoundsPlayed = s.RoundsPlayed
@@ -99,8 +99,8 @@ func (s *PlayerStats) FromHostReportedStats(in types.HostReportedStats) {
 	s.StunsReceived = in.StunsReceived
 	s.SnakeFrags = in.SnakeFrags
 	s.Points = in.Points
-	s.Unknown1 = in.Unknown1
-	s.Unknown2 = in.Unknown2
+	s.Suicides = in.Suicides
+	s.SelfStuns = in.SelfStuns
 	s.TeamKills = in.TeamKills
 	s.TeamStuns = in.TeamStuns
 	s.RoundsPlayed = in.RoundsPlayed
