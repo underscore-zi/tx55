@@ -96,8 +96,13 @@ func main() {
 			return konamiserver.HookResultContinue
 		})
 		//*/
-
 	l.WithField("address", cfg.Address).Info("Starting server")
+	if endpoint, found := os.LookupEnv("EVENTS_ENDPOINT"); !found {
+		l.Info("EVENTS_ENDPOINT not set, events will not be broadcast to external service")
+	} else {
+		l.WithField("events_endpoint", endpoint).Info("Sending events to external service")
+	}
+
 	if !*withTests {
 		if err := server.Start(); err != nil {
 			panic(err)

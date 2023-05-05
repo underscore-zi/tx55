@@ -21,10 +21,8 @@ const (
 func (s *Session) publishEvent(e EventType, data interface{}) {
 	endpoint, found := os.LookupEnv("EVENTS_ENDPOINT")
 	if !found {
-		s.Log.Info("EVENTS_ENDPOINT not set")
 		return
 	}
-	s.Log.WithField("endpoint", endpoint).Info("publishEvent")
 
 	jsonData, err := json.Marshal(map[string]interface{}{
 		"event": e,
@@ -42,8 +40,12 @@ func (s *Session) publishEvent(e EventType, data interface{}) {
 		s.Log.WithError(err).WithField("event", e).Error("failed to post event data")
 		return
 	}
-
 	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != 200 {
+		s.Log.WithField("event", e).WithField("status_code", resp.StatusCode).Error("failed to post event data")
+	}
+
 	return
 }
 
