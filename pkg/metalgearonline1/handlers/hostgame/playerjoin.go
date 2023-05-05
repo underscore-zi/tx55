@@ -46,6 +46,8 @@ func (h HostPlayerJoinHandler) HandleArgs(sess *session.Session, args *ArgsHostP
 		sess.GameState.AddPlayer(args.UserID)
 		out = append(out, ResponseHostPlayerJoin{ErrorCode: 0, UserID: args.UserID})
 	}
+
+	sess.EventGamePlayerJoined(args.UserID)
 	return
 }
 

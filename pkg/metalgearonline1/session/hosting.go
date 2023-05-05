@@ -27,6 +27,8 @@ func (s *Session) StopHosting() {
 			s.Log.WithError(err).Error("Failed to stop game")
 		}
 	}
+
+	s.EventGameDeleted()
 	s.GameState = nil
 }
 

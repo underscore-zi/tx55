@@ -65,6 +65,7 @@ func (h CreateGameHandler) HandleArgs(s *session.Session, args *types.CreateGame
 
 	s.StartHosting(types.GameID(newGame.ID), args.Rules)
 
+	s.EventGameCreated(newGame.ID, args)
 	return []types.Response{ResponseCreateGame{ErrorCode: 0}}, nil
 }
 

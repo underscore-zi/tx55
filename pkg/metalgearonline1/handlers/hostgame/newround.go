@@ -47,6 +47,7 @@ func (h HostNewRoundHandler) HandleArgs(sess *session.Session, args *ArgsHostNew
 	}
 
 	sess.GameState.CurrentRound = args.RoundID
+	sess.EventGameNewRound(args.RoundID)
 	out = append(out, ResponseHostNewRound{ErrorCode: 0})
 	return
 }

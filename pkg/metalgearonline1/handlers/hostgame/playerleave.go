@@ -46,6 +46,8 @@ func (h HostPlayerLeaveHandler) HandleArgs(sess *session.Session, args *ArgsHost
 		sess.GameState.RemovePlayer(args.UserID)
 		out = append(out, ResponseHostPlayerLeave{ErrorCode: 0, UserID: args.UserID})
 	}
+
+	sess.EventGamePlayerLeft(args.UserID)
 	return
 }
 
