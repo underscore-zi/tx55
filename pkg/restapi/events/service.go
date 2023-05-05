@@ -56,6 +56,7 @@ func (s *Service) broadcast(message []byte) {
 }
 
 func (s *Service) Run() {
+	s.Log.Info("Starting Events Service")
 	for {
 		select {
 		case client := <-s.addCh:

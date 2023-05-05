@@ -47,11 +47,13 @@ func NewServer(db *gorm.DB) *Server {
 
 	if tokens, found := os.LookupEnv("EVENT_TOKENS"); found {
 		tokenList := strings.Split(tokens, ",")
-		s.EventService = events.NewService(logrus.StandardLogger(), tokenList)
-		go s.EventService.Run()
+		if len(tokenList) > 0 {
+			s.EventService = events.NewService(logrus.StandardLogger(), tokenList)
+			go s.EventService.Run()
 
-		s.Engine.POST("/api/v1/stream/events/:token", s.EventService.PostNewEvent)
-		s.Engine.GET("/api/v1/stream/events", s.EventService.AcceptGinWebsocket)
+			s.Engine.POST("/api/v1/stream/events/:token", s.EventService.PostNewEvent)
+			s.Engine.GET("/api/v1/stream/events", s.EventService.AcceptGinWebsocket)
+		}
 
 	}
 

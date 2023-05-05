@@ -21,8 +21,10 @@ const (
 func (s *Session) publishEvent(e EventType, data interface{}) {
 	endpoint, found := os.LookupEnv("EVENTS_ENDPOINT")
 	if !found {
+		s.Log.Info("EVENTS_ENDPOINT not set")
 		return
 	}
+	s.Log.WithField("endpoint", endpoint).Info("publishEvent")
 
 	jsonData, err := json.Marshal(map[string]interface{}{
 		"event": e,
