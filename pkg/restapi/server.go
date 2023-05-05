@@ -4,13 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"os"
+	"strings"
+	"tx55/pkg/restapi/events"
 )
 
 var l = logrus.StandardLogger()
 
 type Server struct {
-	DB     *gorm.DB
-	Engine *gin.Engine
+	DB           *gorm.DB
+	Engine       *gin.Engine
+	EventService *events.Service
 }
 
 func NewServer(db *gorm.DB) *Server {
@@ -40,6 +44,16 @@ func NewServer(db *gorm.DB) *Server {
 	s.Engine.GET("/api/v1/user/:user_id/settings", getUserOptions)
 	s.Engine.GET("/api/v1/game/list", getGamesList)
 	s.Engine.GET("/api/v1/game/:game_id", getGame)
+
+	if tokens, found := os.LookupEnv("EVENT_TOKENS"); found {
+		tokenList := strings.Split(tokens, ",")
+		s.EventService = events.NewService(logrus.StandardLogger(), tokenList)
+		go s.EventService.Run()
+
+		s.Engine.POST("/api/v1/stream/events/:token", s.EventService.PostNewEvent)
+		s.Engine.GET("/api/v1/stream/events", s.EventService.AcceptGinWebsocket)
+
+	}
 
 	return s
 }
