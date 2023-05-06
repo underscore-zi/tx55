@@ -6,16 +6,82 @@ import (
 	"tx55/pkg/metalgearonline1/types"
 )
 
-// GET /api/v1/user/:user_id => UserJSON
-// GET /api/v1/user/:user_id/stats => []PlayerStatsJSON
-// GET /api/v1/user/:user_id/games => []GamePlayedJSON
-// GET /api/v1/lobby/list => []LobbyJSON
-// GET /api/v1/game/list => []GameJSON
-// GET /api/v1/game/:game_id => GameJSON
+// Every API request returns the fairly simple ResponseJSON which contains a boolean `success` and a `data` field.
+// On any error, the `success` field will be false and the `data` field will contain a string with the error message.
+// On success, the `success` field will be true and the `data` field will contain the appropiate response data.
 
-// See `PeriodParam` for :period values and `GameModeParam` for optional mode values
-// GET /api/v1/rankings/:period?mode=GameModeParam => []RankingEntryJSON
-// GET /api/v1/ranking/:period/:page?mode=GameModeParam => []RankingEntryJSON
+// Endpoints
+// Prefix: /api/v1
+
+// GET /news/list
+//  - Description: Retrieve a list of current news items matching those displayed in-game
+//  - URL Params: None
+//  - Returns: []NewsJSON
+
+// GET /lobby/list
+//  - Description: Retrieve a list of the game lobbies, including their current player count
+//  - URL Params: None
+//  - Returns: []LobbyJSON
+
+// GET /rankings/:period/:page?mode=GameModeParam
+//  - Description: Retrieve a list of the players in ranked over based on their points in a given period
+//  - Path Options:
+//    - period: Can be either "all" or "weekly"
+//    - page: (optional) The page of the rankings to retrieve
+//  - Query Options:
+//    - mode: Can be one of "tdm", "dm", "cap", "res", or "sne" and limits the results to the specific game mode
+//  - Returns: []RankingEntryJSON
+
+// GET /user/:user_id
+//  - Description: Retrieve a user's basic information
+//  - Path Options:
+//    - user_id: The ID of the user to retrieve
+//  - Returns: UserJSON
+
+// GET /user/:user_id/stats
+//  - Description: |-
+//      Retrieve all the generated stat entries for a user. The stats are broken up by period, mode, and map.
+//      Only the stats a user has generated will be returned, so if a user has never played TDM on S.East then there
+//      will be no entry for that combination. Weekly stats however only get zeroed out so you can have a weekly entry
+//      with effectively no stats. Take a look at the `PlayerStatsJSON` struct for more information about specific values.
+//  - Path Options:
+//    - user_id: The ID of the user to retrieve
+//  - Returns: []PlayerStatsJSON
+
+// GET /user/:user_id/games/:page
+//  - Description:  Retrieve a list of all the games a user has played.
+//  - Path Options:
+//    - user_id: The ID of the user to retrieve
+//    - page: (optional) The page of the games to retrieve
+//  - Returns: []GamePlayedJSON
+
+// GET /game/list
+//  - Description: |-
+//      Retrieve a list of all the active games. This is the same list that is displayed in-game. The player list is
+//      only the players currently in the game. Within the `GamePlayersJSON` the `UserJSON` will be nil.
+//      If you need the information you can use the `/game/:game_id` endpoint to retrieve it.
+//  - URL Params: None
+//  - Returns: []GameJSON
+
+// GET /game/:game_id
+//  - Description: Retrieve a specific game's information
+//  - Path Options:
+//    - game_id: The ID of the game to retrieve
+//  - Returns: GameJSON
+
+// GET /stream/events
+//  - Description: |-
+//      A Websocket endpoint that streams game related events like creation, deletion, player join/leave, and round starts
+//      the specific format of these events can be derived from pkg/metalgearonline1/session/events.go but generally just
+//      contain the event identifier, and ids related to it. For example, a player join event will contain the game id and
+//     the user id of the player that joined. Its meant to be used in conjunction with this API.
+
+// POST /stream/events/:token
+//  - Description: |-
+//      This is how the game server sends events to be broadcast on the websocket. Messages recieves are broadcast to all
+//      connected websocket clients exactly.
+//  - Path Options:
+//    - token: The secret token to use to authenticate the request.
 
 type ResponseJSON struct {
 	Success bool        `json:"success"`
