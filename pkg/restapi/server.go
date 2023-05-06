@@ -31,6 +31,15 @@ func NewServer(db *gorm.DB) *Server {
 			c.Next()
 		}
 	}())
+
+	if tokens, found := os.LookupEnv("EVENT_TOKENS"); found {
+		tokenList := strings.Split(tokens, ",")
+		if len(tokenList) > 0 {
+			s.EventService = events.NewService(logrus.StandardLogger(), tokenList)
+			go s.EventService.Run()
+		}
+	}
+
 	_ = s.Engine.SetTrustedProxies([]string{"127.0.0.1", "::1"})
 
 	s.Engine.GET("/api/v1/news/list", getNewsList)
@@ -45,16 +54,12 @@ func NewServer(db *gorm.DB) *Server {
 	s.Engine.GET("/api/v1/game/list", getGamesList)
 	s.Engine.GET("/api/v1/game/:game_id", getGame)
 
-	if tokens, found := os.LookupEnv("EVENT_TOKENS"); found {
-		tokenList := strings.Split(tokens, ",")
-		if len(tokenList) > 0 {
-			s.EventService = events.NewService(logrus.StandardLogger(), tokenList)
-			go s.EventService.Run()
-
-			s.Engine.POST("/api/v1/stream/events/:token", s.EventService.PostNewEvent)
-			s.Engine.GET("/api/v1/stream/events", s.EventService.AcceptGinWebsocket)
-		}
-
+	if s.EventService != nil {
+		s.Engine.POST("/api/v1/stream/events/:token", s.EventService.PostNewEvent)
+		s.Engine.GET("/api/v1/stream/events", s.EventService.AcceptGinWebsocket)
+	} else {
+		s.Engine.GET("/api/v1/stream/events", notImplemented)
+		s.Engine.POST("/api/v1/stream/events/:token", notImplemented)
 	}
 
 	return s
@@ -72,4 +77,8 @@ func Error(c *gin.Context, code int, message string) {
 		Success: false,
 		Data:    message,
 	})
+}
+
+func notImplemented(c *gin.Context) {
+	success(c, "Not implemented")
 }
