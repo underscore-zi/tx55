@@ -103,8 +103,9 @@ type ResponseGameListEntry struct {
 	FriendOrBlocked     uint8
 	VSRatingRestriction types.VSRatingRestriction
 	VSRating            uint32
-	U1                  uint16
-	U2                  uint32
+	// Based on a leaked struct from MGO2, but these are not displayed so won't implement them
+	WinStreak uint16
+	WinnerID  types.UserID
 }
 
 func (r ResponseGameList) Type() types.PacketType { return types.ServerGameListEntry }
