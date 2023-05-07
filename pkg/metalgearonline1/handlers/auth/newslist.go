@@ -28,7 +28,7 @@ func (h NewsListHandler) Handle(sess *session.Session, packet *packet.Packet) ([
 	var entries []models.News
 	out = append(out, ResponseNewsListStart{})
 
-	_ = sess.DB.Find(&entries)
+	_ = sess.DB.Where("topic != ?", "policy").Find(&entries)
 	for _, entry := range entries {
 		news := ResponseNewsListEntry{
 			ID: uint32(entry.ID),
