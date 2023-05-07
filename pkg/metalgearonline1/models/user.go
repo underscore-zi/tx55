@@ -28,8 +28,7 @@ type User struct {
 	Sessions       []Session
 	PlayerSettings PlayerSettings
 	Connections    []Connection
-	Friends        []Friend
-	Blocked        []Blocked
+	FBList         []UserList
 }
 
 // HashPassword will hash the password in the right format for MGO1 and then bcrypt it

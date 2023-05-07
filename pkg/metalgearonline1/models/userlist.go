@@ -1,21 +1,14 @@
 package models
 
 func init() {
-	All = append(All, &Friend{}, &Blocked{})
+	All = append(All, &UserList{})
 }
 
-type Friend struct {
+type UserList struct {
 	ID       uint
 	UserID   uint
 	User     User
-	FriendID uint
-	Friend   User `gorm:"foreignKey:FriendID"`
-}
-
-type Blocked struct {
-	ID        uint
-	UserID    uint
-	User      User
-	BlockedID uint
-	Blocked   User `gorm:"foreignKey:BlockedID"`
+	EntryID  uint
+	Entry    User `gorm:"foreignKey:EntryID"`
+	ListType byte
 }

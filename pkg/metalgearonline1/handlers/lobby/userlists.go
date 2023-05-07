@@ -1,7 +1,7 @@
 package lobby
 
 import (
-	"gorm.io/gorm/clause"
+	"gorm.io/gorm"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -30,35 +30,20 @@ func (h GetUserListHandler) Handle(sess *session.Session, packet *packet.Packet)
 
 func (h GetUserListHandler) HandleArgs(sess *session.Session, args *ArgsGetUserList) (out []types.Response, err error) {
 	out = append(out, ResponseUserListStart{})
-	switch args.ListType {
-	case types.UserListFriends:
-		var list []models.Friend
-		if tx := sess.DB.Where("user_id = ?", sess.User.ID).Preload(clause.Associations).Find(&list); tx.Error != nil {
-			out = append(out, ResponseUserListEnd{})
-			err = tx.Error
-			return
+
+	var list []models.UserList
+	err = sess.DB.Debug().Where("user_id = ? AND list_type = ?", sess.User.ID, args.ListType).Joins("Entry").Find(&list).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		out = append(out, ResponseUserListEnd{})
+		return
+	}
+
+	for _, entry := range list {
+		newEntry := types.UserListEntry{
+			UserID: types.UserID(entry.Entry.ID),
 		}
-		for _, entry := range list {
-			newEntry := types.UserListEntry{
-				UserID: types.UserID(entry.FriendID),
-			}
-			copy(newEntry.DisplayName[:], entry.Friend.DisplayName[:])
-			out = append(out, ResponseUserListEntry{User: newEntry})
-		}
-	case types.UserListBlocked:
-		var list []models.Blocked
-		if tx := sess.DB.Where("user_id = ?", sess.User.ID).Preload(clause.Associations).Find(&list); tx.Error != nil {
-			out = append(out, ResponseUserListEnd{})
-			err = tx.Error
-			return
-		}
-		for _, entry := range list {
-			newEntry := types.UserListEntry{
-				UserID: types.UserID(entry.BlockedID),
-			}
-			copy(newEntry.DisplayName[:], entry.Blocked.DisplayName[:])
-			out = append(out, ResponseUserListEntry{User: newEntry})
-		}
+		copy(newEntry.DisplayName[:], entry.Entry.DisplayName[:])
+		out = append(out, ResponseUserListEntry{User: newEntry})
 	}
 
 	out = append(out, ResponseUserListEnd{})

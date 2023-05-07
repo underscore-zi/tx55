@@ -1,6 +1,8 @@
 package lobby
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -20,120 +22,65 @@ func (h AddUserToList) Type() types.PacketType {
 }
 
 func (h AddUserToList) ArgumentTypes() (out []reflect.Type) {
-	//out = append(out, reflect.TypeOf(ArgsAddToList{}))
+	out = append(out, reflect.TypeOf(ArgsAddToList{}))
 	return
 }
 
 func (h AddUserToList) Handle(_ *session.Session, _ *packet.Packet) (out []types.Response, err error) {
-	// Not exactly sure how these packets work, the code does something pretty weird and when we don't complete
-	// the request as expected the client stops doing any FL/BL actions
-	// But when we send all this data, it removes them from the visible list immediately (ingame only)
-	// No packet is sent for deletion, so really this just doesn't work. So I'm leaving the code for my own sake
-	// and we'll keep the NOP response for now
-
-	out = append(out, ResponseAddUserToList{})
-	return
-}
-
-func (h AddUserToList) addFriend(s *session.Session, args *ArgsAddToList) (out ResponseAddUserToList, err error) {
-	var list []models.Friend
-	if tx := s.DB.Where("user_id = ?", s.User.ID).Find(&list); tx.Error != nil {
-		out.ErrorCode = handlers.ErrDatabase.Code
-		err = tx.Error
-		return
-	}
-
-	if len(list) >= 16 {
-		out.ErrorCode = handlers.ErrInvalidArguments.Code
-		err = handlers.ErrInvalidArguments
-		return
-	}
-
-	for _, entry := range list {
-		if types.UserID(entry.FriendID) == args.UserID {
-			// User is already in the list
-			out.ErrorCode = 0
-			out.UserID = args.UserID
-			out.ListType = args.ListType
-			copy(out.DisplayName[:], "some random name")
-			err = nil
-			return
-		}
-	}
-
-	newEntry := models.Friend{
-		UserID:   s.User.ID,
-		FriendID: uint(args.UserID),
-	}
-	if tx := s.DB.Create(&newEntry); tx.Error != nil {
-		out.ErrorCode = handlers.ErrDatabase.Code
-		err = tx.Error
-		return
-	}
-
-	out.ErrorCode = 0
-	out.UserID = args.UserID
-	out.ListType = args.ListType
-	copy(out.DisplayName[:], "some random name")
-	err = nil
-	return
-}
-
-func (h AddUserToList) addBlocked(s *session.Session, args *ArgsAddToList) (out ResponseAddUserToList, err error) {
-	var list []models.Blocked
-	if tx := s.DB.Where("user_id = ?", s.User.ID).Find(&list); tx.Error != nil {
-		out.ErrorCode = handlers.ErrDatabase.Code
-		err = tx.Error
-		return
-	}
-
-	if len(list) >= 16 {
-		out.ErrorCode = handlers.ErrInvalidArguments.Code
-		err = handlers.ErrInvalidArguments
-		return
-	}
-
-	for _, entry := range list {
-		if types.UserID(entry.BlockedID) == args.UserID {
-			// User is already in the list
-			out.ErrorCode = 0
-			out.UserID = args.UserID
-			out.ListType = args.ListType
-			copy(out.DisplayName[:], "some random name")
-			err = nil
-			return
-		}
-	}
-
-	newEntry := models.Blocked{
-		UserID:    s.User.ID,
-		BlockedID: uint(args.UserID),
-	}
-	if tx := s.DB.Create(&newEntry); tx.Error != nil {
-		out.ErrorCode = handlers.ErrDatabase.Code
-		err = tx.Error
-		return
-	}
-
-	out.ErrorCode = 0
-	out.UserID = args.UserID
-	out.ListType = args.ListType
-	copy(out.DisplayName[:], "some random name")
-	err = nil
+	err = handlers.ErrNotImplemented
+	out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrNotImplemented.Code})
 	return
 }
 
 func (h AddUserToList) HandleArgs(s *session.Session, args *ArgsAddToList) (out []types.Response, err error) {
-	switch args.ListType {
-	case types.UserListFriends:
-		var res ResponseAddUserToList
-		res, err = h.addFriend(s, args)
-		out = append(out, res)
-	case types.UserListBlocked:
-		var res ResponseAddUserToList
-		res, err = h.addBlocked(s, args)
-		out = append(out, res)
+	var list []models.UserList
+
+	if tx := s.DB.Where("user_id = ? AND list_type = ?", s.User.ID, args.ListType).Find(&list); tx.Error != nil {
+		out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrDatabase.Code})
+		err = tx.Error
+		return
 	}
+
+	// This limit comes from ingame
+	if len(list) >= 16 {
+		out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrInvalidArguments.Code})
+		err = errors.New("list is full")
+		return
+	}
+
+	// Make sure its legit user (and get the display name for later)
+	var user models.User
+	user.ID = uint(args.UserID)
+	if tx := s.DB.First(&user); tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrNotFound.Code})
+			err = handlers.ErrNotFound
+		} else {
+			out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrDatabase.Code})
+			err = tx.Error
+		}
+		return
+	}
+
+	err = s.DB.Model(&models.UserList{}).Save(&models.UserList{
+		UserID:   s.User.ID,
+		ListType: byte(args.ListType),
+		EntryID:  uint(args.UserID),
+	}).Error
+
+	if err != nil {
+		out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrDatabase.Code})
+		return
+	}
+
+	res := ResponseAddUserToList{
+		ErrorCode: 0,
+		UserID:    args.UserID,
+		ListType:  args.ListType,
+	}
+	copy(res.DisplayName[:], user.DisplayName)
+	out = append(out, res)
+
 	return out, err
 }
 
@@ -143,10 +90,6 @@ type ArgsAddToList struct {
 	ListType types.UserListType
 	UserID   types.UserID
 }
-
-type ResponseAddUserToListEmpty types.ResponseEmpty
-
-func (r ResponseAddUserToListEmpty) Type() types.PacketType { return types.ServerAddUserToList }
 
 type ResponseAddUserToListError types.ResponseErrorCode
 

@@ -43,6 +43,23 @@ func (h JoinHandler) overviewPacket(sess *session.Session) types.Response {
 		OverallRank: uint32(sess.User.OverallRank),
 		WeeklyRank:  uint32(sess.User.WeeklyRank),
 	}
+	var indexF, indexB int
+	if err := sess.DB.Where("user_id = ?", sess.User.ID).Find(&sess.User.FBList).Error; err == nil {
+		for _, entry := range sess.User.FBList {
+			switch entry.ListType {
+			case byte(types.UserListFriends):
+				if indexF < 16 {
+					out.FriendsList[indexF] = types.UserID(entry.EntryID)
+					indexF++
+				}
+			case byte(types.UserListBlocked):
+				if indexB < 16 {
+					out.BlockList[indexB] = types.UserID(entry.EntryID)
+					indexB++
+				}
+			}
+		}
+	}
 	return out
 }
 
