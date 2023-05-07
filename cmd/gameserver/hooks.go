@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"os"
 	"time"
@@ -188,4 +189,31 @@ func hookConnectionInfo(p, req *packet.Packet, out chan packet.Packet) konamiser
 	copy(data[4:], "69.11.34.177\x00")
 	(*p).SetData(data)
 	return konamiserver.HookResultContinue
+}
+
+func hookResponseFromFile(s *konamiserver.Server, cmd types.PacketType, cmds []types.PacketType, files []string) {
+	if len(cmds) != len(files) {
+		panic("cmd and files must be the same length")
+	}
+
+	s.AddHook(uint16(cmd), konamiserver.HookBefore, func(p, req *packet.Packet, out chan packet.Packet) konamiserver.HookResult {
+		for i, file := range files {
+			var bs []byte
+			var err error
+
+			if file != "" {
+				bs, err = os.ReadFile(file)
+				if err != nil {
+					log.WithError(err).WithField("file", file).Error("Failed reading file")
+					break
+				}
+			}
+
+			p := packet.New()
+			p.SetType(uint16(cmds[i]))
+			p.SetData(bs)
+			out <- p
+		}
+		return konamiserver.HookResultStop
+	})
 }
