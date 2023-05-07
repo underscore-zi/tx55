@@ -30,7 +30,7 @@ func (h GetLobbyListHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h GetLobbyListHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h GetLobbyListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	var out []types.Response
 	out = append(out, ResponseLobbyListStart{})
 
@@ -54,6 +54,7 @@ func (h GetLobbyListHandler) getLobbies(sess *session.Session) []LobbyListEntry 
 			// TODO: Calculate player count
 			Port:    lobby.Port,
 			Players: lobby.Players,
+			GID:     uint16(lobby.ID),
 		}
 		copy(newLobby.Name[:], lobby.Name)
 		copy(newLobby.IP[:], lobby.IP)
@@ -85,5 +86,5 @@ type LobbyListEntry struct {
 	IP      [15]byte
 	Port    uint16
 	Players uint16
-	Unknown uint16
+	GID     uint16
 }
