@@ -38,15 +38,24 @@ func PostGetRanks(c *gin.Context) {
 	var query string
 	var queryArgs []interface{}
 
+	// VS Rating request
+	if args.Skey == 1 {
+		args.Rule = int(types.ModeOverall)
+	}
+
 	if types.GameMode(args.Rule) == types.ModeOverall {
 		var rankCol string
-		switch types.PlayerStatsPeriod(args.Term) {
-		case types.PeriodAllTime:
-			rankCol = "overall_rank"
-		case types.PeriodWeekly:
-			rankCol = "weekly_rank"
-		default:
-			rankCol = "overall_rank"
+		if args.Skey == 0 {
+			switch types.PlayerStatsPeriod(args.Term) {
+			case types.PeriodAllTime:
+				rankCol = "overall_rank"
+			case types.PeriodWeekly:
+				rankCol = "weekly_rank"
+			default:
+				rankCol = "overall_rank"
+			}
+		} else {
+			rankCol = "vs_rating_rank"
 		}
 
 		if args.Pid > 0 {

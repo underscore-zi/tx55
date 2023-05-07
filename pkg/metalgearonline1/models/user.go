@@ -25,6 +25,7 @@ type User struct {
 	OverallRank    uint
 	WeeklyRank     uint
 	VsRating       uint
+	VsRatingRank   uint
 	Sessions       []Session
 	PlayerSettings PlayerSettings
 	Connections    []Connection
@@ -49,7 +50,7 @@ func (u *User) CheckPassword(password []byte) bool {
 	return true
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
+func (u *User) BeforeCreate(_ *gorm.DB) error {
 	if u.Password == "" {
 		return errors.New("missing password")
 	}

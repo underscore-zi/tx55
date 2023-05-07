@@ -106,4 +106,13 @@ func UpdateRankings(db *gorm.DB) {
 	if tx := db.Exec(updateQuery); tx.Error != nil {
 		l.WithError(tx.Error).Error("failed to update weekly rankings")
 	}
+
+	// rank() users by users.vs_rating, and store the result in users.vs_rating_rank
+	innerQuery = "SELECT id, rank() OVER (ORDER BY vs_rating DESC) AS `rank` FROM users"
+	selectorQuery = "SELECT `rank` from (" + innerQuery + ") as t WHERE t.id=users.id"
+	updateQuery = "UPDATE users SET vs_rating_rank = (" + selectorQuery + ")"
+	if tx := db.Exec(updateQuery); tx.Error != nil {
+		l.WithError(tx.Error).Error("failed to update vs rating rankings")
+	}
+
 }
