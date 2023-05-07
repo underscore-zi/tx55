@@ -110,15 +110,15 @@ type GameTypeStatsWithRank struct {
 }
 
 type PlayerOverview struct {
-	UserID      UserID
-	DisplayName [16]byte
-	Emblem      uint16
-	U1          uint16
-	EmblemText  [16]byte
-	U2          [4]uint16
-	VsRating    uint32
-	CurrentTime uint32
-	LastLogin   uint32
+	UserID          UserID
+	DisplayName     [16]byte
+	Emblem          uint16
+	U1              uint16
+	EmblemText      [16]byte
+	U2              [4]uint16
+	VsRating        uint32
+	LastLogin       uint32
+	BeforeLastLogin uint32
 }
 
 func (p *PlayerOverview) FillDisplayName(displayName []byte) {

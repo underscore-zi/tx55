@@ -44,6 +44,13 @@ func (h LoginHandler) HandleWithCredentials(sess *session.Session, args *ArgsLog
 		return []types.Response{ResponseLoginError{ErrorCode: ErrInvalidCredentials}}, nil
 	}
 
+	// Only want to update the previous with a login with credentials
+	// so if they maybe got TSU rank, it'll last until they disconnect entirely
+	sess.DB.Model(row).Updates(map[string]interface{}{
+		"previous_updated_at": gorm.Expr("updated_at"),
+		"updated_at":          gorm.Expr("NOW()"),
+	})
+
 	sess.Login(&row)
 
 	// Valid login attempt, create a new session ID

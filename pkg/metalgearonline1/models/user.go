@@ -17,19 +17,20 @@ const SALT = "\x84\xbd\xb8\xcf\xad\x46\xdd\x6e\x42\x4a\xe4\xd8\xd2\x6a\x12\xf3"
 
 type User struct {
 	gorm.Model
-	Username       []byte `gorm:"uniqueIndex,size:16"`
-	DisplayName    []byte `gorm:"uniqueIndex,size:16"`
-	Password       string `gorm:"type:varchar(128)"`
-	HasEmblem      bool
-	EmblemText     []byte `gorm:"size:16"`
-	OverallRank    uint
-	WeeklyRank     uint
-	VsRating       uint
-	VsRatingRank   uint
-	Sessions       []Session
-	PlayerSettings PlayerSettings
-	Connections    []Connection
-	FBList         []UserList
+	PreviousUpdatedAt time.Time
+	Username          []byte `gorm:"uniqueIndex,size:16"`
+	DisplayName       []byte `gorm:"uniqueIndex,size:16"`
+	Password          string `gorm:"type:varchar(128)"`
+	HasEmblem         bool
+	EmblemText        []byte `gorm:"size:16"`
+	OverallRank       uint
+	WeeklyRank        uint
+	VsRating          uint
+	VsRatingRank      uint
+	Sessions          []Session
+	PlayerSettings    PlayerSettings
+	Connections       []Connection
+	FBList            []UserList
 }
 
 // HashPassword will hash the password in the right format for MGO1 and then bcrypt it
@@ -71,10 +72,10 @@ func (u *User) BeforeCreate(_ *gorm.DB) error {
 
 func (u *User) PlayerOverview() *types.PlayerOverview {
 	o := types.PlayerOverview{
-		UserID:      types.UserID(u.ID),
-		VsRating:    1000,
-		CurrentTime: uint32(time.Now().Unix()),
-		LastLogin:   uint32(time.Now().Add(-time.Hour * 24 * 31).Unix()),
+		UserID:          types.UserID(u.ID),
+		VsRating:        uint32(u.VsRating),
+		LastLogin:       uint32(u.UpdatedAt.Unix()),
+		BeforeLastLogin: uint32(u.PreviousUpdatedAt.Unix()),
 	}
 
 	o.FillDisplayName(u.DisplayName)

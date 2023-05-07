@@ -64,7 +64,6 @@ func (s *Session) LogFields() logrus.Fields {
 // Login is also where any first-time setup should be done
 func (s *Session) Login(user *models.User) {
 	s.User = user
-	s.DB.Model(user).Update("updated_at", gorm.Expr("NOW()"))
 
 	if s.User.PlayerSettings.UserID == 0 {
 		var settings models.PlayerSettings
