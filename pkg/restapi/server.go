@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"tx55/pkg/restapi/events"
+	"tx55/pkg/restapi/gameweb"
 )
 
 var l = logrus.StandardLogger()
@@ -61,6 +62,8 @@ func NewServer(db *gorm.DB) *Server {
 		s.Engine.GET("/api/v1/stream/events", notImplemented)
 		s.Engine.POST("/api/v1/stream/events/:token", notImplemented)
 	}
+
+	s.Engine.POST("/us/mgs3/rank/mg3getrank.html", gameweb.PostGetRanks)
 
 	return s
 }

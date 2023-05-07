@@ -5,11 +5,12 @@ import "tx55/pkg/metalgearonline1/types/bitfield"
 type GameMode byte
 
 const (
-	ModeDeathmatch GameMode = iota
-	ModeTeamDeathmatch
-	ModeRescue
-	ModeCapture
-	ModeSneaking
+	ModeDeathmatch     GameMode = iota
+	ModeTeamDeathmatch GameMode = 1
+	ModeRescue         GameMode = 2
+	ModeCapture        GameMode = 3
+	ModeSneaking       GameMode = 4
+	ModeOverall        GameMode = 5 // Only used by the Rankings request
 )
 
 func (g GameMode) String() string {
