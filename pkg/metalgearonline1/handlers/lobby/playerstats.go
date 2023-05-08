@@ -54,6 +54,24 @@ func (h PlayerStatsHandler) playerOverview(sess *session.Session, args *ArgsGetP
 		OverallVSRank: uint32(user.VsRatingRank),
 	}
 
+	var list []models.UserList
+	sess.DB.Where("user_id = ?", args.UserID).Find(&list)
+	var indexF, indexB int
+	for _, l := range list {
+		switch types.UserListType(l.ListType) {
+		case types.UserListFriends:
+			if indexF < len(overview.FriendsList) {
+				overview.FriendsList[indexF] = types.UserID(l.EntryID)
+				indexF++
+			}
+		case types.UserListBlocked:
+			if indexB < len(overview.BlockedList) {
+				overview.BlockedList[indexB] = types.UserID(l.EntryID)
+				indexB++
+			}
+		}
+	}
+
 	return overview
 }
 
