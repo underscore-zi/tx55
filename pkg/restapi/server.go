@@ -65,6 +65,9 @@ func NewServer(db *gorm.DB) *Server {
 
 	s.Engine.POST("/us/mgs3/rank/mg3getrank.html", gameweb.PostGetRanks)
 	s.Engine.GET("/us/mgs3/text/:filename", gameweb.GetTextFile)
+	s.Engine.POST("/us/mgs3/reguser/reguser.html", gameweb.RegisterAccount)
+	s.Engine.POST("/us/mgs3/reguser/deluser.html", gameweb.DeleteAccount)
+	s.Engine.POST("/us/mgs3/reguser/chgpswd.html", gameweb.ChangePassword)
 
 	return s
 }

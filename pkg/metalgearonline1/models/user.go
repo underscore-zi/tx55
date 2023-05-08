@@ -51,8 +51,8 @@ func (u *User) CheckPassword(password []byte) bool {
 	return true
 }
 
-func (u *User) BeforeCreate(_ *gorm.DB) error {
-	if u.Password == "" {
+func (u *User) hashIfNecessary() error {
+	if len(u.Password) == 0 {
 		return errors.New("missing password")
 	}
 
@@ -68,6 +68,14 @@ func (u *User) BeforeCreate(_ *gorm.DB) error {
 
 	u.Password = string(hash)
 	return nil
+}
+
+func (u *User) BeforeCreate(_ *gorm.DB) error {
+	return u.hashIfNecessary()
+}
+
+func (u *User) BeforeUpdate(_ *gorm.DB) error {
+	return u.hashIfNecessary()
 }
 
 func (u *User) PlayerOverview() *types.PlayerOverview {
