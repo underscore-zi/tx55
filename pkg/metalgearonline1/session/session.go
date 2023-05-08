@@ -65,6 +65,10 @@ func (s *Session) LogFields() logrus.Fields {
 func (s *Session) Login(user *models.User) {
 	s.User = user
 
+	s.DB.Model(user).Updates(map[string]interface{}{
+		"updated_at": gorm.Expr("NOW()"),
+	})
+
 	if s.User.PlayerSettings.UserID == 0 {
 		var settings models.PlayerSettings
 		tx := s.DB.Model(&models.PlayerSettings{}).Where("user_id = ?", s.User.ID).First(&settings)
