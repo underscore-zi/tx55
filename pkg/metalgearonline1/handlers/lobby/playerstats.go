@@ -1,9 +1,6 @@
 package lobby
 
 import (
-	"bufio"
-	"encoding/hex"
-	"os"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -28,7 +25,7 @@ func (h PlayerStatsHandler) ArgumentTypes() []reflect.Type {
 	}
 }
 
-func (h PlayerStatsHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h PlayerStatsHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, handlers.ErrNotImplemented
 }
 
@@ -54,36 +51,10 @@ func (h PlayerStatsHandler) playerOverview(sess *session.Session, args *ArgsGetP
 		Overview:      *user.PlayerOverview(),
 		OverallRank:   uint32(user.OverallRank),
 		WeeklyRank:    uint32(user.WeeklyRank),
-		OverallVSRank: 0,
+		OverallVSRank: uint32(user.VsRatingRank),
 	}
 
 	return overview
-}
-
-func ReadHexBytesFromFile(filename string) []byte {
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = file.Close() }()
-
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
-	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	var out []byte
-	for _, line := range lines {
-		b, err := hex.DecodeString(line)
-		if err != nil {
-			panic(err)
-		}
-		out = append(out, b...)
-	}
-
-	return out
 }
 
 func (h PlayerStatsHandler) playerStats(sess *session.Session, args *ArgsGetPlayerStats) []types.Response {
@@ -91,7 +62,7 @@ func (h PlayerStatsHandler) playerStats(sess *session.Session, args *ArgsGetPlay
 
 	all, weekly, err := models.GetPlayerStats(sess.DB, args.UserID)
 	if err != nil {
-		return nil
+		sess.Log.WithError(err).WithField("player_is", args.UserID).Error("failed to get player stats")
 	}
 	out = append(out, ResponsePlayerStats{
 		Stats: all,

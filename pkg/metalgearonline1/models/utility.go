@@ -100,6 +100,7 @@ func GetPlayerStats(db *gorm.DB, UserID types.UserID) (allTimeStats, weeklyStats
 		if stat.DeathStreak > targetMode.Stats.DeathStreak {
 			targetMode.Stats.DeathStreak = stat.DeathStreak
 		}
+		targetMode.Rank = stat.Rank
 
 	}
 
