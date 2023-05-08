@@ -37,6 +37,12 @@ func (h GetGameListHandler) getGames(s *session.Session) ([]ResponseGameListEntr
 	if tx := s.DB.Preload(clause.Associations).Where("lobby_id = ?", s.LobbyID).Find(&games); tx.Error != nil {
 		return out, tx.Error
 	}
+
+	listLookup := make(map[uint]types.UserListType)
+	for _, f := range s.User.FBList {
+		listLookup[f.EntryID] = types.UserListType(f.ListType)
+	}
+
 	for _, game := range games {
 		entry := ResponseGameListEntry{
 			ID:                  uint32(game.ID),
@@ -53,6 +59,18 @@ func (h GetGameListHandler) getGames(s *session.Session) ([]ResponseGameListEntr
 		if len(game.Players) > 0 {
 			entry.Ping = game.Players[0].Ping
 		}
+
+		for _, p := range game.Players {
+			if listType, found := listLookup[p.UserID]; found {
+				switch listType {
+				case types.UserListFriends:
+					entry.FriendOrBlocked |= 0x01
+				case types.UserListBlocked:
+					entry.FriendOrBlocked |= 0x02
+				}
+			}
+		}
+
 		copy(entry.Name[:], game.GameOptions.Name)
 		out = append(out, entry)
 	}
