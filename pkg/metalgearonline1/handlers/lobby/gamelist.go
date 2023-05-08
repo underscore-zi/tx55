@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"gorm.io/gorm/clause"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -34,7 +33,9 @@ func (h GetGameListHandler) ArgumentTypes() []reflect.Type {
 func (h GetGameListHandler) getGames(s *session.Session) ([]ResponseGameListEntry, error) {
 	var out []ResponseGameListEntry
 	var games []models.Game
-	if tx := s.DB.Preload(clause.Associations).Where("lobby_id = ?", s.LobbyID).Find(&games); tx.Error != nil {
+
+	q := s.DB.Joins("Connection").Joins("GameOptions").Preload("Players")
+	if tx := q.Where("lobby_id = ?", s.LobbyID).Find(&games); tx.Error != nil {
 		return out, tx.Error
 	}
 
@@ -78,7 +79,7 @@ func (h GetGameListHandler) getGames(s *session.Session) ([]ResponseGameListEntr
 	return out, nil
 }
 
-func (h GetGameListHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h GetGameListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	var out []types.Response
 	out = append(out, ResponseGameListStart{})
 	games, err := h.getGames(sess)
