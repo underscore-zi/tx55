@@ -49,17 +49,17 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 
 	// Do the update, or create the stats as needed
 	if args.Stats.Points < 0 || args.Stats.Kills < 0 || args.Stats.Deaths < 0 {
-		if err = h.updatePlayerStats(sess, uint(args.UserID), args.Stats); err != nil {
-			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
-			return
-		}
-	} else {
 		sess.Log.WithFields(logrus.Fields{
 			"StatsUserID": args.UserID,
 			"Kills":       args.Stats.Kills,
 			"Deaths":      args.Stats.Deaths,
 			"Points":      args.Stats.Points,
 		}).Info("Stats with negative values!")
+	} else {
+		if err = h.updatePlayerStats(sess, uint(args.UserID), args.Stats); err != nil {
+			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
+			return
+		}
 	}
 
 	out = append(out, ResponseHostPlayerStats{ErrorCode: 0})
