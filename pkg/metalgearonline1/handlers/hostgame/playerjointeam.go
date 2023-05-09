@@ -36,7 +36,7 @@ func (h HostPlayerJoinTeam) HandleArgs(sess *session.Session, args *ArgsHostPlay
 		return
 	}
 
-	sess.GameState.JoinTeam(args.UserID, args.TeamID)
+	go sess.GameState.JoinTeam(args.UserID, args.TeamID)
 	out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: 0, UserID: args.UserID})
 	return
 }

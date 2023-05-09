@@ -36,7 +36,7 @@ func (h HostPlayerKickedHandler) HandleArgs(sess *session.Session, args *ArgsHos
 		return
 	}
 
-	sess.GameState.KickPlayer(args.UserID)
+	go sess.GameState.KickPlayer(args.UserID)
 	out = append(out, ResponseHostPlayerKicked{ErrorCode: 0, UserID: args.UserID})
 	return
 }

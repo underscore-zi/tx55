@@ -75,3 +75,11 @@ func (hs *HostSession) StopGame() {
 		hs.ParentSession.Log.WithError(err).Error("Failed to remove game")
 	}
 }
+
+func (hs *HostSession) NewRound(roundID byte) {
+	md := hs.ParentSession.DB.Model(&models.Game{
+		Model: gorm.Model{ID: uint(hs.GameID)},
+	})
+	md.Update("current_round", roundID)
+	hs.CurrentRound = roundID
+}

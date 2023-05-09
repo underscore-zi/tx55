@@ -39,6 +39,15 @@ func (h HostPingInfoHandler) parseArgs(packet *packet.Packet) (args ArgsHostPing
 	return
 }
 
+func (h HostPingInfoHandler) updatePings(sess *session.Session, args ArgsHostPingInfo) {
+	for _, ping := range args.Pings {
+		if ping.UserID == 0 {
+			break
+		}
+		sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, ping.UserID).Update("ping", ping.Ping)
+	}
+}
+
 func (h HostPingInfoHandler) Handle(sess *session.Session, packet *packet.Packet) (out []types.Response, err error) {
 	if !sess.IsHost() {
 		out = append(out, ResponseHostPingInfo{ErrorCode: handlers.ErrNotHosting.Code})
@@ -46,25 +55,7 @@ func (h HostPingInfoHandler) Handle(sess *session.Session, packet *packet.Packet
 		return
 	}
 
-	args := h.parseArgs(packet)
-	for _, ping := range args.Pings {
-		if ping.UserID == 0 {
-			break
-		}
-		tx := sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, ping.UserID).Update("ping", ping.Ping)
-		if tx.Error != nil {
-			out = append(out, ResponseHostPingInfo{ErrorCode: handlers.ErrDatabase.Code})
-			err = tx.Error
-			return
-		}
-
-		if tx.RowsAffected == 0 {
-			out = append(out, ResponseHostPingInfo{ErrorCode: handlers.ErrNotFound.Code})
-			err = handlers.ErrNotFound
-			return
-		}
-	}
-
+	go h.updatePings(sess, h.parseArgs(packet))
 	out = append(out, ResponseHostPingInfo{ErrorCode: 0})
 
 	return
