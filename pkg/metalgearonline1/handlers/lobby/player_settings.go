@@ -27,7 +27,7 @@ func (h UpdatePlayerSettingsHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{reflect.TypeOf(ArgsUpdatePlayerSettings{})}
 }
 
-func (h UpdatePlayerSettingsHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h UpdatePlayerSettingsHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, handlers.ErrNotImplemented
 }
 

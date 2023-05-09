@@ -1,4 +1,4 @@
-package lobby
+package auth
 
 import (
 	"reflect"
@@ -22,7 +22,7 @@ func (h SessionInfoHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h SessionInfoHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h SessionInfoHandler) Handle(sess *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	res := ResponseSessionInfo{
 		ErrorCode: 0,
 		UserID:    types.UserID(sess.User.ID),

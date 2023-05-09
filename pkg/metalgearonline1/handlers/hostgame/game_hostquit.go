@@ -22,7 +22,7 @@ func (h HostQuitHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h HostQuitHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h HostQuitHandler) Handle(sess *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	sess.StopHosting()
 	return []types.Response{
 		ResponseHostQuit{ErrorCode: 0},

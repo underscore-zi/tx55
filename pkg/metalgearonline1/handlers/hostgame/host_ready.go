@@ -22,7 +22,7 @@ func (h HostReadyToCreateHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h HostReadyToCreateHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h HostReadyToCreateHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return []types.Response{ResponseHostReadyToCreate{}}, nil
 }
 

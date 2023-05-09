@@ -26,7 +26,7 @@ func (h ReportConnectionInfo) ArgumentTypes() []reflect.Type {
 	}
 }
 
-func (h ReportConnectionInfo) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h ReportConnectionInfo) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, handlers.ErrNotImplemented
 }
 

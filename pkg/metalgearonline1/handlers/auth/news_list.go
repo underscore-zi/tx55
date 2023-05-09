@@ -23,7 +23,7 @@ func (h NewsListHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h NewsListHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h NewsListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	var out []types.Response
 	var entries []models.News
 	out = append(out, ResponseNewsListStart{})

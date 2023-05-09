@@ -1,4 +1,4 @@
-package lobby
+package auth
 
 import (
 	"reflect"
