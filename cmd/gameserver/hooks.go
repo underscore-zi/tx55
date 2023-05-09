@@ -185,9 +185,16 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 }
 
 func hookConnectionInfo(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResult {
-	data := (*p).Data()
-	copy(data[4:], "69.11.34.177\x00")
-	(*p).SetData(data)
+	if ip, found := os.LookupEnv("FORCED_HOST_REMOTE_ADDR"); found {
+		if len(ip) >= 15 {
+			ip = ip[:15]
+		} else {
+			ip = ip + "\x00"
+		}
+		data := (*p).Data()
+		copy(data[4:], ip)
+		(*p).SetData(data)
+	}
 	return konamiserver.HookResultContinue
 }
 

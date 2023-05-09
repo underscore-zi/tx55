@@ -75,27 +75,16 @@ func main() {
 
 	// Temporary Hook to transfer logins from old database to new
 	if OriginalDb != nil {
-		l.Info("Enabling sessions from old database")
+		l.Info("Enabling Hook: Transfer sessions from old database to new")
 		GormDb = db
 		server.KonamiServer.AddHook(uint16(types.ClientLogin), konamiserver.HookBefore, hookLogin)
 	}
 
-	/* Example Hook: Hooking the game host info packet containing IP/port info to redirect any game to connect to a
-	   controlled IP address. When testing games with a server and clients all in the same network the remote addresses
-	   were not correct making this necessary */
-	/*
-		matchedIp := []byte("55.66.77.88")
-		replacedIp := "11.22.33.44\x00"
-		server.KonamiServer.AddHook(uint16(types.ServerHostInfo), konamiserver.HookOutputPacket, func(p, req *packet.Packet, out chan packet.Packet) konamiserver.HookResult {
-			data := (*p).Data()
-			idx := bytes.Index(data, matchedIp)
-			if idx >= 0 {
-				copy(data[idx:], replacedIp)
-				(*p).SetData(data)
-			}
-			return konamiserver.HookResultContinue
-		})
-		//*/
+	if v, found := os.LookupEnv("FORCED_HOST_REMOTE_ADDR"); found {
+		l.Info("Enabling Hook: Rewrite all host's remote_addr with: " + v)
+		server.KonamiServer.AddHook(uint16(types.ServerHostInfo), konamiserver.HookOutputPacket, hookConnectionInfo)
+	}
+
 	l.WithField("address", cfg.Address).Info("Starting server")
 	if endpoint, found := os.LookupEnv("EVENTS_ENDPOINT"); !found {
 		l.Info("EVENTS_ENDPOINT not set, events will not be broadcast to external service")
