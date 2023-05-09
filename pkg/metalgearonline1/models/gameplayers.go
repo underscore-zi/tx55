@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 	"tx55/pkg/metalgearonline1/types"
 )
 
@@ -31,7 +32,7 @@ func (g GamePlayers) GamePlayerStats() (out types.GamePlayerStats) {
 	out.Kills = g.Kills
 	out.Deaths = g.Deaths
 	out.Score = g.Score
-	out.Seconds = g.Seconds
+	out.Seconds = uint32(time.Now().Sub(g.CreatedAt).Seconds())
 	out.Ping = g.Ping
 	return
 }

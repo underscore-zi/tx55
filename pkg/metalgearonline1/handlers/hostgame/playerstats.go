@@ -67,6 +67,13 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 	sess.DB.Model(sess.User).Update("vs_rating", stats.VsRating)
 
 	updates := map[string]interface{}{
+		"kills":  gorm.Expr("kills + ?", stats.Kills),
+		"deaths": gorm.Expr("deaths + ?", stats.Deaths),
+		"score":  gorm.Expr("score + ?", stats.Points),
+	}
+	sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, UserID).Updates(updates)
+
+	updates = map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),
 		"deaths":               gorm.Expr("deaths + ?", stats.Deaths),
 		"stuns":                gorm.Expr("stuns + ?", stats.Stuns),
