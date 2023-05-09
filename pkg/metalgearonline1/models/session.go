@@ -11,13 +11,13 @@ func init() {
 }
 
 type Session struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key"`
 	CreatedAt time.Time
 	UserID    uint
 	User      User
 }
 
-func (s *Session) BeforeCreate(tx *gorm.DB) error {
+func (s *Session) BeforeCreate(_ *gorm.DB) error {
 	if s.ID == uuid.Nil {
 		s.ID = uuid.New()
 	}

@@ -150,7 +150,7 @@ func toGameOptionsJSON(opts models.GameOptions) GameOptionsJSON {
 		HasVoiceChat:      opts.Bitfield.GetVoiceChat(),
 	}
 
-	// The rules list is always 15 elements so we need to truncate it for the JSON
+	// The rules list is always 15 elements, so we need to truncate it for the JSON
 	// This is done by looking for the "null" rules, there is no map 0
 	ruleCount := 0
 	for _, rule := range opts.Rules {

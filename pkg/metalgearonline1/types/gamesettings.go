@@ -32,6 +32,7 @@ func (g GameMode) String() string {
 
 type GameMap byte
 
+//goland:noinspection GoUnusedConst
 const (
 	MapLostForest GameMap = iota + 1
 	MapGhostFactory
@@ -212,6 +213,6 @@ type CreateGameOptions struct {
 	Bitfield          bitfield.GameSettings
 	AutoBalance       uint8
 	IdleKickMinutes   uint16
-	// The game sends this as `3` when off, so you need to check the bitoptions
+	// The game sends this as `3` when off, so you need to check the bitfield
 	TeamKillCount uint16
 }

@@ -50,7 +50,6 @@ func (h GetUserListHandler) HandleArgs(sess *session.Session, args *ArgsGetUserL
 	return out, nil
 }
 
-// --- Packets ---
 type ArgsGetUserList struct {
 	ListType types.UserListType
 }

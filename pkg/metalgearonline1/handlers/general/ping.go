@@ -22,11 +22,10 @@ func (h PingHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h PingHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h PingHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return []types.Response{ResponsePing{}}, nil
 }
 
-// --- Packets ---
 type ResponsePing types.ResponseEmpty
 
 func (r ResponsePing) Type() types.PacketType { return types.ServerPing }

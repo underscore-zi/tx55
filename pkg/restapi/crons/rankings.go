@@ -79,6 +79,7 @@ func AwardChampion(db *gorm.DB) {
 	})
 }
 
+//goland:noinspection Annotator,Annotator,Annotator,Annotator,Annotator,Annotator,Annotator,Annotator
 func UpdateRankings(db *gorm.DB) {
 	// The innerQuery is the key query. It queries for every user and generates their rank for each period/mode
 	// The selector takes that query down to a single result that is good for the update query

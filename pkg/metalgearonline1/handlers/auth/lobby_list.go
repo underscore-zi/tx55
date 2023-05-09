@@ -64,7 +64,6 @@ func (h GetLobbyListHandler) getLobbies(sess *session.Session) []LobbyListEntry 
 	return out
 }
 
-// --- Packets ---
 type ResponseLobbyListStart types.ResponseEmpty
 
 func (r ResponseLobbyListStart) Type() types.PacketType { return types.ServerLobbyListStart }

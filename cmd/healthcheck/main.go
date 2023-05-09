@@ -27,7 +27,7 @@ func main() {
 
 	notFoundErr := fmt.Sprintf("code(%d)", handlers.ErrNotFound.Code)
 	databaseErr := fmt.Sprintf("code(%d)", handlers.ErrDatabase.Code)
-	if err := c.LoginWithSession("AAAAAAAAAAAAAAAA"); err != nil {
+	if err := c.LoginWithSession("NotALegitSession"); err != nil {
 		switch err.Error() {
 		case notFoundErr:
 			fmt.Println("OK")

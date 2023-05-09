@@ -18,7 +18,7 @@ var AllHandlers = map[types.PacketType]Handler{}
 type Handler interface {
 	// Type is a singular packet type that the handler will handle
 	Type() types.PacketType
-	// ArgumentTypes is a list of argument types the handler expects. Argument types must fixed size structs
+	// ArgumentTypes is a list of argument types the handler expects. Argument types must be fixed size structs
 	ArgumentTypes() []reflect.Type
 	// Handle is the default handler that'll be called with teh session and packet
 	// However you can have other `Handle*` methods. Instead of a packet these can take a pointer to one of the types
@@ -60,7 +60,7 @@ func getArgs(h Handler, p *packet.Packet) (reflect.Type, any, error) {
 }
 
 // Handle will dispatch automatically find the correct handler for a given packet
-// If it can find a handler with arguments that match what was recieved it'll send
+// If it can find a handler with arguments that match what was received it'll send
 // the packet to that handler, otherwise it defaults to the interface Handler() func
 func Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
 	cmd := types.PacketType((*packet).Type())

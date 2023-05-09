@@ -85,6 +85,7 @@ func TestCreateGameAndStats(c *testclient.TestClient, db *gorm.DB) {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func TestCreateGameAndDisconnect(c *testclient.TestClient, db *gorm.DB) {
 	newGame := createGame(c, db)
 	playerJoin(c, db, newGame)

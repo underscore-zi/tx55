@@ -35,7 +35,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop() {
-	// Should end up killing the mainLoops but I haven't confirmed that
+	// Should end up killing the mainLoops, but I haven't confirmed that
 	_ = s.listener.Close()
 }
 

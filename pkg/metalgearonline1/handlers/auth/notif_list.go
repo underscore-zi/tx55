@@ -27,14 +27,14 @@ func (h GetNotificationsHandler) Handle(sess *session.Session, _ *packet.Packet)
 	var out []types.Response
 	out = append(out, ResponseNotificationsStart{})
 
-	var notifs []models.Notification
-	if tx := sess.DB.Where("user_id = ?", sess.User.ID).Find(&notifs); tx.Error != nil {
+	var notifications []models.Notification
+	if tx := sess.DB.Where("user_id = ?", sess.User.ID).Find(&notifications); tx.Error != nil {
 		sess.Log.WithFields(sess.LogFields()).WithError(tx.Error).Error("failed to get notifications")
 		return out, tx.Error
 	}
 
-	for _, n := range notifs {
-		notif := ResponseNotificationEntry{
+	for _, n := range notifications {
+		notification := ResponseNotificationEntry{
 			ID:        uint32(n.ID),
 			Important: n.IsImportant,
 			HasRead:   n.HasRead,
@@ -42,17 +42,16 @@ func (h GetNotificationsHandler) Handle(sess *session.Session, _ *packet.Packet)
 			Title:     [64]byte{},
 			Body:      [900]byte{},
 		}
-		copy(notif.TimeStr[:], []byte(n.CreatedAt.Format("2006-01-02 15:04:05")))
-		copy(notif.Title[:], []byte(n.Title))
-		copy(notif.Body[:], []byte(n.Body))
-		out = append(out, notif)
+		copy(notification.TimeStr[:], n.CreatedAt.Format("2006-01-02 15:04:05"))
+		copy(notification.Title[:], n.Title)
+		copy(notification.Body[:], n.Body)
+		out = append(out, notification)
 	}
 
 	out = append(out, ResponseNotificationsEnd{})
 	return out, nil
 }
 
-// --- Packets ---
 type ResponseNotificationsStart types.ResponseErrorCode
 
 func (r ResponseNotificationsStart) Type() types.PacketType { return types.ServerNotificationsStart }

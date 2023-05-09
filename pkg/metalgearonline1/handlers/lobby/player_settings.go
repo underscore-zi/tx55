@@ -64,8 +64,6 @@ func (h UpdatePlayerSettingsHandler) HandleArgs(sess *session.Session, args *Arg
 	return out, nil
 }
 
-// --- Packets ---
-
 type ArgsUpdatePlayerSettings struct {
 	Settings bitfield.PlayerSettings
 	FKeys    [12][26]byte

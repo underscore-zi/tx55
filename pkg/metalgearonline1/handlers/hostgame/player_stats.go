@@ -139,7 +139,7 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		}).Info("Creating new stats for user")
 
 		newStats := models.PlayerStats{
-			UserID: uint(UserID),
+			UserID: UserID,
 			Mode:   currentRules.Mode,
 			Map:    currentRules.Map,
 			Period: types.PeriodWeekly,
@@ -148,7 +148,7 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		sess.DB.Create(&newStats)
 
 		newStats = models.PlayerStats{
-			UserID: uint(UserID),
+			UserID: UserID,
 			Mode:   currentRules.Mode,
 			Map:    currentRules.Map,
 			Period: types.PeriodAllTime,

@@ -32,7 +32,6 @@ func (h SessionInfoHandler) Handle(sess *session.Session, _ *packet.Packet) ([]t
 	return []types.Response{res}, nil
 }
 
-// --- Packets ---
 type ResponseSessionInfo struct {
 	ErrorCode   uint32
 	UserID      types.UserID

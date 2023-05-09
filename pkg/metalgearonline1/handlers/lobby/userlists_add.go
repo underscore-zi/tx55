@@ -41,7 +41,7 @@ func (h AddUserToList) HandleArgs(s *session.Session, args *ArgsAddToList) (out 
 		return
 	}
 
-	// This limit comes from ingame
+	// This limit comes from in-game
 	if len(list) >= 16 {
 		out = append(out, ResponseAddUserToListError{ErrorCode: handlers.ErrInvalidArguments.Code})
 		err = errors.New("list is full")

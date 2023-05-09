@@ -33,9 +33,9 @@ func (h NewsListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]type
 		news := ResponseNewsListEntry{
 			ID: uint32(entry.ID),
 		}
-		copy(news.Time[:], []byte(entry.Time.Format("2006-01-02 15:04:05")))
-		copy(news.Topic[:], []byte(entry.Topic))
-		copy(news.Body[:], []byte(entry.Body))
+		copy(news.Time[:], entry.Time.Format("2006-01-02 15:04:05"))
+		copy(news.Topic[:], entry.Topic)
+		copy(news.Body[:], entry.Body)
 		out = append(out, news)
 	}
 
@@ -44,7 +44,6 @@ func (h NewsListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]type
 	return out, nil
 }
 
-// --- Packets ---
 type ResponseNewsListStart types.ResponseEmpty
 
 func (r ResponseNewsListStart) Type() types.PacketType { return types.ServerNewsListStart }

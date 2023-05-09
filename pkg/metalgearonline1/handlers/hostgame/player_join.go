@@ -49,8 +49,6 @@ type ArgsHostPlayerJoin struct {
 	UserID types.UserID
 }
 
-// The client is satisified with the ErrorCode and UserID being sent back
-// But the code seems to be willing to read more info from the server
 type ResponseHostPlayerJoin struct {
 	ErrorCode int32
 	UserID    types.UserID

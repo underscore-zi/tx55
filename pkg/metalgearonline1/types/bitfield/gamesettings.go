@@ -6,13 +6,16 @@ type GameSettings struct {
 
 const (
 	// First Byte
+
 	UniqueCharactersPos = 0
 	RumbleRosesGirlsPos = 1
 	GhostsPos           = 3
 	FriendlyFirePos     = 4
 	TeamAutoBalancePos  = 6
 	IdleKickPos         = 7
+
 	// Second Byte
+
 	TeamKillKickPos = 0
 	VoiceChatPos    = 1
 )

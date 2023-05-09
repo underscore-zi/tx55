@@ -16,7 +16,7 @@ func init() {
 // JoinHandler is called when a client selects a game lobby to join
 // In response is sends the player two pieces of information:
 // - First it sends an "overview" packet containing things like the display name, user id and such
-// - Then it sends the players stats in two packets (one for alltime one for weekly stats)
+// - Then it sends the players stats in two packets (one for all-time one for weekly stats)
 type JoinHandler struct{}
 
 func (h JoinHandler) Type() types.PacketType {

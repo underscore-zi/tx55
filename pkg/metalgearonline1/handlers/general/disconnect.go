@@ -22,6 +22,6 @@ func (h DisconnectHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h DisconnectHandler) Handle(s *session.Session, _ *packet.Packet) ([]types.Response, error) {
+func (h DisconnectHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, nil
 }

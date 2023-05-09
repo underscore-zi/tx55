@@ -55,11 +55,11 @@ func (p *PlayerSettings) FromBitfield(b bitfield.PlayerSettings) {
 	p.USBKeyboardType = b.GetUSBKeyboardType()
 	p.WeaponSwitchStyle = b.GetWeaponSwitchStyle()
 
-	newbf := p.Bitfield()
-	for i, cur := range newbf.Data {
+	newBitfield := p.Bitfield()
+	for i, cur := range newBitfield.Data {
 		if cur.Data != b.Data[i].Data {
 			// We could return an error here instead of printing, but really this "error" isn't something that should
-			// ever happen. Its not something one can "recover" or do something about. Its just important if it happens
+			// ever happen. It's not something one can "recover" or do something about. Its just important if it happens
 			// to know about it and fix it.
 			fmt.Printf("bitfield mismatch [%d]: %x != %x\n", i, cur.Data, b.Data[i].Data)
 		}

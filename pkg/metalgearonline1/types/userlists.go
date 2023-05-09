@@ -21,6 +21,7 @@ type UserListEntry struct {
 
 type LobbyType uint32
 
+//goland:noinspection GoUnusedConst,GoUnusedConst
 const (
 	LobbyTypeGate    LobbyType = 0
 	LobbyTypeAccount LobbyType = 1

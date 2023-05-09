@@ -8,7 +8,7 @@ import (
 
 // Every API request returns the fairly simple ResponseJSON which contains a boolean `success` and a `data` field.
 // On any error, the `success` field will be false and the `data` field will contain a string with the error message.
-// On success, the `success` field will be true and the `data` field will contain the appropiate response data.
+// On success, the `success` field will be true and the `data` field will contain the appropriate response data.
 
 // Endpoints
 // Prefix: /api/v1
@@ -42,7 +42,7 @@ import (
 //  - Description: |-
 //      Retrieve all the generated stat entries for a user. The stats are broken up by period, mode, and map.
 //      Only the stats a user has generated will be returned, so if a user has never played TDM on S.East then there
-//      will be no entry for that combination. Weekly stats however only get zeroed out so you can have a weekly entry
+//      will be no entry for that combination. Weekly stats however only get zeroed out, so you can have a weekly entry
 //      with effectively no stats. Take a look at the `PlayerStatsJSON` struct for more information about specific values.
 //  - Path Options:
 //    - user_id: The ID of the user to retrieve
@@ -74,11 +74,11 @@ import (
 //      A Websocket endpoint that streams game related events like creation, deletion, player join/leave, and round starts
 //      the specific format of these events can be derived from pkg/metalgearonline1/session/events.go but generally just
 //      contain the event identifier, and ids related to it. For example, a player join event will contain the game id and
-//     the user id of the player that joined. Its meant to be used in conjunction with this API.
+//     the user id of the player that joined. It is meant to be used in conjunction with this API.
 
 // POST /stream/events/:token
 //  - Description: |-
-//      This is how the game server sends events to be broadcast on the websocket. Messages recieves are broadcast to all
+//      This is how the game server sends events to be broadcast on the websocket. Messages receives are broadcast to all
 //      connected websocket clients exactly.
 //  - Path Options:
 //    - token: The secret token to use to authenticate the request.
@@ -223,7 +223,7 @@ type PlayerStatsJSON struct {
 	RoundsPlayed  uint32 `json:"rounds_played"`
 	RoundsNoDeath uint32 `json:"rounds_no_death"`
 
-	// KerotansForWin is the number of Gakos resuced when Mode is rescue
+	// KerotansForWin is the number of Gakos rescued when Mode is rescue
 	KerotansForWin uint32 `json:"kerotans_for_win"`
 	// KerotansPlaced is the number of goals as snake when Mode is sneaking
 	KerotansPlaced uint32 `json:"kerotans_placed"`

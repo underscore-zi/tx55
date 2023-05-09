@@ -9,8 +9,8 @@ import (
 
 func getRankings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
-	var limit int = 50
-	var AllModes types.GameMode = types.GameMode(255)
+	limit := 50
+	AllModes := types.GameMode(255)
 
 	var period types.PlayerStatsPeriod
 	var page int
@@ -64,7 +64,7 @@ func getRankings(c *gin.Context) {
 			return
 		}
 	} else {
-		query := "SELECT `rank`, user_id, u.display_name, SUM(points) as points FROM player_stats INNER JOIN users u ON u.id = player_stats.user_id WHERE period = ? AND mode = ? GROUP BY user_id ORDER BY `rank` ASC LIMIT ? OFFSET ?"
+		query := "SELECT `rank`, user_id, u.display_name, SUM(points) as points FROM player_stats INNER JOIN users u ON u.id = player_stats.user_id WHERE period = ? AND mode = ? GROUP BY user_id ORDER BY `rank` LIMIT ? OFFSET ?"
 		if err = db.Raw(query, period, gameMode, limit, (page-1)*limit).Scan(&rankings).Error; err != nil {
 			Error(c, 500, "Database error")
 			l.WithError(err).Error("Error getting mode rankings")

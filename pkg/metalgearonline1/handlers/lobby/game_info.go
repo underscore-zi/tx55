@@ -13,7 +13,7 @@ func init() {
 	handlers.Register(GetGameInfoHandler{})
 }
 
-// GetGameInfoHandler is called a couple times in game from the game list page.
+// GetGameInfoHandler is called a couple of times in game from the game list page.
 // - Hovering over a game in the game list, after a couple seconds it'll show a little box
 // - Selecting Player Info or Host Info from the menu in the game list
 type GetGameInfoHandler struct{}
@@ -59,7 +59,6 @@ type ArgsGetGameInfo struct {
 	GameID types.GameID
 }
 
-// --- Packets ---
 type ResponseGameInfo struct {
 	ErrorCode int32
 	Info      types.GameInfo

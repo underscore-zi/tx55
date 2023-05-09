@@ -37,8 +37,8 @@ func (s *Server) AddHook(command uint16, hookType HookType, f HookFunc) {
 
 // ----- Client Functions -----
 
-// processReplies wraps all the replies cause by a single packet so we can apply output hooks
-// it's a bit round-about create a new channel just for that but it lets us associate the request with the outputs
+// processReplies wraps all the replies cause by a single packet, so we can apply output hooks
+// it's a bit round-about create a new channel just for that, but it lets us associate the request with the outputs
 // hooking later in the writer loop removes that information
 func (c *client) processReplies(request packet.Packet, out chan packet.Packet, in chan packet.Packet) {
 	for {

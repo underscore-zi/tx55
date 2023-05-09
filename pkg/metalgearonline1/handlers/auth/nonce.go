@@ -22,7 +22,7 @@ func (h GetNonceHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{}
 }
 
-func (h GetNonceHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h GetNonceHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	// Originally they probably changed this every time as it is used for a digest auth mechanism. To do that
 	// means storing passwords in a recoverable way both the server can know the correct response without needing to
 	// transmit the secret over the wire. To avoid storing the passwords we use a static value here. The trade-off is

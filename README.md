@@ -6,7 +6,7 @@ This is primarily a private server for Metal Gear Online 1 (MGO or MGO1), a game
 
 In doing the reverse engineering of the game's network traffic we realized that several Konami games around the same time used a similar TCP-layer protocol. So the [konamiserver](./pkg/konamiserver) package provides generic implementation of this protocol.
 
-The main requirement to using it is to implement the `GameClient` interface to recieve the connection/disconnection and packet events, and a factory function to create a new client for each connection. The [metalgearonline1](./pkg/metalgearonline1) package is an example implementation of this. Though it has some added complexity to do automated parsing and routing of argument structures to the appropriate handlers.
+The main requirement to using it is to implement the `GameClient` interface to receive the connection/disconnection and packet events, and a factory function to create a new client for each connection. The [metalgearonline1](./pkg/metalgearonline1) package is an example implementation of this. Though it has some added complexity to do automated parsing and routing of argument structures to the appropriate handlers.
 
 With the interface implemented, the Konami server will handle the incoming packets verifying their hashes for you, and call your packet receiver with the incoming `Packet` structure, and a channel for an outbound packets. The implementation also supports hooking in and outbound packets to make on-the-fly modifications.
 
@@ -24,7 +24,7 @@ The client could send NULL bytes to fill the space, which is what the binary ser
 
 # Metal Gear Online 1 Server (pkg/metalgearonline1)
 
-This package is the core of the game server, specifically the `handlers` package within. On top of the Konami Server GameClient interface, I impelment a sort of handler registration system. Various structs can define what packet type they handle and supported argument structures. Then packets are routed to the appropriate handler automatically. 
+This package is the core of the game server, specifically the `handlers` package within. On top of the Konami Server GameClient interface, I implement a sort of handler registration system. Various structs can define what packet type they handle and supported argument structures. Then packets are routed to the appropriate handler automatically. 
 
  - handlers - Contains all of these handler structures for all supported packets types. They are roughly broken down into user-state when the command would be called. So Authenticating, in-lobby, and hosting.
  - models - Contains the gorm models for all the game state data. Each model may also have associated conversion methods implemented for converting between the model and the game's binary representation of the data. 
@@ -32,22 +32,22 @@ This package is the core of the game server, specifically the `handlers` package
  - testclient - honestly, this is unmaintained garbage code used to invoke certain server actions without needing to use the game. It can send packets to the server and do some interactions but its really just intended for development testing.
  - types - Is the a central location for all the data types defined during reverse engineering. They are generally are binary serializable structures using sized integers or sized byte arrays. This are roughly grouped based on what I was working on when I discovered the type, but the organization could be better and is something to do in the future.
 
-While most configuration happens through teh `gameserver` binary and its configuration file (see the `configurations` package) it does read one envrionment value `EVENTS_ENDPOINT` if specified the game will POST JSON objects to this endpoint as various game events happen. This is intended to be used with the `restapi` package's `/api/v1/stream/events/:token` endpoint.
+While most configuration happens through teh `gameserver` binary and its configuration file (see the `configurations` package) it does read one environment value `EVENTS_ENDPOINT` if specified the game will POST JSON objects to this endpoint as various game events happen. This is intended to be used with the `restapi` package's `/api/v1/stream/events/:token` endpoint.
 
 # Metal Gear Online 1 - REST API (pkg/restapi)
 
 This is a REST interface used to expose the game-server state to whoever wants that information, but it is also where regular crons such as updating rankings are run. There is also an optional `/api/v1/stream/events` endpoint that is a websocket endpoint that will stream JSON blobs of game-related events as they are reported by the game servers.
 
-The API's endpoints are documented in [pkg/restapi/types.go](./pkg/restapi/types.go), but every request will get a `ResponseJSON` as the response object with a varying `Data` field depending on the request.
+The APIs endpoints are documented in [pkg/restapi/types.go](./pkg/restapi/types.go), but every request will get a `ResponseJSON` as the response object with a varying `Data` field depending on the request.
 
 
 # Running the Server for Development
 
 ## Cheats
-One of the bigger challenges for this is just getting a copy of the game to communicate with a custom server. Right now this does require the use of "cheats" or memory editing. See [cheats.md](./cheats.md) for information about what each of the cheats does but I will assume here that you are running the appropiate cheats for your game version AND cheat device.
+One of the bigger challenges for this is just getting a copy of the game to communicate with a custom server. Right now this does require the use of "cheats" or memory editing. See [cheats.md](./cheats.md) for information about what each of the cheats does but I will assume here that you are running the appropriate cheats for your game version AND cheat device.
 
 ## DNS 
-Next when you run the game it will make several DNS lookups to get to the game server. You will need to setup your game so that it points to a DNS you control. You can do this with the built-in network configuration editing, or the PS2 network adapters came with a configuration disc. If using PCSX2 (prefered) you can just do this in the settings. The main domains you need to resolve are:
+Next when you run the game it will make several DNS lookups to get to the game server. You will need to setup your game so that it points to a DNS you control. You can do this with the built-in network configuration editing, or the PS2 network adapters came with a configuration disc. If using PCSX2 (preferred) you can just do this in the settings. The main domains you need to resolve are:
 
 - mgs3sstun.konamionline.com - this needs to point to some compatible STUN server. I used stund to run one you may be able to find a public STUN server but not all STUN servers are compatible and I'm not entirely sure what the requirements are, but running my own always worked.
 - savemgo.com - One of the cheats rewrites a konami domain to savemgo.com. This is so we could get around the HTTPS requirement. The game makes a few web requests to this server:
@@ -66,9 +66,9 @@ This should just be a `go build tx55/cmd/gameserver` to build. It does require C
 
 ## Database
 
-The first run with the gameserver you should provide a config via `-config <filename>` and use the `-migrate` flag. The Migrate flag will create all the necessary database tables. You can use this any time you update this server, though I don't forsee often needing to change the database schema on such an old game. 
+The first run with the gameserver you should provide a config via `-config <filename>` and use the `-migrate` flag. The Migrate flag will create all the necessary database tables. You can use this any time you update this server, though I don't foresee often needing to change the database schema on such an old game. 
 
-Within the database, you'll need to have atleast three entries in the lobby table:
+Within the database, you'll need to have at least three entries in the lobby table:
  - The first entry should be of type `LobbyTypeGate` which is the gate server. I don't thing the game actually uses this value, but it expects it to be there and its best just to point it to the same place as the DNS entry for the gate server and port 5731.
  - The second is the account/auth server (`LobbyTypeGate`). After making the lobby list request, it'll try to do some auth related actions, and eventually login. The metalgearonline1 implementation handles all packets the same regardless of the type of server so the distinction between gate/auth/game doesn't matter and these can all be the same, but the game will split requests across them depending on what it is doing.
  - Lastly is the `LobbyTypeGame` entries, these are the ones actually displayed to the user  and that users can connect to and create games on.

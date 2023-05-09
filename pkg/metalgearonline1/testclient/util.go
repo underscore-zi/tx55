@@ -51,7 +51,7 @@ func (c *TestClient) Send(cmd types.PacketType, v any) error {
 	return err
 }
 
-// Doesn't work well for large/multipart packets
+// Receive Doesn't work well for large/multipart packets
 func (c *TestClient) Receive() (*packet.Packet, error) {
 	bs := make([]byte, 1024)
 	n, err := c.conn.Read(bs)

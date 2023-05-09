@@ -184,20 +184,21 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 	return konamiserver.HookResultContinue
 }
 
-func hookConnectionInfo(p, req *packet.Packet, out chan packet.Packet) konamiserver.HookResult {
+func hookConnectionInfo(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResult {
 	data := (*p).Data()
 	copy(data[4:], "69.11.34.177\x00")
 	(*p).SetData(data)
 	return konamiserver.HookResultContinue
 }
 
-func hookResponseFromFile(s *konamiserver.Server, cmd types.PacketType, cmds []types.PacketType, files []string) {
-	if len(cmds) != len(files) {
-		panic("cmd and files must be the same length")
+//goland:noinspection GoUnusedFunction
+func hookResponseFromFile(s *konamiserver.Server, cmd types.PacketType, outCmd []types.PacketType, outFile []string) {
+	if len(outCmd) != len(outFile) {
+		panic("outCmd and outFile must be the same length")
 	}
 
 	s.AddHook(uint16(cmd), konamiserver.HookBefore, func(p, req *packet.Packet, out chan packet.Packet) konamiserver.HookResult {
-		for i, file := range files {
+		for i, file := range outFile {
 			var bs []byte
 			var err error
 
@@ -210,7 +211,7 @@ func hookResponseFromFile(s *konamiserver.Server, cmd types.PacketType, cmds []t
 			}
 
 			p := packet.New()
-			p.SetType(uint16(cmds[i]))
+			p.SetType(uint16(outCmd[i]))
 			p.SetData(bs)
 			out <- p
 		}

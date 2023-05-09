@@ -13,6 +13,7 @@ func init() {
 	All = append(All, &User{})
 }
 
+//goland:noinspection GoUnusedConst
 const SALT = "\x84\xbd\xb8\xcf\xad\x46\xdd\x6e\x42\x4a\xe4\xd8\xd2\x6a\x12\xf3"
 
 type User struct {
@@ -36,7 +37,7 @@ type User struct {
 // HashPassword will hash the password in the right format for MGO1 and then bcrypt it
 func (u *User) HashPassword(password []byte) ([]byte, error) {
 	hash := md5.New()
-	hash.Write([]byte(u.Username))
+	hash.Write(u.Username)
 	hash.Write(types.NONCE[:])
 	hash.Write(password)
 	sum := hash.Sum(nil)
@@ -45,7 +46,7 @@ func (u *User) HashPassword(password []byte) ([]byte, error) {
 }
 
 func (u *User) CheckPassword(password []byte) bool {
-	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), password); err != nil {
 		return false
 	}
 	return true

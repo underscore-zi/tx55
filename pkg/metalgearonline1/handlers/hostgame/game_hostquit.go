@@ -29,7 +29,6 @@ func (h HostQuitHandler) Handle(sess *session.Session, _ *packet.Packet) ([]type
 	}, nil
 }
 
-// --- Packets ---
 type ResponseHostQuit types.ResponseErrorCode
 
 func (r ResponseHostQuit) Type() types.PacketType { return types.ServerHostQuitGame }

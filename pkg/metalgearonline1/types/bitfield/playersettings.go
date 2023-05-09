@@ -8,10 +8,12 @@ type PlayerSettings struct {
 
 const (
 	// Byte 1
+
 	NameTagsPosition = 4
 	UnknownPosition  = 0
 
 	// Byte 2
+
 	SwitchSpeedPosition           = 4
 	SwitchSpeedSize               = 4
 	FirstPersonVerticalPosition   = 0
@@ -19,6 +21,7 @@ const (
 	FirstPersonSwitchOrientation  = 2
 
 	// Byte 3
+
 	ThirdPersonVerticalPosition      = 4
 	ThirdPersonHorizontalPosition    = 5
 	ChaseCameraWhileShootingPosition = 6
@@ -26,12 +29,14 @@ const (
 	FirstPersonRotationSpeedSize     = 4
 
 	// Byte 4
+
 	EquipmentSwitchStylePosition = 4
 	EquipmentSwitchStyleSize     = 2
 	CameraRotationSpeedPosition  = 0
 	CameraRotationSpeedSize      = 4
 
 	// Byte 5
+
 	USBKeyboardTypePosition   = 4
 	USBKeyboardTypeSize       = 2
 	WeaponSwitchStylePosition = 0
@@ -103,6 +108,7 @@ func (p *PlayerSettings) GetFirstPersonCameraRotationSpeed() byte {
 }
 
 // Byte 4
+
 func (p *PlayerSettings) SetEquipmentSwitchStyle(value byte) {
 	p.Data[3].SetBits(EquipmentSwitchStylePosition, EquipmentSwitchStyleSize, value)
 }
@@ -120,6 +126,7 @@ func (p *PlayerSettings) GetCameraRotationSpeed() byte {
 }
 
 // Byte 5
+
 func (p *PlayerSettings) SetUSBKeyboardType(value byte) {
 	p.Data[4].SetBits(USBKeyboardTypePosition, USBKeyboardTypeSize, value)
 }
@@ -136,7 +143,6 @@ func (p *PlayerSettings) GetWeaponSwitchStyle() byte {
 	return p.Data[4].GetBits(WeaponSwitchStylePosition, WeaponSwitchStyleSize)
 }
 
-// String method to pretty print the PlayerSettings
 func (p *PlayerSettings) String() string {
 	nameTags := "Off"
 	if p.GetNameTags() {

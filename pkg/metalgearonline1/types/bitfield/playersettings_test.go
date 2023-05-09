@@ -14,7 +14,7 @@ func TestPlayerSettings_Byte1(t *testing.T) {
 	}
 
 	buf := bytes.Buffer{}
-	binary.Write(&buf, binary.BigEndian, b.Data)
+	_ = binary.Write(&buf, binary.BigEndian, b.Data)
 	if buf.Bytes()[0] != 0x10 {
 		t.Error("GetNameTags() should return true")
 	}

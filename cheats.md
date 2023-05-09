@@ -2,7 +2,7 @@ On the PS2 we don't have an easy way to modify the game to point it towards a se
 
 ## Cheat Format
 
-For more complete documentaiton of the format check out: https://macrox.gshi.org/The%20Hacking%20Text.htm#ps2_code_types or https://web.archive.org/web/20070902023442/http://hellion00.thegfcc.com/commands.html
+For more complete documentation of the format check out: https://macrox.gshi.org/The%20Hacking%20Text.htm#ps2_code_types or https://web.archive.org/web/20070902023442/http://hellion00.thegfcc.com/commands.html
 
 But the basic idea for the cheats we use are they have a single letter dedicated to the operation code, and then the next 7 are an address (without the highest 4-bits/letter) and a value. 
 
