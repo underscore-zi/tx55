@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"sync"
+	"time"
 	"tx55/pkg/konamiserver"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/session"
@@ -12,12 +13,14 @@ import (
 )
 
 type GameServer struct {
-	Db           *gorm.DB
-	Sessions     map[string]*session.Session
-	sessionLock  sync.Mutex
-	LobbyID      types.LobbyID
-	KonamiServer *konamiserver.Server
-	Log          logrus.FieldLogger
+	Db            *gorm.DB
+	Sessions      map[string]*session.Session
+	sessionLock   sync.Mutex
+	LobbyID       types.LobbyID
+	KonamiServer  *konamiserver.Server
+	Log           logrus.FieldLogger
+	LastBanUpdate time.Time
+	BannedIPs     map[string]bool
 }
 
 type Config struct {
@@ -25,6 +28,26 @@ type Config struct {
 	Db      *gorm.DB
 	LobbyID types.LobbyID
 	Log     logrus.FieldLogger
+}
+
+func (gs *GameServer) IsBannedIP(ip string) bool {
+	if gs.LastBanUpdate.Before(time.Now().Add(-5 * time.Minute)) {
+		query := "SELECT remote_addr FROM connections WHERE user_id IN (SELECT user_id FROM bans WHERE expires_at > NOW() AND type=?) GROUP BY remote_addr"
+
+		var ips []string
+		gs.Db.Raw(query, models.IPBan).Find(&ips)
+		gs.LastBanUpdate = time.Now()
+
+		gs.BannedIPs = make(map[string]bool)
+		for _, i := range ips {
+			gs.BannedIPs[i] = true
+		}
+	}
+
+	if _, found := gs.BannedIPs[ip]; found {
+		return true
+	}
+	return false
 }
 
 func (gs *GameServer) DeleteSession(id string) {
@@ -70,7 +93,7 @@ func (gs *GameServer) Start() error {
 	return gs.KonamiServer.Start()
 }
 
-func (gs *GameServer) ClientFactory(id string) konamiserver.GameClient {
+func (gs *GameServer) ClientFactory(_ string) konamiserver.GameClient {
 	return &GameClient{
 		Server:  gs,
 		Session: gs.NewSession(),

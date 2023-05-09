@@ -7,6 +7,7 @@ var ErrNotFound = NewError(-3, "not found")
 var ErrInvalidArguments = NewError(-4, "invalid arguments")
 var ErrDatabase = NewError(-5, "database error")
 var ErrNotHosting = NewError(-6, "not hosting")
+var ErrBanned = NewError(-7, "banned")
 
 type GameError struct {
 	Code    int32

@@ -1,6 +1,7 @@
 package metalgearonline1
 
 import (
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"net"
 	"tx55/pkg/metalgearonline1/handlers"
@@ -20,6 +21,12 @@ func (c *GameClient) OnConnected(conn net.Conn, out chan packet.Packet) (err err
 	c.conn = conn
 	c.out = out
 	c.Session.IP = conn.RemoteAddr().(*net.TCPAddr).IP.String()
+
+	if c.Server.IsBannedIP(c.Session.IP) {
+		c.Session.Log.WithFields(c.Session.LogFields()).Info("Banned IP, closing connection")
+		return errors.New("banned ip")
+	}
+
 	return nil
 }
 
