@@ -1,7 +1,8 @@
 package hostgame
 
 import (
-	"io"
+	"bytes"
+	"encoding/binary"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -24,6 +25,20 @@ func (h HostPingInfoHandler) ArgumentTypes() (out []reflect.Type) {
 	return
 }
 
+func (h HostPingInfoHandler) parseArgs(packet *packet.Packet) (args ArgsHostPingInfo) {
+	// Since this packet has a dynamic size we can't use binary.Read, instead we do it ourselves
+	buf := bytes.NewBuffer((*packet).Data())
+	args.GamePing = binary.BigEndian.Uint32(buf.Next(4))
+
+	for i := 0; i < len(args.Pings) && buf.Len() >= 8; i++ {
+		args.Pings[i] = types.PingInfo{
+			UserID: types.UserID(binary.BigEndian.Uint32(buf.Next(4))),
+			Ping:   binary.BigEndian.Uint32(buf.Next(4)),
+		}
+	}
+	return
+}
+
 func (h HostPingInfoHandler) Handle(sess *session.Session, packet *packet.Packet) (out []types.Response, err error) {
 	if !sess.IsHost() {
 		out = append(out, ResponseHostPingInfo{ErrorCode: handlers.ErrNotHosting.Code})
@@ -31,13 +46,7 @@ func (h HostPingInfoHandler) Handle(sess *session.Session, packet *packet.Packet
 		return
 	}
 
-	var args ArgsHostPingInfo
-	if err = (*packet).DataInto(&args); err != nil && err != io.ErrUnexpectedEOF {
-		out = append(out, ResponseHostPingInfo{ErrorCode: handlers.ErrInvalidArguments.Code})
-		return
-	}
-	err = nil
-
+	args := h.parseArgs(packet)
 	for _, ping := range args.Pings {
 		if ping.UserID == 0 {
 			break
