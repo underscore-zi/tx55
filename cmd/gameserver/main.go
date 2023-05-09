@@ -80,6 +80,8 @@ func main() {
 		server.KonamiServer.AddHook(uint16(types.ClientLogin), konamiserver.HookBefore, hookLogin)
 	}
 
+	// This is a development hook, rewrites the remote_addr in the host's connection info
+	// since when working inside a LAN the address can be incorrect/inaccessible
 	if v, found := os.LookupEnv("FORCED_HOST_REMOTE_ADDR"); found {
 		l.Info("Enabling Hook: Rewrite all host's remote_addr with: " + v)
 		server.KonamiServer.AddHook(uint16(types.ServerHostInfo), konamiserver.HookOutputPacket, hookConnectionInfo)
