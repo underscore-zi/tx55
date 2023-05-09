@@ -9,11 +9,12 @@ import (
 )
 
 type HostSession struct {
-	GameID       types.GameID
-	Rules        [15]types.GameRules
-	CurrentRound byte
-	Players      map[types.UserID]bool
-	Lock         sync.Mutex
+	GameID        types.GameID
+	Rules         [15]types.GameRules
+	CurrentRound  byte
+	Players       map[types.UserID]bool
+	Lock          sync.Mutex
+	ParentSession *Session
 }
 
 type Session struct {

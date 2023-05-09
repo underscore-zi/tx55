@@ -3,7 +3,6 @@ package hostgame
 import (
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
-	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/session"
 	"tx55/pkg/metalgearonline1/types"
 	"tx55/pkg/packet"
@@ -37,17 +36,10 @@ func (h HostPlayerJoinHandler) HandleArgs(sess *session.Session, args *ArgsHostP
 		return
 	}
 
-	var game *models.Game
-	if game, err = sess.Game(); err != nil {
-		out = append(out, ResponseHostPlayerJoin{ErrorCode: handlers.ErrDatabase.Code})
-	} else if err = game.AddPlayer(sess.DB, uint(args.UserID)); err != nil {
-		out = append(out, ResponseHostPlayerJoin{ErrorCode: handlers.ErrDatabase.Code})
-	} else {
-		sess.GameState.AddPlayer(args.UserID)
-		out = append(out, ResponseHostPlayerJoin{ErrorCode: 0, UserID: args.UserID})
-	}
-
+	sess.GameState.AddPlayer(args.UserID)
 	sess.EventGamePlayerJoined(args.UserID)
+	out = append(out, ResponseHostPlayerJoin{ErrorCode: 0, UserID: args.UserID})
+
 	return
 }
 

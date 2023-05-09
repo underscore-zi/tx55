@@ -56,6 +56,7 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 			"Points":      args.Stats.Points,
 		}).Info("Stats with negative values!")
 	} else {
+
 		if err = h.updatePlayerStats(sess, uint(args.UserID), args.Stats); err != nil {
 			out = append(out, ResponseHostPlayerStats{ErrorCode: handlers.ErrDatabase.Code})
 			return

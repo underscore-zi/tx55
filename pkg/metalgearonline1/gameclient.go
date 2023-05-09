@@ -29,11 +29,6 @@ func (c *GameClient) OnDisconnected() {
 	}
 
 	if c.Session.IsHost() {
-		if game, err := c.Session.Game(); err == nil {
-			_ = game.Stop(c.Session.DB)
-		} else {
-			c.Session.Log.WithFields(c.Session.LogFields()).WithError(err).Error("Failed to stop game")
-		}
 		c.Session.StopHosting()
 	}
 

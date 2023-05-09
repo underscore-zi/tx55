@@ -59,13 +59,10 @@ func (h CreateGameHandler) HandleArgs(s *session.Session, args *types.CreateGame
 		return []types.Response{ResponseCreateGame{ErrorCode: handlers.ErrDatabase.Code}}, tx.Error
 	}
 
-	if err := newGame.AddPlayer(s.DB, s.User.ID); err != nil {
-		return []types.Response{ResponseCreateGame{ErrorCode: handlers.ErrDatabase.Code}}, err
-	}
-
 	s.StartHosting(types.GameID(newGame.ID), args.Rules)
-
 	s.EventGameCreated(newGame.ID, args)
+
+	s.GameState.AddPlayer(types.UserID(s.User.ID))
 	return []types.Response{ResponseCreateGame{ErrorCode: 0}}, nil
 }
 

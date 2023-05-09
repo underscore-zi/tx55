@@ -3,7 +3,6 @@ package hostgame
 import (
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
-	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/session"
 	"tx55/pkg/metalgearonline1/types"
 	"tx55/pkg/packet"
@@ -37,14 +36,8 @@ func (h HostPlayerKickedHandler) HandleArgs(sess *session.Session, args *ArgsHos
 		return
 	}
 
-	var game *models.Game
-	if game, err = sess.Game(); err != nil {
-		out = append(out, ResponseHostPlayerKicked{ErrorCode: handlers.ErrDatabase.Code})
-	} else if err = game.KickPlayer(sess.DB, uint(args.UserID)); err != nil {
-		out = append(out, ResponseHostPlayerKicked{ErrorCode: handlers.ErrDatabase.Code})
-	} else {
-		out = append(out, ResponseHostPlayerKicked{ErrorCode: 0, UserID: args.UserID})
-	}
+	sess.GameState.KickPlayer(args.UserID)
+	out = append(out, ResponseHostPlayerKicked{ErrorCode: 0, UserID: args.UserID})
 	return
 }
 

@@ -24,7 +24,7 @@ func (h GetUserListHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{reflect.TypeOf(ArgsGetUserList{})}
 }
 
-func (h GetUserListHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h GetUserListHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, handlers.ErrNotImplemented
 }
 
@@ -32,7 +32,7 @@ func (h GetUserListHandler) HandleArgs(sess *session.Session, args *ArgsGetUserL
 	out = append(out, ResponseUserListStart{})
 
 	var list []models.UserList
-	err = sess.DB.Debug().Where("user_id = ? AND list_type = ?", sess.User.ID, args.ListType).Joins("Entry").Find(&list).Error
+	err = sess.DB.Where("user_id = ? AND list_type = ?", sess.User.ID, args.ListType).Joins("Entry").Find(&list).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		out = append(out, ResponseUserListEnd{})
 		return

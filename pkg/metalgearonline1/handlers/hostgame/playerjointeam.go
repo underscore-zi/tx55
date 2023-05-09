@@ -3,7 +3,6 @@ package hostgame
 import (
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
-	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/session"
 	"tx55/pkg/metalgearonline1/types"
 	"tx55/pkg/packet"
@@ -37,24 +36,8 @@ func (h HostPlayerJoinTeam) HandleArgs(sess *session.Session, args *ArgsHostPlay
 		return
 	}
 
-	var game *models.Game
-	if game, err = sess.Game(); err != nil {
-		out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: handlers.ErrDatabase.Code})
-		err = handlers.ErrDatabase
-	} else if player, found := game.FindPlayer(sess.DB, uint(args.UserID)); found {
-		player.Team = args.TeamID
-		if tx := sess.DB.Save(player); tx.Error == nil {
-			// Success
-			out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: 0, UserID: args.UserID})
-		} else {
-			out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: handlers.ErrDatabase.Code})
-			err = handlers.ErrDatabase
-		}
-	} else {
-		out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: handlers.ErrInvalidArguments.Code})
-		err = handlers.ErrInvalidArguments
-	}
-
+	sess.GameState.JoinTeam(args.UserID, args.TeamID)
+	out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: 0, UserID: args.UserID})
 	return
 }
 

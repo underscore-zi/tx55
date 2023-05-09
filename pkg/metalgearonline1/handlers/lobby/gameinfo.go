@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"gorm.io/gorm/clause"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -27,27 +26,30 @@ func (h GetGameInfoHandler) ArgumentTypes() []reflect.Type {
 	return []reflect.Type{reflect.TypeOf(ArgsGetGameInfo{})}
 }
 
-func (h GetGameInfoHandler) Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, error) {
+func (h GetGameInfoHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	return nil, handlers.ErrNotImplemented
 }
 
 func (h GetGameInfoHandler) HandlerArgs(sess *session.Session, args *ArgsGetGameInfo) (out []types.Response, err error) {
-	info := ResponseGameInfo{}
-
+	var info ResponseGameInfo
 	var game models.Game
-	game.ID = uint(args.GameID)
-	if tx := sess.DB.Preload(clause.Associations).Preload("Players.User").First(&game); tx.Error != nil {
-		err = tx.Error
-		out = append(out, ResponseGameInfo{ErrorCode: 1})
+	var players []models.GamePlayers
+
+	if err = sess.DB.Joins("GameOptions").First(&game, "games.id = ?", uint(args.GameID)).Error; err != nil {
+		out = append(out, ResponseGameInfo{ErrorCode: handlers.ErrDatabase.Code})
+		return
+	}
+
+	if err = sess.DB.Joins("User").Find(&players, "game_id = ?", uint(args.GameID)).Error; err != nil {
+		out = append(out, ResponseGameInfo{ErrorCode: handlers.ErrDatabase.Code})
 		return
 	}
 
 	info.Info = game.GameOptions.GameInfo()
-
-	for i, player := range game.Players {
+	info.Info.PlayerCount = byte(len(players))
+	for i, player := range players {
 		info.Info.Players[i] = player.GamePlayerStats()
 	}
-	info.Info.PlayerCount = byte(len(game.Players))
 
 	return []types.Response{info}, nil
 
@@ -59,7 +61,7 @@ type ArgsGetGameInfo struct {
 
 // --- Packets ---
 type ResponseGameInfo struct {
-	ErrorCode uint32
+	ErrorCode int32
 	Info      types.GameInfo
 }
 

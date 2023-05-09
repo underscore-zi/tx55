@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"gorm.io/gorm/clause"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/models"
@@ -40,7 +39,7 @@ func (h GetHostInfoHandler) HandleArgs(sess *session.Session, args *ArgsGetHostI
 
 	game := models.Game{}
 	game.ID = uint(args.GameID)
-	if tx := sess.DB.Preload(clause.Associations).First(&game); tx.Error != nil {
+	if tx := sess.DB.Joins("GameOptions").Joins("Connection").First(&game); tx.Error != nil {
 		out = append(out, ResponseGetHostInfo{ErrorCode: handlers.ErrDatabase.Code})
 		err = handlers.ErrDatabase
 		return
