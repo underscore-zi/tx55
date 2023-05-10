@@ -71,7 +71,12 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		"deaths": gorm.Expr("deaths + ?", stats.Deaths),
 		"score":  gorm.Expr("score + ?", stats.Points),
 	}
-	sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, UserID).Updates(updates)
+
+	q := sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, UserID)
+	if rowCount := q.Updates(updates).RowsAffected; rowCount != 1 {
+		sess.Log.WithFields(sess.LogFields()).Warn("Attempting to update stats for a player that is not in the game")
+		return nil
+	}
 
 	updates = map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),
