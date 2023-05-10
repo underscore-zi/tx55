@@ -13,6 +13,17 @@ import (
 // Endpoints
 // Prefix: /api/v1
 
+// POST /auth/login
+//  - Description: Authenticate/Start a game-user session
+//  - Body Params:
+//    - username: The username of the account to login to
+//    - password: The password of the account to login to
+//  - Returns: UserJSON
+
+// GET /auth/logout
+//  - Description: Logout of the current game-user account
+//  - Returns: None
+
 // GET /news/list
 //  - Description: Retrieve a list of current news items matching those displayed in-game
 //  - URL Params: None
@@ -31,6 +42,11 @@ import (
 //  - Query Options:
 //    - mode: Can be one of "tdm", "dm", "cap", "res", or "sne" and limits the results to the specific game mode
 //  - Returns: []RankingEntryJSON
+
+// GET /user/whoami
+//  - Description: Retrieve the current logged-in game-user account
+//  - Requires: game-user session
+//  - Returns: UserJSON
 
 // GET /user/:user_id
 //  - Description: Retrieve a user's basic information
