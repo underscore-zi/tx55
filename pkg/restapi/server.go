@@ -15,8 +15,6 @@ import (
 	"tx55/pkg/restapi/gameweb"
 )
 
-var l = logrus.StandardLogger()
-
 type Server struct {
 	DB           *gorm.DB
 	Engine       *gin.Engine
@@ -47,6 +45,13 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	}
 	store := gormsessions.NewStore(sessionDB, true, []byte(config.SessionSecret))
 	s.Engine.Use(sessions.Sessions("sessions", store))
+
+	s.Engine.Use(func() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("logger", logrus.StandardLogger())
+			c.Next()
+		}
+	}())
 
 	s.Engine.Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {

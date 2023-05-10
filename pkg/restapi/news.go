@@ -2,12 +2,14 @@ package restapi
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"tx55/pkg/metalgearonline1/models"
 )
 
 func getNewsList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	l := c.MustGet("logger").(*logrus.Logger)
 
 	var news []models.News
 	if err := db.Find(&news).Error; err != nil {

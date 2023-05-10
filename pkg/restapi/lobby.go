@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
@@ -9,6 +10,7 @@ import (
 
 func getLobbyList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	l := c.MustGet("logger").(*logrus.Logger)
 
 	var lobbies []models.Lobby
 	if err := db.Where("type = ?", types.LobbyTypeGame).Find(&lobbies).Error; err != nil {

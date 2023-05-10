@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strconv"
 	"tx55/pkg/metalgearonline1/types"
@@ -9,6 +10,7 @@ import (
 
 func getRankings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	l := c.MustGet("logger").(*logrus.Logger)
 	limit := 50
 	AllModes := types.GameMode(255)
 

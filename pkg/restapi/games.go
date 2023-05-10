@@ -2,12 +2,14 @@ package restapi
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"tx55/pkg/metalgearonline1/models"
 )
 
 func getGame(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	l := c.MustGet("logger").(*logrus.Logger)
 
 	var game models.Game
 
@@ -29,6 +31,7 @@ func getGame(c *gin.Context) {
 
 func getGamesList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	l := c.MustGet("logger").(*logrus.Logger)
 
 	var games []models.Game
 	q := db.Joins("GameOptions").Preload("Players")

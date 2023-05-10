@@ -3,6 +3,7 @@ package restapi
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strconv"
 	"tx55/pkg/metalgearonline1/models"
@@ -47,6 +48,7 @@ func getUserStats(c *gin.Context) {
 
 func getUserGames(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	l := c.MustGet("logger").(*logrus.Logger)
 	userIdParam := c.Param("user_id")
 	limit := 50
 
