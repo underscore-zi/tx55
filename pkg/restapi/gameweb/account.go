@@ -62,7 +62,7 @@ func DeleteAccount(c *gin.Context) {
 		c.String(404, "User not found")
 		return
 	}
-	if !user.CheckPassword([]byte(args.Password)) {
+	if !user.CheckRawPassword([]byte(args.Password)) {
 		c.String(404, "User not found")
 		return
 	}
@@ -97,7 +97,7 @@ func ChangePassword(c *gin.Context) {
 		c.String(404, "User not found")
 		return
 	}
-	if !user.CheckPassword([]byte(args.Password)) {
+	if !user.CheckRawPassword([]byte(args.Password)) {
 		c.String(404, "User not found")
 		return
 	}

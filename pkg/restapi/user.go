@@ -1,6 +1,7 @@
 package restapi
 
 import (
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"strconv"
@@ -17,6 +18,16 @@ func getUser(c *gin.Context) {
 	} else {
 		success(c, toUserJSON(&user))
 	}
+}
+
+func whoAmI(c *gin.Context) {
+	session := sessions.Default(c)
+	uid := session.Get("user_id").(uint)
+
+	db := c.MustGet("db").(*gorm.DB)
+	var user models.User
+	db.First(&user, uid)
+	success(c, toUserJSON(&user))
 }
 
 func getUserStats(c *gin.Context) {
@@ -84,5 +95,4 @@ func getUserOptions(c *gin.Context) {
 	} else {
 		success(c, toUserSettingsJSON(options))
 	}
-
 }

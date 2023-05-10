@@ -45,6 +45,23 @@ func (u *User) HashPassword(password []byte) ([]byte, error) {
 	return bcrypt.GenerateFromPassword(sum, bcrypt.DefaultCost)
 }
 
+func (u *User) Md5Password(password []byte) ([]byte, error) {
+	hash := md5.New()
+	hash.Write(u.Username)
+	hash.Write(types.NONCE[:])
+	hash.Write(password)
+	return hash.Sum(nil), nil
+}
+
+func (u *User) CheckRawPassword(password []byte) bool {
+	hash := md5.New()
+	hash.Write(u.Username)
+	hash.Write(types.NONCE[:])
+	hash.Write(password)
+	password = hash.Sum(nil)
+	return u.CheckPassword(password)
+}
+
 func (u *User) CheckPassword(password []byte) bool {
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), password); err != nil {
 		return false

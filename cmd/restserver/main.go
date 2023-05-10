@@ -18,8 +18,6 @@ import (
 var l = logrus.StandardLogger()
 
 func main() {
-	port := flag.Int("port", 8888, "Port to listen on")
-	noCrons := flag.Bool("no-crons", false, "Disable scheduled tasks")
 	configFile := flag.String("config", "", "Path to config file")
 	flag.Parse()
 
@@ -28,23 +26,21 @@ func main() {
 		return
 	}
 
-	var serverConfig configurations.MetalGearOnline1
-	if err := configurations.LoadTOML(*configFile, &serverConfig); err != nil {
+	var config configurations.RestAPI
+	if err := configurations.LoadTOML(*configFile, &config); err != nil {
 		l.WithError(err).Fatal("Error loading config file")
 		return
 	}
 
-	//serverConfig.Database.LogConfig.Level = "info"
-
-	db, err := serverConfig.Database.Open(&gorm.Config{
-		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), serverConfig.Database.LogConfig.LoggerConfig()),
+	db, err := config.Database.Open(&gorm.Config{
+		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
 	})
 	if err != nil {
 		l.WithError(err).Error("Unable to open database")
 		return
 	}
 
-	if !*noCrons {
+	if config.RunCronJobs {
 		scheduler := gocron.NewScheduler(time.UTC)
 		if err = crons.Schedule(scheduler, db); err != nil {
 			l.WithError(err).Error("Unable to schedule crons")
@@ -55,8 +51,13 @@ func main() {
 		}
 	}
 
-	server := restapi.NewServer(db)
-	if err := server.Engine.Run(fmt.Sprintf(":%d", *port)); err != nil {
+	server, err := restapi.NewServer(config)
+	if err != nil {
+		l.WithError(err).Error("Unable to create server")
+		return
+	}
+
+	if err := server.Engine.Run(fmt.Sprintf("%s:%d", config.Host, config.Port)); err != nil {
 		panic(err)
 	}
 }

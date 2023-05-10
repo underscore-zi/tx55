@@ -1,11 +1,16 @@
 package restapi
 
 import (
+	"errors"
+	"github.com/gin-contrib/sessions"
+	gormsessions "github.com/gin-contrib/sessions/gorm"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
 	"os"
-	"strings"
+	"tx55/pkg/configurations"
 	"tx55/pkg/restapi/events"
 	"tx55/pkg/restapi/gameweb"
 )
@@ -18,13 +23,30 @@ type Server struct {
 	EventService *events.Service
 }
 
-func NewServer(db *gorm.DB) *Server {
+func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	gin.SetMode(gin.ReleaseMode)
-
-	s := &Server{
-		DB:     db,
+	s = &Server{
 		Engine: gin.Default(),
 	}
+
+	s.DB, err = config.Database.Open(&gorm.Config{
+		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
+	})
+	if err != nil {
+		return
+	}
+
+	if config.SessionSecret == "" {
+		err = errors.New("no session secret specified")
+		return
+	}
+
+	sessionDB, err := config.SessionDatabase.Open(&gorm.Config{})
+	if err != nil {
+		return
+	}
+	store := gormsessions.NewStore(sessionDB, true, []byte(config.SessionSecret))
+	s.Engine.Use(sessions.Sessions("sessions", store))
 
 	s.Engine.Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {
@@ -33,12 +55,13 @@ func NewServer(db *gorm.DB) *Server {
 		}
 	}())
 
-	if tokens, found := os.LookupEnv("EVENT_TOKENS"); found {
-		tokenList := strings.Split(tokens, ",")
-		if len(tokenList) > 0 {
-			s.EventService = events.NewService(logrus.StandardLogger(), tokenList)
-			go s.EventService.Run()
+	if config.Events.Enabled {
+		if len(config.Events.AccessTokens) == 0 {
+			err = errors.New("no event access tokens specified")
+			return
 		}
+		s.EventService = events.NewService(logrus.StandardLogger(), config.Events.AccessTokens)
+		go s.EventService.Run()
 	}
 
 	_ = s.Engine.SetTrustedProxies([]string{"127.0.0.1", "::1"})
@@ -69,7 +92,14 @@ func NewServer(db *gorm.DB) *Server {
 	s.Engine.POST("/us/mgs3/reguser/deluser.html", gameweb.DeleteAccount)
 	s.Engine.POST("/us/mgs3/reguser/chgpswd.html", gameweb.ChangePassword)
 
-	return s
+	s.Engine.POST("/api/v1/auth/login", Login)
+	s.Engine.GET("/api/v1/auth/logout", Logout)
+
+	gameusers := s.Engine.Group("/api/v1")
+	gameusers.Use(GameLoginRequired)
+	gameusers.GET("/user/whoami", whoAmI)
+	gameusers.POST("/user/display_name")
+	return
 }
 
 func success(c *gin.Context, data any) {
@@ -80,7 +110,7 @@ func success(c *gin.Context, data any) {
 }
 
 func Error(c *gin.Context, code int, message string) {
-	c.JSON(code, ResponseJSON{
+	c.AbortWithStatusJSON(code, ResponseJSON{
 		Success: false,
 		Data:    message,
 	})
