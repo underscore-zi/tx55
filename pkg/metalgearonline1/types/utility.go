@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"tx55/pkg/packet"
+	"tx55/pkg/restapi/iso8859"
 )
 
 func (r RawPacket) Type() PacketType { return 0 }
@@ -32,10 +33,14 @@ func ToPacket(r Response) (packet.Packet, error) {
 
 func BytesToString(b []byte) string {
 	idx := bytes.IndexByte(b, 0)
-	if idx == -1 {
-		return string(b)
+	if idx != -1 {
+		b = b[:idx]
+	}
+	str, err := iso8859.DecodeBytes(b)
+	if err == nil {
+		return str
 	} else {
-		return string(b[:idx])
+		return string(b)
 	}
 }
 
