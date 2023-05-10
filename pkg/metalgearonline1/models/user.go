@@ -70,10 +70,9 @@ func (u *User) CheckPassword(password []byte) bool {
 }
 
 func (u *User) hashIfNecessary() error {
-	if len(u.Password) == 0 {
-		return errors.New("missing password")
+	if u.Password == "" {
+		return nil
 	}
-
 	if len(u.Password) == 60 {
 		// Already hashed (in theory)
 		return nil
@@ -89,6 +88,9 @@ func (u *User) hashIfNecessary() error {
 }
 
 func (u *User) BeforeCreate(_ *gorm.DB) error {
+	if len(u.Password) == 0 {
+		return errors.New("missing password")
+	}
 	return u.hashIfNecessary()
 }
 
