@@ -19,7 +19,8 @@ func init() {
 	Register(AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings, nil, UserSettingsJSON{})
 
 	Register(AuthLevelUser, "GET", "/whoami", whoAmI, nil, UserJSON{})
-	Register(AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, UserSettingsJSON{})
+	Register(AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, nil)
+	Register(AuthLevelUser, "POST", "/user/settings", UpdateUserSettings, UserSettingsJSON{}, nil)
 }
 
 func getUser(c *gin.Context) {
@@ -168,10 +169,91 @@ func UpdateUserProfile(c *gin.Context) {
 		user.Password = newPassword
 	}
 
-	if tx := db.Debug().Updates(&user); tx.RowsAffected != 1 {
+	if tx := db.Updates(&user); tx.RowsAffected != 1 {
 		if tx.Error != nil {
 			log := c.MustGet("logger").(*logrus.Logger)
 			log.WithError(tx.Error).Error("Error updating user")
+		}
+		Error(c, 500, "Database error")
+		return
+	}
+	success(c, nil)
+}
+
+func stringToOrientation(s string) types.SwitchOrientation {
+	switch s {
+	case types.CameraOrientation.String():
+		return types.CameraOrientation
+	case types.PlayerOrientation.String():
+		return types.PlayerOrientation
+	default:
+		return types.PlayerOrientation
+	}
+}
+
+func stringToSwitch(s string) types.GearSwitchMode {
+	switch s {
+	case types.GearSwitchToggle.String():
+		return types.GearSwitchToggle
+	case types.GearSwitchFlashback.String():
+		return types.GearSwitchFlashback
+	case types.GearSwitchCycle.String():
+		return types.GearSwitchCycle
+	default:
+		return types.GearSwitchToggle
+	}
+}
+
+func UpdateUserSettings(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	session := sessions.Default(c)
+	uid := session.Get("user_id").(uint)
+
+	var args UserSettingsJSON
+	if err := c.ShouldBindJSON(&args); err != nil {
+		Error(c, 400, err.Error())
+		return
+	}
+
+	var settings, oldSettings models.PlayerSettings
+	if err := db.First(&oldSettings, "user_id = ?", uid).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			Error(c, 500, "Database error")
+		}
+		// When there are no settings, we can just create them
+	}
+
+	settings.ID = oldSettings.ID
+	settings.UserID = uid
+	settings.ShowNameTags = args.ShowNameTags
+	settings.SwitchSpeed = byte(args.SwitchSpeed) - 1
+	settings.FPVVertical = args.FPVVertical
+	settings.FPVHorizontal = args.FPVHorizontal
+	settings.FPVSwitchOrientation = bool(stringToOrientation(args.FPVSwitchOrientation))
+	settings.TPVVertical = args.TPVVertical
+	settings.TPVHorizontal = args.TPVHorizontal
+	settings.TPVChase = args.TPVChase
+	settings.FPVRotationSpeed = byte(args.FPVRotationSpeed) - 1
+	settings.EquipmentSwitchStyle = byte(stringToSwitch(args.EquipmentSwitchStyle))
+	settings.TPVRotationSpeed = byte(args.TPVRotationSpeed) - 1
+	settings.WeaponSwitchStyle = byte(stringToSwitch(args.WeaponSwitchStyle))
+	settings.FKey0, _ = iso8859.EncodeAsBytes(args.FKeys[0])
+	settings.FKey1, _ = iso8859.EncodeAsBytes(args.FKeys[1])
+	settings.FKey2, _ = iso8859.EncodeAsBytes(args.FKeys[2])
+	settings.FKey3, _ = iso8859.EncodeAsBytes(args.FKeys[3])
+	settings.FKey4, _ = iso8859.EncodeAsBytes(args.FKeys[4])
+	settings.FKey5, _ = iso8859.EncodeAsBytes(args.FKeys[5])
+	settings.FKey6, _ = iso8859.EncodeAsBytes(args.FKeys[6])
+	settings.FKey7, _ = iso8859.EncodeAsBytes(args.FKeys[7])
+	settings.FKey8, _ = iso8859.EncodeAsBytes(args.FKeys[8])
+	settings.FKey9, _ = iso8859.EncodeAsBytes(args.FKeys[9])
+	settings.FKey10, _ = iso8859.EncodeAsBytes(args.FKeys[10])
+	settings.FKey11, _ = iso8859.EncodeAsBytes(args.FKeys[11])
+
+	if tx := db.Save(&settings); tx.RowsAffected != 1 {
+		if tx.Error != nil {
+			log := c.MustGet("logger").(*logrus.Logger)
+			log.WithError(tx.Error).Error("Error updating user settings")
 		}
 		Error(c, 500, "Database error")
 		return
