@@ -21,7 +21,10 @@ type ArgsUpdateProfile struct {
 }
 
 func UpdateProfile(c *gin.Context) {
-	RequirePrivilege(c, PrivUpdateProfiles)
+	if !CheckPrivilege(c, PrivUpdateProfiles) {
+		restapi.Error(c, 403, "insufficient privileges")
+		return
+	}
 
 	var args ArgsUpdateProfile
 	if err := c.ShouldBindJSON(&args); err != nil {
@@ -74,7 +77,10 @@ type ArgsUpdateEmblem struct {
 }
 
 func UpdateEmblem(c *gin.Context) {
-	RequirePrivilege(c, PrivUpdateProfiles)
+	if !CheckPrivilege(c, PrivUpdateProfiles) {
+		restapi.Error(c, 403, "insufficient privileges")
+		return
+	}
 	var args ArgsUpdateEmblem
 
 	if err := c.ShouldBindJSON(&args); err != nil {

@@ -4,17 +4,12 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"tx55/pkg/restapi"
 )
 
-// RequirePrivilege should be the first function calls by any handler that requires a particular privilege
-func RequirePrivilege(c *gin.Context, p Privilege) {
+// CheckPrivilege should be the first function calls by any handler that requires a particular privilege
+func CheckPrivilege(c *gin.Context, p Privilege) bool {
 	user := FetchUser(c)
-	if !user.HasPrivilege(p) {
-		restapi.Error(c, 401, "unauthorized")
-		return
-	}
-	c.Next()
+	return user.HasPrivilege(p)
 }
 
 // FetchUser will grab the user+role from the database once and cache it in the request context, returning the cached

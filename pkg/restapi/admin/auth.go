@@ -50,7 +50,10 @@ type ArgsChangePassword struct {
 }
 
 func ChangePassword(c *gin.Context) {
-	RequirePrivilege(c, PrivNone)
+	if !CheckPrivilege(c, PrivNone) {
+		restapi.Error(c, 403, "insufficient privileges")
+		return
+	}
 
 	var args ArgsChangePassword
 	if err := c.BindJSON(&args); err != nil {
@@ -65,12 +68,9 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	adminDB := c.MustGet("adminDB").(*gorm.DB)
-	updates := User{
-		ID:       adminUser.ID,
-		Password: args.NewPassword,
-	}
+	adminUser.Password = args.NewPassword
 
-	if tx := adminDB.Save(&updates); tx.Error != nil {
+	if tx := adminDB.Model(&adminUser).Updates(adminUser); tx.Error != nil {
 		log := c.MustGet("logger").(logrus.FieldLogger)
 		log.WithError(tx.Error).Error("failed to update admin user password")
 		restapi.Error(c, 500, "Database Error")

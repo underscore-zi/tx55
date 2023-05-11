@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -27,11 +28,12 @@ func (b BanType) String() string {
 }
 
 type Ban struct {
-	ID        uint
-	CreatedAt time.Time
+	gorm.Model
 	ExpiresAt time.Time
 	UserID    uint
 	User      User
+	CreatedBy string
+	UpdatedBy string
 	Reason    string
 	Type      BanType
 }

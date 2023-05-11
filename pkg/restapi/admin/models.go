@@ -21,6 +21,9 @@ type Role struct {
 	Name           string `json:"name" gorm:"uniqueIndex"`
 	AllPrivileges  bool   `json:"all_privileges"`
 	UpdateProfiles bool   `json:"update_profiles"`
+	ReadIPs        bool   `json:"read_ips"`
+	ReadBans       bool   `json:"read_bans"`
+	UpdateBans     bool   `json:"update_bans"`
 }
 
 func (u *User) CheckPassword(password []byte) bool {
@@ -57,29 +60,4 @@ func (u *User) BeforeCreate(_ *gorm.DB) error {
 
 func (u *User) BeforeUpdate(_ *gorm.DB) error {
 	return u.hashIfNecessary()
-}
-
-type Privilege string
-
-const (
-	PrivNone           Privilege = ""
-	PrivAll            Privilege = "all_privileges"
-	PrivUpdateProfiles Privilege = "update_profiles"
-)
-
-func (u *User) HasPrivilege(p Privilege) bool {
-	if u.Role.AllPrivileges {
-		return true
-	}
-
-	switch p {
-	case PrivNone:
-		return true
-	case PrivAll:
-		return u.Role.AllPrivileges
-	case PrivUpdateProfiles:
-		return u.Role.UpdateProfiles
-	}
-
-	return false
 }
