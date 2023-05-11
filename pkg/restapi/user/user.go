@@ -1,4 +1,4 @@
-package restapi
+package user
 
 import (
 	"github.com/gin-contrib/sessions"
@@ -8,19 +8,20 @@ import (
 	"strconv"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
+	"tx55/pkg/restapi"
 	"tx55/pkg/restapi/iso8859"
 )
 
 func init() {
-	Register(AuthLevelNone, "GET", "/user/:user_id", getUser, nil, UserJSON{})
-	Register(AuthLevelNone, "GET", "/user/:user_id/stats", getUserStats, nil, []PlayerStatsJSON{})
-	Register(AuthLevelNone, "GET", "/user/:user_id/games", getUserGames, nil, []GameJSON{})
-	Register(AuthLevelNone, "GET", "/user/:user_id/games/:page", getUserGames, nil, []GameJSON{})
-	Register(AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings, nil, UserSettingsJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id", getUser, nil, restapi.UserJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/stats", getUserStats, nil, []restapi.PlayerStatsJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games", getUserGames, nil, []restapi.GameJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games/:page", getUserGames, nil, []restapi.GameJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings, nil, restapi.UserSettingsJSON{})
 
-	Register(AuthLevelUser, "GET", "/whoami", whoAmI, nil, UserJSON{})
-	Register(AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, nil)
-	Register(AuthLevelUser, "POST", "/user/settings", UpdateUserSettings, UserSettingsJSON{}, nil)
+	restapi.Register(restapi.AuthLevelUser, "GET", "/whoami", whoAmI, nil, restapi.UserJSON{})
+	restapi.Register(restapi.AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, nil)
+	restapi.Register(restapi.AuthLevelUser, "POST", "/user/settings", UpdateUserSettings, restapi.UserSettingsJSON{}, nil)
 }
 
 func getUser(c *gin.Context) {
@@ -28,9 +29,9 @@ func getUser(c *gin.Context) {
 
 	var user models.User
 	if err := db.First(&user, c.Param("user_id")).Error; err != nil {
-		Error(c, 404, "User not found")
+		restapi.Error(c, 404, "User not found")
 	} else {
-		success(c, toUserJSON(&user))
+		restapi.Success(c, restapi.ToUserJSON(&user))
 	}
 }
 
@@ -41,7 +42,7 @@ func whoAmI(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	var user models.User
 	db.First(&user, uid)
-	success(c, toUserJSON(&user))
+	restapi.Success(c, restapi.ToUserJSON(&user))
 }
 
 func getUserStats(c *gin.Context) {
@@ -49,13 +50,13 @@ func getUserStats(c *gin.Context) {
 
 	var stats []models.PlayerStats
 	if err := db.Find(&stats, "user_id = ?", c.Param("user_id")).Error; err != nil {
-		success(c, []PlayerStatsJSON{})
+		restapi.Success(c, []restapi.PlayerStatsJSON{})
 	} else {
-		out := make([]PlayerStatsJSON, len(stats))
+		out := make([]restapi.PlayerStatsJSON, len(stats))
 		for i, stat := range stats {
-			out[i] = toPlayerStatsJSON(stat)
+			out[i] = restapi.ToPlayerStatsJSON(stat)
 		}
-		success(c, out)
+		restapi.Success(c, out)
 	}
 }
 
@@ -67,7 +68,7 @@ func getUserGames(c *gin.Context) {
 
 	userId, err := strconv.Atoi(userIdParam)
 	if err != nil {
-		Error(c, 400, "Invalid user id")
+		restapi.Error(c, 400, "Invalid user id")
 		return
 	}
 
@@ -77,7 +78,7 @@ func getUserGames(c *gin.Context) {
 	}
 	page, err := strconv.Atoi(pageParam)
 	if err != nil {
-		Error(c, 400, "Invalid page")
+		restapi.Error(c, 400, "Invalid page")
 		return
 	}
 
@@ -85,10 +86,10 @@ func getUserGames(c *gin.Context) {
 	// so using preload this would give us three queries, or I could split it into 2 (player entries, and a game JOIN game_options)
 	// or write the fairly simple query myself and get it done in one
 
-	var gamesPlayed []GamePlayedJSON
+	var gamesPlayed []restapi.GamePlayedJSON
 	query := "SELECT p.game_id, go.name as game_name, go.has_password as game_has_password, go.user_id as game_host_id, p.created_at, p.deleted_at, p.was_kicked, p.score as points, p.kills, p.deaths FROM game_players p JOIN games g ON p.game_id = g.id JOIN game_options go ON g.game_options_id = go.id WHERE p.user_id = ? ORDER BY p.updated_at DESC LIMIT ? OFFSET ?"
 	if err := db.Raw(query, userId, limit, (page-1)*limit).Scan(&gamesPlayed).Error; err != nil {
-		Error(c, 500, "Database error")
+		restapi.Error(c, 500, "Database error")
 		l.WithError(err).Error("Error getting user's games")
 		return
 	}
@@ -97,7 +98,7 @@ func getUserGames(c *gin.Context) {
 		gamesPlayed[i].GameName = types.BytesToString([]byte(gamesPlayed[i].GameName))
 		gamesPlayed[i].WasHost = gamesPlayed[i].GameHostID == uint(userId)
 	}
-	success(c, gamesPlayed)
+	restapi.Success(c, gamesPlayed)
 }
 
 func getUserSettings(c *gin.Context) {
@@ -106,10 +107,16 @@ func getUserSettings(c *gin.Context) {
 
 	var options models.PlayerSettings
 	if err := db.First(&options, "user_id = ?", userID).Error; err != nil {
-		Error(c, 404, "User not found")
+		restapi.Error(c, 404, "User not found")
 	} else {
-		success(c, toUserSettingsJSON(options))
+		restapi.Success(c, restapi.ToUserSettingsJSON(options))
 	}
+}
+
+type ArgsUpdateProfile struct {
+	DisplayName string `json:"display_name"`
+	Password    string `json:"password"`
+	OldPassword string `json:"old_password"`
 }
 
 func UpdateUserProfile(c *gin.Context) {
@@ -118,7 +125,7 @@ func UpdateUserProfile(c *gin.Context) {
 
 	var args ArgsUpdateProfile
 	if err := c.ShouldBindJSON(&args); err != nil {
-		Error(c, 400, err.Error())
+		restapi.Error(c, 400, err.Error())
 		return
 	}
 
@@ -126,11 +133,11 @@ func UpdateUserProfile(c *gin.Context) {
 	user.ID = session.Get("user_id").(uint)
 	if args.DisplayName != "" {
 		if bs, err := iso8859.EncodeAsBytes(args.DisplayName); err != nil {
-			Error(c, 400, "Display name contains characters that can't be typed in-game")
+			restapi.Error(c, 400, "Display name contains characters that can't be typed in-game")
 			return
 		} else {
 			if len(bs) > 16 {
-				Error(c, 400, "Display name too long")
+				restapi.Error(c, 400, "Display name too long")
 				return
 			}
 			user.DisplayName = bs
@@ -140,29 +147,29 @@ func UpdateUserProfile(c *gin.Context) {
 	if args.Password != "" {
 		newPassword, err := iso8859.Encode(args.Password)
 		if err != nil {
-			Error(c, 400, "New Password contains characters that can't be typed in-game")
+			restapi.Error(c, 400, "New Password contains characters that can't be typed in-game")
 			return
 		}
 
 		if len(newPassword) < 3 {
 			// Game will silently fail on this
-			Error(c, 400, "Password too short")
+			restapi.Error(c, 400, "Password too short")
 			return
 		}
 
 		if args.OldPassword != "" {
-			Error(c, 400, "Missing old password")
+			restapi.Error(c, 400, "Missing old password")
 			return
 		}
 
 		oldPassword, err := iso8859.EncodeAsBytes(args.OldPassword)
 		if err != nil {
-			Error(c, 400, "Old Password contains characters that can't be typed in-game")
+			restapi.Error(c, 400, "Old Password contains characters that can't be typed in-game")
 			return
 		}
 
 		if !user.CheckRawPassword(oldPassword) {
-			Error(c, 400, "Incorrect password")
+			restapi.Error(c, 400, "Incorrect password")
 			return
 		}
 
@@ -174,10 +181,10 @@ func UpdateUserProfile(c *gin.Context) {
 			log := c.MustGet("logger").(*logrus.Logger)
 			log.WithError(tx.Error).Error("Error updating user")
 		}
-		Error(c, 500, "Database error")
+		restapi.Error(c, 500, "Database error")
 		return
 	}
-	success(c, nil)
+	restapi.Success(c, nil)
 }
 
 func stringToOrientation(s string) types.SwitchOrientation {
@@ -209,16 +216,16 @@ func UpdateUserSettings(c *gin.Context) {
 	session := sessions.Default(c)
 	uid := session.Get("user_id").(uint)
 
-	var args UserSettingsJSON
+	var args restapi.UserSettingsJSON
 	if err := c.ShouldBindJSON(&args); err != nil {
-		Error(c, 400, err.Error())
+		restapi.Error(c, 400, err.Error())
 		return
 	}
 
 	var settings, oldSettings models.PlayerSettings
 	if err := db.First(&oldSettings, "user_id = ?", uid).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
-			Error(c, 500, "Database error")
+			restapi.Error(c, 500, "Database error")
 		}
 		// When there are no settings, we can just create them
 	}
@@ -255,8 +262,8 @@ func UpdateUserSettings(c *gin.Context) {
 			log := c.MustGet("logger").(*logrus.Logger)
 			log.WithError(tx.Error).Error("Error updating user settings")
 		}
-		Error(c, 500, "Database error")
+		restapi.Error(c, 500, "Database error")
 		return
 	}
-	success(c, nil)
+	restapi.Success(c, nil)
 }

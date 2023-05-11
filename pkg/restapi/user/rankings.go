@@ -1,4 +1,4 @@
-package restapi
+package user
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,11 +6,12 @@ import (
 	"gorm.io/gorm"
 	"strconv"
 	"tx55/pkg/metalgearonline1/types"
+	"tx55/pkg/restapi"
 )
 
 func init() {
-	Register(AuthLevelNone, "GET", "/rankings/:period", getRankings, nil, []RankingEntryJSON{})
-	Register(AuthLevelNone, "GET", "/rankings/:period/:mode", getRankings, nil, []RankingEntryJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period", getRankings, nil, []restapi.RankingEntryJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period/:mode", getRankings, nil, []restapi.RankingEntryJSON{})
 }
 
 func getRankings(c *gin.Context) {
@@ -23,9 +24,9 @@ func getRankings(c *gin.Context) {
 	var page int
 	gameMode := AllModes
 
-	period, valid := PeriodParam(c.Param("period")).PlayerStatsPeriod()
+	period, valid := restapi.PeriodParam(c.Param("period")).PlayerStatsPeriod()
 	if !valid {
-		Error(c, 400, "Invalid period")
+		restapi.Error(c, 400, "Invalid period")
 		return
 	}
 
@@ -37,19 +38,19 @@ func getRankings(c *gin.Context) {
 
 	page, err := strconv.Atoi(pageParam)
 	if err != nil {
-		Error(c, 400, "Invalid page")
+		restapi.Error(c, 400, "Invalid page")
 		return
 	}
 
 	if modeParam := c.Query("mode"); modeParam != "" {
-		gameMode, valid = GameModeParam(modeParam).GameMode()
+		gameMode, valid = restapi.GameModeParam(modeParam).GameMode()
 		if !valid {
-			Error(c, 400, "Invalid mode")
+			restapi.Error(c, 400, "Invalid mode")
 			return
 		}
 	}
 
-	rankings := make([]RankingEntryJSON, 0, limit)
+	rankings := make([]restapi.RankingEntryJSON, 0, limit)
 	if gameMode == AllModes {
 		var query string
 		switch period {
@@ -62,21 +63,21 @@ func getRankings(c *gin.Context) {
 					INNER JOIN (SELECT user_id, SUM(points) as points FROM player_stats WHERE period = ? GROUP BY user_id) t ON users.id = t.user_id
 					WHERE users.weekly_rank > 0 ORDER BY users.weekly_rank ASC LIMIT ? OFFSET ?`
 		case types.PeriodArchive:
-			Error(c, 400, "Cannot get overall ranking from archive")
+			restapi.Error(c, 400, "Cannot get overall ranking from archive")
 			return
 		}
 		if err := db.Raw(query, period, limit, (page-1)*limit).Scan(&rankings).Error; err != nil {
-			Error(c, 500, "Database error")
+			restapi.Error(c, 500, "Database error")
 			l.WithError(err).Error("Error getting overall rankings")
 			return
 		}
 	} else {
 		query := "SELECT `rank`, user_id, u.display_name, SUM(points) as points FROM player_stats INNER JOIN users u ON u.id = player_stats.user_id WHERE period = ? AND mode = ? GROUP BY user_id ORDER BY `rank` LIMIT ? OFFSET ?"
 		if err = db.Raw(query, period, gameMode, limit, (page-1)*limit).Scan(&rankings).Error; err != nil {
-			Error(c, 500, "Database error")
+			restapi.Error(c, 500, "Database error")
 			l.WithError(err).Error("Error getting mode rankings")
 			return
 		}
 	}
-	success(c, rankings)
+	restapi.Success(c, rankings)
 }

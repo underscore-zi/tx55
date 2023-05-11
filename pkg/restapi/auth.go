@@ -9,7 +9,12 @@ import (
 
 func init() {
 	Register(AuthLevelNone, "POST", "/login", Login, ArgsLogin{}, UserJSON{})
-	Register(AuthLevelUser, "GET", "/logout", Logout, nil, nil)
+	Register(AuthLevelNone, "GET", "/logout", Logout, nil, nil)
+}
+
+type ArgsLogin struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 func Login(c *gin.Context) {
@@ -35,12 +40,12 @@ func Login(c *gin.Context) {
 	session.Set("user_id", user.ID)
 	_ = session.Save()
 
-	success(c, toUserJSON(&user))
+	Success(c, ToUserJSON(&user))
 }
 
 func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
 	_ = session.Save()
-	success(c, nil)
+	Success(c, nil)
 }

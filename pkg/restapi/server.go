@@ -17,6 +17,7 @@ import (
 
 type Server struct {
 	DB           *gorm.DB
+	AdminDB      *gorm.DB
 	Engine       *gin.Engine
 	EventService *events.Service
 }
@@ -55,7 +56,7 @@ func Register(level AuthLevel, method, endpoint string, handler gin.HandlerFunc,
 	logrus.StandardLogger().WithFields(logrus.Fields{
 		"method":   method,
 		"endpoint": endpoint,
-	}).Debug("Registered endpoint")
+	}).Info("Registered endpoint")
 }
 
 func NewServer(config configurations.RestAPI) (s *Server, err error) {
@@ -66,6 +67,13 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 
 	s.DB, err = config.Database.Open(&gorm.Config{
 		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
+	})
+	if err != nil {
+		return
+	}
+
+	s.AdminDB, err = config.AdminDatabase.Open(&gorm.Config{
+		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.AdminDatabase.LogConfig.LoggerConfig()),
 	})
 	if err != nil {
 		return
@@ -83,19 +91,10 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	store := gormsessions.NewStore(sessionDB, true, []byte(config.SessionSecret))
 	s.Engine.Use(sessions.Sessions("sessions", store))
 	engineLogger := logrus.StandardLogger()
-	s.Engine.Use(func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			c.Set("logger", engineLogger)
-			c.Next()
-		}
-	}())
 
-	s.Engine.Use(func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			c.Set("db", s.DB)
-			c.Next()
-		}
-	}())
+	s.Engine.Use(ProvideContextVar("logger", engineLogger))
+	s.Engine.Use(ProvideContextVar("db", s.DB))
+	s.Engine.Use(ProvideContextVar("adminDB", s.AdminDB))
 
 	_ = s.Engine.SetTrustedProxies(config.TrustedProxies)
 
@@ -154,7 +153,7 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	return
 }
 
-func success(c *gin.Context, data any) {
+func Success(c *gin.Context, data any) {
 	c.JSON(200, ResponseJSON{
 		Success: true,
 		Data:    data,
@@ -169,5 +168,5 @@ func Error(c *gin.Context, code int, message string) {
 }
 
 func notImplemented(c *gin.Context) {
-	success(c, "Not implemented")
+	Success(c, "Not implemented")
 }

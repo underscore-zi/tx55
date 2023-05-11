@@ -1,15 +1,16 @@
-package restapi
+package user
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"tx55/pkg/metalgearonline1/models"
+	"tx55/pkg/restapi"
 )
 
 func init() {
-	Register(AuthLevelNone, "GET", "/games/list", getGamesList, nil, []GameJSON{})
-	Register(AuthLevelNone, "GET", "/game/:game_id", getGame, nil, GameJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/games/list", getGamesList, nil, []restapi.GameJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/game/:game_id", getGame, nil, restapi.GameJSON{})
 }
 
 func getGame(c *gin.Context) {
@@ -24,13 +25,13 @@ func getGame(c *gin.Context) {
 	if err := q.First(&game, c.Param("game_id")).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			Error(c, 404, "Game not found")
+			restapi.Error(c, 404, "Game not found")
 		default:
 			l.WithError(err).Error("Error getting game")
-			Error(c, 500, "Error getting game")
+			restapi.Error(c, 500, "Error getting game")
 		}
 	} else {
-		success(c, toGameJSON(game))
+		restapi.Success(c, restapi.ToGameJSON(game))
 	}
 }
 
@@ -42,13 +43,13 @@ func getGamesList(c *gin.Context) {
 	q := db.Joins("GameOptions").Preload("Players")
 	if err := q.Find(&games).Error; err != nil {
 		l.WithError(err).Error("Error getting games list")
-		Error(c, 500, "Error getting games list")
+		restapi.Error(c, 500, "Error getting games list")
 	} else {
-		out := make([]GameJSON, len(games))
+		out := make([]restapi.GameJSON, len(games))
 		for i, game := range games {
-			out[i] = toGameJSON(game)
+			out[i] = restapi.ToGameJSON(game)
 		}
-		success(c, out)
+		restapi.Success(c, out)
 	}
 
 }

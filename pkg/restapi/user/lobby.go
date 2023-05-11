@@ -1,4 +1,4 @@
-package restapi
+package user
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,10 +6,11 @@ import (
 	"gorm.io/gorm"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
+	"tx55/pkg/restapi"
 )
 
 func init() {
-	Register(AuthLevelNone, "GET", "/lobby/list", getLobbyList, nil, []LobbyJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/lobby/list", getLobbyList, nil, []restapi.LobbyJSON{})
 }
 
 func getLobbyList(c *gin.Context) {
@@ -19,12 +20,12 @@ func getLobbyList(c *gin.Context) {
 	var lobbies []models.Lobby
 	if err := db.Where("type = ?", types.LobbyTypeGame).Find(&lobbies).Error; err != nil {
 		l.WithError(err).Error("Error getting lobbies list")
-		Error(c, 500, "Error getting lobbies list")
+		restapi.Error(c, 500, "Error getting lobbies list")
 	} else {
-		out := make([]LobbyJSON, len(lobbies))
+		out := make([]restapi.LobbyJSON, len(lobbies))
 		for i, lobby := range lobbies {
-			out[i] = toLobbyJSON(lobby)
+			out[i] = restapi.ToLobbyJSON(lobby)
 		}
-		success(c, out)
+		restapi.Success(c, out)
 	}
 }

@@ -25,3 +25,10 @@ func AdminLoginRequired(c *gin.Context) {
 		c.Next()
 	}
 }
+
+func ProvideContextVar(name string, val any) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set(name, val)
+		c.Next()
+	}
+}

@@ -6,7 +6,7 @@ import (
 	"tx55/pkg/metalgearonline1/types"
 )
 
-func toLobbyJSON(lobby models.Lobby) LobbyJSON {
+func ToLobbyJSON(lobby models.Lobby) LobbyJSON {
 	return LobbyJSON{
 		ID:      lobby.ID,
 		Name:    lobby.Name,
@@ -14,7 +14,7 @@ func toLobbyJSON(lobby models.Lobby) LobbyJSON {
 	}
 }
 
-func toUserJSON(user *models.User) *UserJSON {
+func ToUserJSON(user *models.User) *UserJSON {
 	if user == nil || user.ID == 0 {
 		return nil
 	}
@@ -31,7 +31,7 @@ func toUserJSON(user *models.User) *UserJSON {
 	}
 }
 
-func toPlayerStatsJSON(stats models.PlayerStats) PlayerStatsJSON {
+func ToPlayerStatsJSON(stats models.PlayerStats) PlayerStatsJSON {
 	return PlayerStatsJSON{
 		UserID:       stats.UserID,
 		UpdatedAt:    stats.UpdatedAt,
@@ -76,7 +76,7 @@ func toPlayerStatsJSON(stats models.PlayerStats) PlayerStatsJSON {
 	}
 }
 
-func toGameJSON(game models.Game) GameJSON {
+func ToGameJSON(game models.Game) GameJSON {
 	players := make([]GamePlayersJSON, len(game.Players))
 	for i, player := range game.Players {
 		players[i] = GamePlayersJSON{
@@ -84,7 +84,7 @@ func toGameJSON(game models.Game) GameJSON {
 			UpdatedAt: player.UpdatedAt,
 			DeletedAt: player.DeletedAt.Time,
 			UserID:    player.UserID,
-			User:      toUserJSON(&player.User),
+			User:      ToUserJSON(&player.User),
 			Team:      player.Team,
 			Kills:     player.Kills,
 			Deaths:    player.Deaths,
@@ -109,13 +109,13 @@ func toGameJSON(game models.Game) GameJSON {
 		DeletedAt:    game.DeletedAt.Time,
 		LobbyID:      game.LobbyID,
 		UserID:       game.UserID,
-		Options:      toGameOptionsJSON(game.GameOptions),
+		Options:      ToGameOptionsJSON(game.GameOptions),
 		Players:      players,
 		CurrentRound: game.CurrentRound,
 	}
 }
 
-func toGameOptionsJSON(opts models.GameOptions) GameOptionsJSON {
+func ToGameOptionsJSON(opts models.GameOptions) GameOptionsJSON {
 	out := GameOptionsJSON{
 		Name:              types.BytesToString(opts.Name),
 		Description:       types.BytesToString(opts.Description),
@@ -172,7 +172,7 @@ func toGameOptionsJSON(opts models.GameOptions) GameOptionsJSON {
 	return out
 }
 
-func toUserSettingsJSON(settings models.PlayerSettings) UserSettingsJSON {
+func ToUserSettingsJSON(settings models.PlayerSettings) UserSettingsJSON {
 	return UserSettingsJSON{
 		ShowNameTags:         settings.ShowNameTags,
 		SwitchSpeed:          uint(settings.SwitchSpeed + 1),
