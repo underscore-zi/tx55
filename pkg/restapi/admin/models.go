@@ -21,7 +21,8 @@ type Role struct {
 	Name           string `json:"name" gorm:"uniqueIndex"`
 	AllPrivileges  bool   `json:"all_privileges"`
 	UpdateProfiles bool   `json:"update_profiles"`
-	ReadIPs        bool   `json:"read_ips"`
+	FullIPs        bool   `json:"full_ips"`
+	SearchByIP     bool   `json:"search_by_ip"`
 	ReadBans       bool   `json:"read_bans"`
 	UpdateBans     bool   `json:"update_bans"`
 }

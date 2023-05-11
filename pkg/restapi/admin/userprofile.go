@@ -1,9 +1,12 @@
 package admin
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"strconv"
+	"strings"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/restapi"
 	"tx55/pkg/restapi/iso8859"
@@ -12,6 +15,7 @@ import (
 func init() {
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/profile", UpdateProfile, ArgsUpdateProfile{}, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem, ArgsUpdateEmblem{}, restapi.UserJSON{})
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserIPs, nil, []ConnectionInfoJSON{})
 }
 
 type ArgsUpdateProfile struct {
@@ -107,4 +111,57 @@ func UpdateEmblem(c *gin.Context) {
 		}).Error("failed to update game user emblem")
 	}
 	restapi.Success(c, nil)
+}
+
+type ConnectionInfoJSON struct {
+	Remote string
+	Local  string
+}
+
+func ListUserIPs(c *gin.Context) {
+	if !CheckPrivilege(c, PrivSearchByIP) {
+		restapi.Error(c, 403, "insufficient privileges")
+		return
+	}
+
+	uidParam := c.Param("userid")
+	if uidParam == "" {
+		restapi.Error(c, 400, "missing userid")
+		return
+	}
+
+	uid, err := strconv.Atoi(uidParam)
+	if err != nil {
+		restapi.Error(c, 400, "invalid userid")
+		return
+	}
+
+	db := c.MustGet("db").(*gorm.DB)
+	var connections []models.Connection
+	if tx := db.Where("user_id = ?", uid).Find(&connections); tx.Error != nil {
+		c.MustGet("log").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
+			"target_user": uid,
+			"admin_id":    c.MustGet("admin_id"),
+		}).Error("failed to list user connections")
+		restapi.Error(c, 500, tx.Error.Error())
+		return
+	}
+
+	var out []ConnectionInfoJSON
+	for _, conn := range connections {
+		remoteAddr := conn.RemoteAddr
+		localAddr := conn.LocalAddr
+
+		if !CheckPrivilege(c, PrivFullIPs) {
+			remoteAddr = remoteAddr[:strings.LastIndex(remoteAddr, ".")+1] + "xxx"
+			localAddr = localAddr[:strings.LastIndex(localAddr, ".")+1] + "xxx"
+		}
+
+		out = append(out, ConnectionInfoJSON{
+			Remote: fmt.Sprintf("%s:%d", remoteAddr, conn.RemotePort),
+			Local:  fmt.Sprintf("%s:%d", localAddr, conn.LocalPort),
+		})
+	}
+
+	restapi.Success(c, out)
 }
