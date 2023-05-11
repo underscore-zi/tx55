@@ -289,6 +289,17 @@ type NewsJSON struct {
 
 // Params
 
+type ArgsLogin struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type ArgsUpdateProfile struct {
+	DisplayName string `json:"display_name"`
+	Password    string `json:"password"`
+	OldPassword string `json:"old_password"`
+}
+
 type GameModeParam string
 
 var GameModeParams = map[string]types.GameMode{

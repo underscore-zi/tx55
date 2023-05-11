@@ -21,6 +21,43 @@ type Server struct {
 	EventService *events.Service
 }
 
+type AuthLevel int
+
+const (
+	AuthLevelNone  AuthLevel = 1
+	AuthLevelUser  AuthLevel = 2
+	AuthLevelAdmin AuthLevel = 3
+)
+
+type endpointInfo struct {
+	level            AuthLevel
+	method, endpoint string
+	handler          gin.HandlerFunc
+	args             any
+	returns          any
+}
+
+var routes = map[AuthLevel][]endpointInfo{
+	AuthLevelNone:  {},
+	AuthLevelUser:  {},
+	AuthLevelAdmin: {},
+}
+
+func Register(level AuthLevel, method, endpoint string, handler gin.HandlerFunc, args, output any) {
+	routes[level] = append(routes[level], endpointInfo{
+		level:    level,
+		method:   method,
+		endpoint: endpoint,
+		handler:  handler,
+		args:     args,
+		returns:  output,
+	})
+	logrus.StandardLogger().WithFields(logrus.Fields{
+		"method":   method,
+		"endpoint": endpoint,
+	}).Debug("Registered endpoint")
+}
+
 func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	gin.SetMode(gin.ReleaseMode)
 	s = &Server{
@@ -45,10 +82,10 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	}
 	store := gormsessions.NewStore(sessionDB, true, []byte(config.SessionSecret))
 	s.Engine.Use(sessions.Sessions("sessions", store))
-
+	engineLogger := logrus.StandardLogger()
 	s.Engine.Use(func() gin.HandlerFunc {
 		return func(c *gin.Context) {
-			c.Set("logger", logrus.StandardLogger())
+			c.Set("logger", engineLogger)
 			c.Next()
 		}
 	}())
@@ -60,50 +97,60 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 		}
 	}())
 
+	_ = s.Engine.SetTrustedProxies(config.TrustedProxies)
+
+	unauthGroup := s.Engine.Group(config.ApiPrefix)
+	userGroup := s.Engine.Group(config.ApiPrefix, GameLoginRequired)
+	adminGroup := s.Engine.Group(config.ApiPrefix, AdminLoginRequired)
+
 	if config.Events.Enabled {
 		if len(config.Events.AccessTokens) == 0 {
 			err = errors.New("no event access tokens specified")
 			return
 		}
-		s.EventService = events.NewService(logrus.StandardLogger(), config.Events.AccessTokens)
+		s.EventService = events.NewService(engineLogger, config.Events.AccessTokens)
 		go s.EventService.Run()
-	}
-
-	_ = s.Engine.SetTrustedProxies([]string{"127.0.0.1", "::1"})
-
-	s.Engine.GET("/api/v1/news/list", getNewsList)
-	s.Engine.GET("/api/v1/lobby/list", getLobbyList)
-	s.Engine.GET("/api/v1/rankings/:period", getRankings)
-	s.Engine.GET("/api/v1/rankings/:period/:page", getRankings)
-	s.Engine.GET("/api/v1/user/:user_id", getUser)
-	s.Engine.GET("/api/v1/user/:user_id/stats", getUserStats)
-	s.Engine.GET("/api/v1/user/:user_id/games", getUserGames)
-	s.Engine.GET("/api/v1/user/:user_id/games/:page", getUserGames)
-	s.Engine.GET("/api/v1/user/:user_id/settings", getUserOptions)
-	s.Engine.GET("/api/v1/game/list", getGamesList)
-	s.Engine.GET("/api/v1/game/:game_id", getGame)
-
-	if s.EventService != nil {
-		s.Engine.POST("/api/v1/stream/events/:token", s.EventService.PostNewEvent)
-		s.Engine.GET("/api/v1/stream/events", s.EventService.AcceptGinWebsocket)
+		unauthGroup.POST("/stream/events/:token", s.EventService.PostNewEvent)
+		unauthGroup.GET("/stream/events", s.EventService.AcceptGinWebsocket)
 	} else {
-		s.Engine.GET("/api/v1/stream/events", notImplemented)
-		s.Engine.POST("/api/v1/stream/events/:token", notImplemented)
+		unauthGroup.GET("/stream/events", notImplemented)
+		unauthGroup.POST("/stream/events/:token", notImplemented)
 	}
 
-	s.Engine.POST("/us/mgs3/rank/mg3getrank.html", gameweb.PostGetRanks)
-	s.Engine.GET("/us/mgs3/text/:filename", gameweb.GetTextFile)
-	s.Engine.POST("/us/mgs3/reguser/reguser.html", gameweb.RegisterAccount)
-	s.Engine.POST("/us/mgs3/reguser/deluser.html", gameweb.DeleteAccount)
-	s.Engine.POST("/us/mgs3/reguser/chgpswd.html", gameweb.ChangePassword)
+	for level, endpoints := range routes {
+		var group *gin.RouterGroup
+		switch level {
+		case AuthLevelNone:
+			group = unauthGroup
+		case AuthLevelUser:
+			group = userGroup
+		case AuthLevelAdmin:
+			group = adminGroup
+		default:
+			panic("unknown auth level")
+		}
 
-	s.Engine.POST("/api/v1/auth/login", Login)
-	s.Engine.GET("/api/v1/auth/logout", Logout)
+		for _, route := range endpoints {
+			switch route.method {
+			case "GET":
+				group.GET(route.endpoint, route.handler)
+			case "POST":
+				group.POST(route.endpoint, route.handler)
+			case "PUT":
+				group.PUT(route.endpoint, route.handler)
+			case "DELETE":
+				group.DELETE(route.endpoint, route.handler)
+			}
+		}
+	}
 
-	gameusers := s.Engine.Group("/api/v1")
-	gameusers.Use(GameLoginRequired)
-	gameusers.GET("/user/whoami", whoAmI)
-	gameusers.POST("/user/display_name")
+	gamewebGroup := s.Engine.Group(config.GameWebPrefix)
+	gamewebGroup.POST("/rank/mg3getrank.html", gameweb.PostGetRanks)
+	gamewebGroup.GET("/text/:filename", gameweb.GetTextFile)
+	gamewebGroup.POST("/reguser/reguser.html", gameweb.RegisterAccount)
+	gamewebGroup.POST("/reguser/deluser.html", gameweb.DeleteAccount)
+	gamewebGroup.POST("/reguser/chgpswd.html", gameweb.ChangePassword)
+
 	return
 }
 

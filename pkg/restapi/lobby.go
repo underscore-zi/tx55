@@ -8,6 +8,10 @@ import (
 	"tx55/pkg/metalgearonline1/types"
 )
 
+func init() {
+	Register(AuthLevelNone, "GET", "/lobby/list", getLobbyList, nil, []LobbyJSON{})
+}
+
 func getLobbyList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

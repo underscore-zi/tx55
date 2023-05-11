@@ -7,6 +7,11 @@ import (
 	"tx55/pkg/metalgearonline1/models"
 )
 
+func init() {
+	Register(AuthLevelNone, "GET", "/games/list", getGamesList, nil, []GameJSON{})
+	Register(AuthLevelNone, "GET", "/game/:game_id", getGame, nil, GameJSON{})
+}
+
 func getGame(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

@@ -7,23 +7,13 @@ import (
 	"tx55/pkg/metalgearonline1/models"
 )
 
-func GameLoginRequired(c *gin.Context) {
-	session := sessions.Default(c)
-	user := session.Get("user_id")
-	if user == nil {
-		Error(c, 401, "unauthorized")
-		return
-	} else {
-		c.Next()
-	}
+func init() {
+	Register(AuthLevelNone, "POST", "/login", Login, ArgsLogin{}, UserJSON{})
+	Register(AuthLevelUser, "GET", "/logout", Logout, nil, nil)
 }
 
 func Login(c *gin.Context) {
-	var args struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
+	var args ArgsLogin
 	var user models.User
 	db := c.MustGet("db").(*gorm.DB)
 

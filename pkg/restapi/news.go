@@ -7,6 +7,10 @@ import (
 	"tx55/pkg/metalgearonline1/models"
 )
 
+func init() {
+	Register(AuthLevelNone, "GET", "/news/list", getNewsList, nil, NewsJSON{})
+}
+
 func getNewsList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

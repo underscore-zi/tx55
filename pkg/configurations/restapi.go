@@ -3,6 +3,12 @@ package configurations
 type RestAPI struct {
 	Host string
 	Port int
+	// ApiPrefix contains the first part of the URL path for all API endpoints like /api/v1
+	ApiPrefix string
+	// GameWebPrefix contains the start of the url path for all the endpoints the console hits. By defualt this should be /us/mgs3/
+	GameWebPrefix string
+	// TrustedProxies is the list of IPs to trust headers like X-Forwarded-For from
+	TrustedProxies []string
 	// Database is the primary database for the game server
 	Database DatabaseConfig
 	// SessionDatabase is purely for storing the sessions

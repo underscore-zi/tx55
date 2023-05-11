@@ -8,6 +8,11 @@ import (
 	"tx55/pkg/metalgearonline1/types"
 )
 
+func init() {
+	Register(AuthLevelNone, "GET", "/rankings/:period", getRankings, nil, []RankingEntryJSON{})
+	Register(AuthLevelNone, "GET", "/rankings/:period/:mode", getRankings, nil, []RankingEntryJSON{})
+}
+
 func getRankings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

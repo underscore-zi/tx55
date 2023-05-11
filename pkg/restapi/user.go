@@ -8,7 +8,19 @@ import (
 	"strconv"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
+	"tx55/pkg/restapi/iso8859"
 )
+
+func init() {
+	Register(AuthLevelNone, "GET", "/user/:user_id", getUser, nil, UserJSON{})
+	Register(AuthLevelNone, "GET", "/user/:user_id/stats", getUserStats, nil, []PlayerStatsJSON{})
+	Register(AuthLevelNone, "GET", "/user/:user_id/games", getUserGames, nil, []GameJSON{})
+	Register(AuthLevelNone, "GET", "/user/:user_id/games/:page", getUserGames, nil, []GameJSON{})
+	Register(AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings, nil, UserSettingsJSON{})
+
+	Register(AuthLevelUser, "GET", "/whoami", whoAmI, nil, UserJSON{})
+	Register(AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, UserSettingsJSON{})
+}
 
 func getUser(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
@@ -87,7 +99,7 @@ func getUserGames(c *gin.Context) {
 	success(c, gamesPlayed)
 }
 
-func getUserOptions(c *gin.Context) {
+func getUserSettings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	userID := c.Param("user_id")
 
@@ -97,4 +109,72 @@ func getUserOptions(c *gin.Context) {
 	} else {
 		success(c, toUserSettingsJSON(options))
 	}
+}
+
+func UpdateUserProfile(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	session := sessions.Default(c)
+
+	var args ArgsUpdateProfile
+	if err := c.ShouldBindJSON(&args); err != nil {
+		Error(c, 400, err.Error())
+		return
+	}
+
+	var user models.User
+	user.ID = session.Get("user_id").(uint)
+	if args.DisplayName != "" {
+		if bs, err := iso8859.EncodeAsBytes(args.DisplayName); err != nil {
+			Error(c, 400, "Display name contains characters that can't be typed in-game")
+			return
+		} else {
+			if len(bs) > 16 {
+				Error(c, 400, "Display name too long")
+				return
+			}
+			user.DisplayName = bs
+		}
+	}
+
+	if args.Password != "" {
+		newPassword, err := iso8859.Encode(args.Password)
+		if err != nil {
+			Error(c, 400, "New Password contains characters that can't be typed in-game")
+			return
+		}
+
+		if len(newPassword) < 3 {
+			// Game will silently fail on this
+			Error(c, 400, "Password too short")
+			return
+		}
+
+		if args.OldPassword != "" {
+			Error(c, 400, "Missing old password")
+			return
+		}
+
+		oldPassword, err := iso8859.EncodeAsBytes(args.OldPassword)
+		if err != nil {
+			Error(c, 400, "Old Password contains characters that can't be typed in-game")
+			return
+		}
+
+		if !user.CheckRawPassword(oldPassword) {
+			Error(c, 400, "Incorrect password")
+			return
+		}
+
+		user.Password = newPassword
+	}
+
+	if tx := db.Debug().Updates(&user); tx.RowsAffected != 1 {
+		if tx.Error != nil {
+			log := c.MustGet("logger").(*logrus.Logger)
+			log.WithError(tx.Error).Error("Error updating user")
+		}
+		Error(c, 500, "Database error")
+		return
+	}
+	success(c, nil)
 }
