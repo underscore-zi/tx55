@@ -13,6 +13,8 @@ type RestAPI struct {
 	Database DatabaseConfig
 	// SessionDatabase is purely for storing the sessions
 	SessionDatabase DatabaseConfig
+	// AdminDatabase is a database for admin users and audit logs. Ideally this is kept running locally or a sqlite db
+	AdminDatabase DatabaseConfig
 	// SessionsSecret is the secret used to secure the sessions
 	SessionSecret string
 	// Events is the configuration for the events websocket and reporting endpoints

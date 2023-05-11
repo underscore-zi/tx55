@@ -11,14 +11,45 @@ import (
 	"os"
 	"time"
 	"tx55/pkg/configurations"
+	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/restapi"
+	"tx55/pkg/restapi/admin"
+	_ "tx55/pkg/restapi/admin"
 	"tx55/pkg/restapi/crons"
 )
 
 var l = logrus.StandardLogger()
 
+func migrate(config configurations.RestAPI) {
+	db, err := config.Database.Open(&gorm.Config{
+		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
+	})
+	if err != nil {
+		l.WithError(err).Error("Unable to open database")
+		return
+	}
+	if err = db.AutoMigrate(models.All...); err != nil {
+		l.WithError(err).Error("Unable to migrate database")
+		return
+	}
+
+	admindb, err := config.AdminDatabase.Open(&gorm.Config{
+		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
+	})
+	if err != nil {
+		l.WithError(err).Error("Unable to open admin database")
+		return
+	}
+	if err = admindb.AutoMigrate(admin.AllModels...); err != nil {
+		l.WithError(err).Error("Unable to migrate admin database")
+		return
+	}
+
+}
+
 func main() {
 	configFile := flag.String("config", "", "Path to config file")
+	shouldMigrate := flag.Bool("migrate", false, "Run database migrations")
 	flag.Parse()
 
 	if *configFile == "" {
@@ -30,6 +61,12 @@ func main() {
 	if err := configurations.LoadTOML(*configFile, &config); err != nil {
 		l.WithError(err).Fatal("Error loading config file")
 		return
+	}
+
+	if *shouldMigrate {
+		l.Info("Running database migrations")
+		migrate(config)
+		l.Info("Finished running database migrations")
 	}
 
 	db, err := config.Database.Open(&gorm.Config{
