@@ -19,10 +19,16 @@ func getGame(c *gin.Context) {
 
 	var game models.Game
 
+	gameId := restapi.ParamAsUint(c, "game_id", 0)
+	if gameId == 0 {
+		restapi.Error(c, 400, "Invalid game ID")
+		return
+	}
+
 	// This one is unscoped to allow for querying of games that have already ended
 	q := db.Unscoped().Joins("GameOptions")
 	q = q.Preload("Players").Preload("Players.User")
-	if err := q.First(&game, c.Param("game_id")).Error; err != nil {
+	if err := q.First(&game, gameId).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
 			restapi.Error(c, 404, "Game not found")

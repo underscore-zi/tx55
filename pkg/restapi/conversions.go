@@ -205,6 +205,19 @@ func ToUserSettingsJSON(settings models.PlayerSettings) UserSettingsJSON {
 	}
 }
 
+func ParamAsUint(c *gin.Context, name string, value uint) uint {
+	param := c.Param(name)
+	if param == "" {
+		return value
+	}
+	paramval, err := strconv.ParseUint(param, 10, 0)
+	if err != nil {
+		return value
+	}
+	return uint(paramval)
+
+}
+
 func ParamAsInt(c *gin.Context, name string, value int) int {
 	param := c.Param(name)
 	if param == "" {

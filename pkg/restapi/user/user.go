@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"strconv"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
 	"tx55/pkg/restapi"
@@ -29,8 +28,14 @@ func init() {
 func getUser(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 
+	uid := restapi.ParamAsUint(c, "user_id", 0)
+	if uid == 0 {
+		restapi.Error(c, 400, "Invalid user id")
+		return
+	}
+
 	var user models.User
-	if err := db.First(&user, c.Param("user_id")).Error; err != nil {
+	if err := db.First(&user, uid).Error; err != nil {
 		restapi.Error(c, 404, "User not found")
 	} else {
 		restapi.Success(c, restapi.ToUserJSON(&user))
@@ -49,9 +54,13 @@ func whoAmI(c *gin.Context) {
 
 func getUserStats(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
-
+	uid := restapi.ParamAsUint(c, "user_id", 0)
+	if uid == 0 {
+		restapi.Error(c, 400, "Invalid user id")
+		return
+	}
 	var stats []models.PlayerStats
-	if err := db.Find(&stats, "user_id = ?", c.Param("user_id")).Error; err != nil {
+	if err := db.Find(&stats, "user_id = ?", uid).Error; err != nil {
 		restapi.Success(c, []restapi.PlayerStatsJSON{})
 	} else {
 		out := make([]restapi.PlayerStatsJSON, len(stats))
@@ -65,24 +74,15 @@ func getUserStats(c *gin.Context) {
 func getUserGames(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)
-	userIdParam := c.Param("user_id")
 	limit := 50
 
-	userId, err := strconv.Atoi(userIdParam)
-	if err != nil {
+	userId := restapi.ParamAsUint(c, "user_id", 0)
+	if userId == 0 {
 		restapi.Error(c, 400, "Invalid user id")
 		return
 	}
 
-	pageParam, found := c.Params.Get("page")
-	if !found {
-		pageParam = "1"
-	}
-	page, err := strconv.Atoi(pageParam)
-	if err != nil {
-		restapi.Error(c, 400, "Invalid page")
-		return
-	}
+	page := restapi.ParamAsInt(c, "page", 1)
 
 	// I didn't want to dive into writing a query here but Gorm doesn't support nesting Joins
 	// so using preload this would give us three queries, or I could split it into 2 (player entries, and a game JOIN game_options)
@@ -105,7 +105,11 @@ func getUserGames(c *gin.Context) {
 
 func getUserSettings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
-	userID := c.Param("user_id")
+	userID := restapi.ParamAsUint(c, "user_id", 0)
+	if userID == 0 {
+		restapi.Error(c, 400, "Invalid user id")
+		return
+	}
 
 	var options models.PlayerSettings
 	if err := db.First(&options, "user_id = ?", userID).Error; err != nil {

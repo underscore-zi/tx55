@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"strconv"
 	"strings"
 	"time"
 	"tx55/pkg/metalgearonline1/models"
@@ -128,14 +127,8 @@ func ListUserConnections(c *gin.Context) {
 		return
 	}
 
-	uidParam := c.Param("userid")
-	if uidParam == "" {
-		restapi.Error(c, 400, "missing userid")
-		return
-	}
-
-	uid, err := strconv.Atoi(uidParam)
-	if err != nil {
+	uid := restapi.ParamAsUint(c, "userid", 0)
+	if uid == 0 {
 		restapi.Error(c, 400, "invalid userid")
 		return
 	}
