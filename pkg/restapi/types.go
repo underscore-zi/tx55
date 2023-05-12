@@ -153,10 +153,10 @@ type GameJSON struct {
 }
 
 type GameRuleJSON struct {
-	Map        types.GameMap  `json:"map"`
-	MapString  string         `json:"map_string"`
-	Mode       types.GameMode `json:"mode"`
-	ModeString string         `json:"mode_string"`
+	Map        types.GameMap        `json:"map"`
+	MapString  types.GameMapString  `json:"map_string"`
+	Mode       types.GameMode       `json:"mode"`
+	ModeString types.GameModeString `json:"mode_string"`
 }
 
 type GamePlayersJSON struct {
@@ -217,9 +217,9 @@ type PlayerStatsJSON struct {
 	Period       types.PlayerStatsPeriod `json:"period"`
 	PeriodString string                  `json:"period_string"`
 	Mode         types.GameMode          `json:"mode"`
-	ModeString   string                  `json:"mode_string"`
+	ModeString   types.GameModeString    `json:"mode_string"`
 	Map          types.GameMap           `json:"map"`
-	MapString    string                  `json:"map_string"`
+	MapString    types.GameMapString     `json:"map_string"`
 
 	// Rank will be the rank in the mode for the period. Though stats are broken down by map also, the rank value will only consider mode.
 	Rank uint32 `json:"rank"`
@@ -289,26 +289,6 @@ type NewsJSON struct {
 
 // Params
 
-type GameModeParam string
-
-var GameModeParams = map[string]types.GameMode{
-	"deathmatch":      types.ModeDeathmatch,
-	"dm":              types.ModeDeathmatch,
-	"team-deathmatch": types.ModeTeamDeathmatch,
-	"tdm":             types.ModeTeamDeathmatch,
-	"capture":         types.ModeCapture,
-	"cap":             types.ModeCapture,
-	"rescue":          types.ModeRescue,
-	"res":             types.ModeRescue,
-	"sneaking":        types.ModeSneaking,
-	"sne":             types.ModeSneaking,
-}
-
-func (m GameModeParam) GameMode() (types.GameMode, bool) {
-	v, found := GameModeParams[strings.ToLower(string(m))]
-	return v, found
-}
-
 type PeriodParam string
 
 var PeriodParams = map[string]types.PlayerStatsPeriod{
@@ -321,40 +301,5 @@ var PeriodParams = map[string]types.PlayerStatsPeriod{
 
 func (s PeriodParam) PlayerStatsPeriod() (types.PlayerStatsPeriod, bool) {
 	v, found := PeriodParams[strings.ToLower(string(s))]
-	return v, found
-}
-
-type GameMapParam string
-
-var GameMapParams = map[string]types.GameMap{
-	"lost-forest":       types.MapLostForest,
-	"lfor":              types.MapLostForest,
-	"ghost-factory":     types.MapGhostFactory,
-	"gfact":             types.MapGhostFactory,
-	"cus":               types.MapCityUnderSiege,
-	"city-under-siege":  types.MapCityUnderSiege,
-	"kha":               types.MapKillhouseA,
-	"killhouse-a":       types.MapKillhouseA,
-	"khb":               types.MapKillhouseB,
-	"killhouse-b":       types.MapKillhouseB,
-	"khc":               types.MapKillhouseC,
-	"killhouse-c":       types.MapKillhouseC,
-	"seast":             types.MapSvyatogornyjEast,
-	"svyatogornyj-east": types.MapSvyatogornyjEast,
-	"mtn":               types.MapMountainTop,
-	"mtop:":             types.MapMountainTop,
-	"mountain-top":      types.MapMountainTop,
-	"ggl":               types.MapGraninyGorkiLab,
-	"graniny-gorki-lab": types.MapGraninyGorkiLab,
-	"pbp":               types.MapPillboxPurgatory,
-	"pillbox-purgatory": types.MapPillboxPurgatory,
-	"hice":              types.MapHighIce,
-	"high-ice":          types.MapHighIce,
-	"btown":             types.MapBrownTown,
-	"brown-town":        types.MapBrownTown,
-}
-
-func (m GameMapParam) GameMap() (types.GameMap, bool) {
-	v, found := GameMapParams[strings.ToLower(string(m))]
 	return v, found
 }

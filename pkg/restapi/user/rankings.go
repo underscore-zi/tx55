@@ -31,10 +31,8 @@ func getRankings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)
 	limit := 50
-	AllModes := types.GameMode(255)
 
 	var period types.PlayerStatsPeriod
-	gameMode := AllModes
 
 	period, valid := restapi.PeriodParam(c.Param("period")).PlayerStatsPeriod()
 	if !valid {
@@ -43,17 +41,19 @@ func getRankings(c *gin.Context) {
 	}
 
 	page := restapi.ParamAsInt(c, "page", 1)
+	gameMode := types.ModeOverall
 
 	if modeParam := c.Query("mode"); modeParam != "" {
-		gameMode, valid = restapi.GameModeParam(modeParam).GameMode()
-		if !valid {
+		modeString := types.GameModeString(modeParam)
+		gameMode = modeString.GameMode()
+		if modeString.GameMode() == types.ModeInvalid {
 			restapi.Error(c, 400, "Invalid mode")
 			return
 		}
 	}
 
 	rankings := make([]restapi.RankingEntryJSON, 0, limit)
-	if gameMode == AllModes {
+	if gameMode == types.ModeOverall {
 		var query string
 		switch period {
 		case types.PeriodAllTime:

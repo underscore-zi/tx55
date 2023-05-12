@@ -270,14 +270,14 @@ const docTemplate = `{
         },
         "/lobby/list": {
             "get": {
-                "description": "Retrieves all active news lists, one may have the title \"policy\" which is the terms of service",
+                "description": "Retrieves all game lobbies and player counts",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "News"
+                    "Lobby"
                 ],
-                "summary": "Retrieve News List",
+                "summary": "Retrieve lobby list",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -292,7 +292,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/restapi.NewsJSON"
+                                                "$ref": "#/definitions/restapi.LobbyJSON"
                                             }
                                         }
                                     }
@@ -409,6 +409,59 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/restapi.UserJSON"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/news/list": {
+            "get": {
+                "description": "Retrieves all active news lists, one may have the title \"policy\" which is the terms of service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "News"
+                ],
+                "summary": "Retrieve News List",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/restapi.NewsJSON"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -1380,13 +1433,13 @@ const docTemplate = `{
                     "$ref": "#/definitions/types.GameMap"
                 },
                 "map_string": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.GameMapString"
                 },
                 "mode": {
                     "$ref": "#/definitions/types.GameMode"
                 },
                 "mode_string": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.GameModeString"
                 }
             }
         },
@@ -1466,13 +1519,13 @@ const docTemplate = `{
                     "$ref": "#/definitions/types.GameMap"
                 },
                 "map_string": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.GameMapString"
                 },
                 "mode": {
                     "$ref": "#/definitions/types.GameMode"
                 },
                 "mode_string": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.GameModeString"
                 },
                 "period": {
                     "$ref": "#/definitions/types.PlayerStatsPeriod"
@@ -1699,6 +1752,39 @@ const docTemplate = `{
                 "MapBrownTown"
             ]
         },
+        "types.GameMapString": {
+            "type": "string",
+            "enum": [
+                "lost forest",
+                "ghost factory",
+                "city under siege",
+                "killhouse a",
+                "killhouse b",
+                "killhouse c",
+                "svyatogornyj east",
+                "mountaintop",
+                "graniny gorki lab",
+                "pillbox purgatory",
+                "high ice",
+                "brown town",
+                "all"
+            ],
+            "x-enum-varnames": [
+                "MapLostForestString",
+                "MapGhostFactoryString",
+                "MapCityUnderSiegeString",
+                "MapKillhouseAString",
+                "MapKillhouseBString",
+                "MapKillhouseCString",
+                "MapSvyatogornyjEastString",
+                "MapMountainTopString",
+                "MapGraninyGorkiLabString",
+                "MapPillboxPurgatoryString",
+                "MapHighIceString",
+                "MapBrownTownString",
+                "MapAllString"
+            ]
+        },
         "types.GameMode": {
             "type": "integer",
             "enum": [
@@ -1707,7 +1793,8 @@ const docTemplate = `{
                 2,
                 3,
                 4,
-                5
+                5,
+                255
             ],
             "x-enum-comments": {
                 "ModeOverall": "Only used by the Rankings request"
@@ -1718,7 +1805,39 @@ const docTemplate = `{
                 "ModeRescue",
                 "ModeCapture",
                 "ModeSneaking",
-                "ModeOverall"
+                "ModeOverall",
+                "ModeInvalid"
+            ]
+        },
+        "types.GameModeString": {
+            "type": "string",
+            "enum": [
+                "deathmatch",
+                "dm",
+                "team deathmatch",
+                "tdm",
+                "rescue",
+                "res",
+                "capture",
+                "cap",
+                "sneaking",
+                "sne",
+                "overall",
+                "all"
+            ],
+            "x-enum-varnames": [
+                "ModeDeathmatchString",
+                "ModeDeathmatchShortString",
+                "ModeTeamDeathmatchString",
+                "ModeTeamDeathmatchShortString",
+                "ModeRescueString",
+                "ModeRescueShortString",
+                "ModeCaptureString",
+                "ModeCaptureShortString",
+                "ModeSneakingString",
+                "ModeSneakingShortString",
+                "ModeOverallString",
+                "ModeOverallShortString"
             ]
         },
         "types.PlayerStatsPeriod": {

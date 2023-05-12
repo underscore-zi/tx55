@@ -166,11 +166,11 @@ definitions:
       map:
         $ref: '#/definitions/types.GameMap'
       map_string:
-        type: string
+        $ref: '#/definitions/types.GameMapString'
       mode:
         $ref: '#/definitions/types.GameMode'
       mode_string:
-        type: string
+        $ref: '#/definitions/types.GameModeString'
     type: object
   restapi.LobbyJSON:
     properties:
@@ -223,11 +223,11 @@ definitions:
       map:
         $ref: '#/definitions/types.GameMap'
       map_string:
-        type: string
+        $ref: '#/definitions/types.GameMapString'
       mode:
         $ref: '#/definitions/types.GameMode'
       mode_string:
-        type: string
+        $ref: '#/definitions/types.GameModeString'
       period:
         $ref: '#/definitions/types.PlayerStatsPeriod'
       period_string:
@@ -390,6 +390,36 @@ definitions:
     - MapPillboxPurgatory
     - MapHighIce
     - MapBrownTown
+  types.GameMapString:
+    enum:
+    - lost forest
+    - ghost factory
+    - city under siege
+    - killhouse a
+    - killhouse b
+    - killhouse c
+    - svyatogornyj east
+    - mountaintop
+    - graniny gorki lab
+    - pillbox purgatory
+    - high ice
+    - brown town
+    - all
+    type: string
+    x-enum-varnames:
+    - MapLostForestString
+    - MapGhostFactoryString
+    - MapCityUnderSiegeString
+    - MapKillhouseAString
+    - MapKillhouseBString
+    - MapKillhouseCString
+    - MapSvyatogornyjEastString
+    - MapMountainTopString
+    - MapGraninyGorkiLabString
+    - MapPillboxPurgatoryString
+    - MapHighIceString
+    - MapBrownTownString
+    - MapAllString
   types.GameMode:
     enum:
     - 0
@@ -398,6 +428,7 @@ definitions:
     - 3
     - 4
     - 5
+    - 255
     type: integer
     x-enum-comments:
       ModeOverall: Only used by the Rankings request
@@ -408,6 +439,35 @@ definitions:
     - ModeCapture
     - ModeSneaking
     - ModeOverall
+    - ModeInvalid
+  types.GameModeString:
+    enum:
+    - deathmatch
+    - dm
+    - team deathmatch
+    - tdm
+    - rescue
+    - res
+    - capture
+    - cap
+    - sneaking
+    - sne
+    - overall
+    - all
+    type: string
+    x-enum-varnames:
+    - ModeDeathmatchString
+    - ModeDeathmatchShortString
+    - ModeTeamDeathmatchString
+    - ModeTeamDeathmatchShortString
+    - ModeRescueString
+    - ModeRescueShortString
+    - ModeCaptureString
+    - ModeCaptureShortString
+    - ModeSneakingString
+    - ModeSneakingShortString
+    - ModeOverallString
+    - ModeOverallShortString
   types.PlayerStatsPeriod:
     enum:
     - 0
@@ -615,8 +675,7 @@ paths:
       - Games
   /lobby/list:
     get:
-      description: Retrieves all active news lists, one may have the title "policy"
-        which is the terms of service
+      description: Retrieves all game lobbies and player counts
       produces:
       - application/json
       responses:
@@ -628,7 +687,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/restapi.NewsJSON'
+                    $ref: '#/definitions/restapi.LobbyJSON'
                   type: array
               type: object
         "500":
@@ -640,9 +699,9 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Retrieve News List
+      summary: Retrieve lobby list
       tags:
-      - News
+      - Lobby
   /login:
     post:
       consumes:
@@ -698,6 +757,36 @@ paths:
       tags:
       - GameUserLogin
       - AdminLogin
+  /news/list:
+    get:
+      description: Retrieves all active news lists, one may have the title "policy"
+        which is the terms of service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/restapi.NewsJSON'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve News List
+      tags:
+      - News
   /rankings/{period}/{page}:
     get:
       description: |-

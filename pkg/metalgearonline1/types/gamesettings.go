@@ -11,28 +11,85 @@ const (
 	ModeCapture        GameMode = 3
 	ModeSneaking       GameMode = 4
 	ModeOverall        GameMode = 5 // Only used by the Rankings request
+	ModeInvalid        GameMode = 255
 )
 
-func (g GameMode) String() string {
+type GameModeString string
+
+const (
+	ModeDeathmatchString          GameModeString = "deathmatch"
+	ModeDeathmatchShortString     GameModeString = "dm"
+	ModeTeamDeathmatchString      GameModeString = "team deathmatch"
+	ModeTeamDeathmatchShortString GameModeString = "tdm"
+	ModeRescueString              GameModeString = "rescue"
+	ModeRescueShortString         GameModeString = "res"
+	ModeCaptureString             GameModeString = "capture"
+	ModeCaptureShortString        GameModeString = "cap"
+	ModeSneakingString            GameModeString = "sneaking"
+	ModeSneakingShortString       GameModeString = "sne"
+	ModeOverallString             GameModeString = "overall"
+	ModeOverallShortString        GameModeString = "all"
+)
+
+func (g GameMode) String() GameModeString {
 	switch g {
 	case ModeDeathmatch:
-		return "Deathmatch"
+		return ModeDeathmatchString
 	case ModeTeamDeathmatch:
-		return "Team Deathmatch"
+		return ModeTeamDeathmatchString
 	case ModeRescue:
-		return "Rescue"
+		return ModeRescueString
 	case ModeCapture:
-		return "Capture"
+		return ModeCaptureString
 	case ModeSneaking:
-		return "Sneaking"
+		return ModeSneakingString
+	case ModeOverall:
+		return ModeOverallString
 	default:
 		return "Unknown"
 	}
 }
 
+func (g GameMode) ShortString() GameModeString {
+	switch g {
+	case ModeDeathmatch:
+		return ModeDeathmatchShortString
+	case ModeTeamDeathmatch:
+		return ModeTeamDeathmatchShortString
+	case ModeRescue:
+		return ModeRescueShortString
+	case ModeCapture:
+		return ModeCaptureShortString
+	case ModeSneaking:
+		return ModeSneakingShortString
+	case ModeOverall:
+		return ModeOverallShortString
+	default:
+		return "Unknown"
+	}
+}
+
+func (s GameModeString) GameMode() GameMode {
+	switch s {
+	case ModeDeathmatchString, ModeDeathmatchShortString:
+		return ModeDeathmatch
+	case ModeTeamDeathmatchString, ModeTeamDeathmatchShortString:
+		return ModeTeamDeathmatch
+	case ModeRescueString, ModeRescueShortString:
+		return ModeRescue
+	case ModeCaptureString, ModeCaptureShortString:
+		return ModeCapture
+	case ModeSneakingString, ModeSneakingShortString:
+		return ModeSneaking
+	case ModeOverallString, ModeOverallShortString:
+		return ModeOverall
+	default:
+		return ModeInvalid
+	}
+}
+
 type GameMap byte
 
-//goland:noinspection GoUnusedConst
 const (
 	MapLostForest GameMap = iota + 1
 	MapGhostFactory
@@ -49,34 +106,87 @@ const (
 	MapAll = 0xFF
 )
 
-func (g GameMap) String() string {
-	switch g {
+type GameMapString string
+
+const (
+	MapLostForestString       GameMapString = "lost forest"
+	MapGhostFactoryString     GameMapString = "ghost factory"
+	MapCityUnderSiegeString   GameMapString = "city under siege"
+	MapKillhouseAString       GameMapString = "killhouse a"
+	MapKillhouseBString       GameMapString = "killhouse b"
+	MapKillhouseCString       GameMapString = "killhouse c"
+	MapSvyatogornyjEastString GameMapString = "svyatogornyj east"
+	MapMountainTopString      GameMapString = "mountaintop"
+	MapGraninyGorkiLabString  GameMapString = "graniny gorki lab"
+	MapPillboxPurgatoryString GameMapString = "pillbox purgatory"
+	MapHighIceString          GameMapString = "high ice"
+	MapBrownTownString        GameMapString = "brown town"
+	MapAllString              GameMapString = "all"
+)
+
+func (gm GameMap) String() GameMapString {
+	switch gm {
 	case MapLostForest:
-		return "Lost Forest"
+		return MapLostForestString
 	case MapGhostFactory:
-		return "Ghost Factory"
+		return MapGhostFactoryString
 	case MapCityUnderSiege:
-		return "City Under Siege"
+		return MapCityUnderSiegeString
 	case MapKillhouseA:
-		return "Killhouse A"
+		return MapKillhouseAString
 	case MapKillhouseB:
-		return "Killhouse B"
+		return MapKillhouseBString
 	case MapKillhouseC:
-		return "Killhouse C"
+		return MapKillhouseCString
 	case MapSvyatogornyjEast:
-		return "Svyatogornyj East"
+		return MapSvyatogornyjEastString
 	case MapMountainTop:
-		return "Mountaintop"
+		return MapMountainTopString
 	case MapGraninyGorkiLab:
-		return "Graniny Gorki Lab"
+		return MapGraninyGorkiLabString
 	case MapPillboxPurgatory:
-		return "Pillbox Purgatory"
+		return MapPillboxPurgatoryString
 	case MapHighIce:
-		return "High Ice"
+		return MapHighIceString
 	case MapBrownTown:
-		return "Brown Town"
+		return MapBrownTownString
+	case MapAll:
+		return MapAllString
 	default:
-		return "Unknown"
+		return ""
+	}
+}
+
+func (gms GameMapString) GameMap() GameMap {
+	switch gms {
+	case MapLostForestString:
+		return MapLostForest
+	case MapGhostFactoryString:
+		return MapGhostFactory
+	case MapCityUnderSiegeString:
+		return MapCityUnderSiege
+	case MapKillhouseAString:
+		return MapKillhouseA
+	case MapKillhouseBString:
+		return MapKillhouseB
+	case MapKillhouseCString:
+		return MapKillhouseC
+	case MapSvyatogornyjEastString:
+		return MapSvyatogornyjEast
+	case MapMountainTopString:
+		return MapMountainTop
+	case MapGraninyGorkiLabString:
+		return MapGraninyGorkiLab
+	case MapPillboxPurgatoryString:
+		return MapPillboxPurgatory
+	case MapHighIceString:
+		return MapHighIce
+	case MapBrownTownString:
+		return MapBrownTown
+	case MapAllString:
+		return MapAll
+	default:
+		return 0
 	}
 }
 
