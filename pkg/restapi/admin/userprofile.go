@@ -13,10 +13,10 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/:userid/profile", UpdateProfile, ArgsUpdateProfile{}, restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem, ArgsUpdateEmblem{}, restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections, nil, []ResponseConnectionsJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/search_ip/:ip", SearchByIP, nil, []ResponseSearchByIPJSON{})
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/:userid/profile", UpdateProfile)
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem)
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections)
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/search_ip/:ip", SearchByIP)
 }
 
 type ArgsUpdateProfile struct {

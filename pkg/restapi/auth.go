@@ -8,8 +8,8 @@ import (
 )
 
 func init() {
-	Register(AuthLevelNone, "POST", "/login", Login, ArgsLogin{}, UserJSON{})
-	Register(AuthLevelNone, "GET", "/logout", Logout, nil, nil)
+	Register(AuthLevelNone, "POST", "/login", Login)
+	Register(AuthLevelNone, "GET", "/logout", Logout)
 }
 
 type ArgsLogin struct {

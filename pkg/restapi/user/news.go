@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelNone, "GET", "/news/list", getNewsList, nil, restapi.NewsJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/news/list", getNewsList)
 }
 
 // getNewsList godoc
@@ -19,7 +19,7 @@ func init() {
 // @Produce      json
 // @Success      200  {object}  restapi.ResponseJSON{data=[]restapi.NewsJSON{}}
 // @Failure      500  {object}  restapi.ResponseJSON{data=string}
-// @Router       /lobby/list [get]
+// @Router       /news/list [get]
 func getNewsList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

@@ -10,13 +10,13 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelNone, "GET", "/lobby/list", getLobbyList, nil, []restapi.LobbyJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/lobby/list", getLobbyList)
 }
 
 // getLobbyList godoc
 // @Summary      Retrieve lobby list
 // @Description  Retrieves all game lobbies and player counts
-// @Tags         Games
+// @Tags         Lobby
 // @Produce      json
 // @Success      200  {object}  restapi.ResponseJSON{data=[]restapi.LobbyJSON{}}
 // @Failure      500  {object}  restapi.ResponseJSON{data=string}

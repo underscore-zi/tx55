@@ -44,14 +44,12 @@ var routes = map[AuthLevel][]endpointInfo{
 	AuthLevelAdmin: {},
 }
 
-func Register(level AuthLevel, method, endpoint string, handler gin.HandlerFunc, args, output any) {
+func Register(level AuthLevel, method, endpoint string, handler gin.HandlerFunc) {
 	routes[level] = append(routes[level], endpointInfo{
 		level:    level,
 		method:   method,
 		endpoint: endpoint,
 		handler:  handler,
-		args:     args,
-		returns:  output,
 	})
 	logrus.StandardLogger().WithFields(logrus.Fields{
 		"method":   method,

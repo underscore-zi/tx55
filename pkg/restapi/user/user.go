@@ -12,17 +12,17 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id", getUser, nil, restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/stats", getUserStats, nil, []restapi.PlayerStatsJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games", getUserGames, nil, []restapi.GameJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games/:page", getUserGames, nil, []restapi.GameJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings, nil, restapi.UserSettingsJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name", SearchByName, nil, []restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name/:page", SearchByName, nil, []restapi.UserJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id", getUser)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/stats", getUserStats)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games", getUserGames)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games/:page", getUserGames)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name", SearchByName)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name/:page", SearchByName)
 
-	restapi.Register(restapi.AuthLevelUser, "GET", "/whoami", whoAmI, nil, restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, nil)
-	restapi.Register(restapi.AuthLevelUser, "POST", "/user/settings", UpdateUserSettings, restapi.UserSettingsJSON{}, nil)
+	restapi.Register(restapi.AuthLevelUser, "GET", "/whoami", whoAmI)
+	restapi.Register(restapi.AuthLevelUser, "POST", "/user/profile", UpdateUserProfile)
+	restapi.Register(restapi.AuthLevelUser, "POST", "/user/settings", UpdateUserSettings)
 }
 
 // getUser godoc

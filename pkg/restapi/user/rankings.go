@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period", getRankings, nil, []restapi.RankingEntryJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period/:page", getRankings, nil, []restapi.RankingEntryJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period", getRankings)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period/:page", getRankings)
 }
 
 // getRankings godoc

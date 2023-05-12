@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelNone, "POST", "/admin/login", Login, ArgsLogin{}, restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/change_password", ChangePassword, ArgsChangePassword{}, nil)
+	restapi.Register(restapi.AuthLevelNone, "POST", "/admin/login", Login)
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/change_password", ChangePassword)
 }
 
 type ArgsLogin struct {

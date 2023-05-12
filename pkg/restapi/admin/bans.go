@@ -10,8 +10,8 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/bans/list", ListBans, nil, []BanJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/bans/update", UpdateBans, ArgsUpdateBan{}, nil)
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/bans/list", ListBans)
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/bans/update", UpdateBans)
 }
 
 type BanJSON struct {
