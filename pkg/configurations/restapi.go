@@ -21,6 +21,10 @@ type RestAPI struct {
 	Events RestAPIEvents
 	// RunCronJobs triggers whether the scheduled jobs like rank updates run
 	RunCronJobs bool
+	// AllowCredentialOrigins is a list of origins that are allowed to fully interact with the API, including proving the X-API-TOKEN header, and using cookies for logged in sessions.
+	AllowCredentialOrigins []string
+	// AllowOrigins is less privileged than the Credential origins. These origins can read responses but not send custom headers or cookies. If you want to allow all origins use a single entry of `*`.
+	AllowOrigins []string
 }
 
 type RestAPIEvents struct {
