@@ -17,6 +17,16 @@ type ArgsLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// Login godoc
+// @Summary      Login to a GameUser account
+// @Description  Login to a specific GameUser account using the in-game credentials
+// @Tags         GameUserLogin
+// @Accept       json
+// @Produce      json
+// @Param 	     body  body  restapi.ArgsLogin  true  "Body"
+// @Success      200  {object}  restapi.ResponseJSON{data=restapi.UserJSON{}{}}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Router       /login [post]
 func Login(c *gin.Context) {
 	var args ArgsLogin
 	var user models.User
@@ -43,6 +53,13 @@ func Login(c *gin.Context) {
 	Success(c, ToUserJSON(&user))
 }
 
+// Logout godoc
+// @Summary      Logout of a GameUser or Admin session
+// @Description  Logout of any currently existing session
+// @Tags         GameUserLogin,AdminLogin
+// @Produce      json
+// @Success      200  {object}  restapi.ResponseJSON{data=restapi.UserJSON{}{}}
+// @Router       /logout [post]
 func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()

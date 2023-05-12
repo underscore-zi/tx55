@@ -13,18 +13,30 @@ import (
 )
 
 func init() {
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/profile", UpdateProfile, ArgsUpdateProfile{}, restapi.UserJSON{})
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/:userid/profile", UpdateProfile, ArgsUpdateProfile{}, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem, ArgsUpdateEmblem{}, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections, nil, []ResponseConnectionsJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/search_ip/:ip", SearchByIP, nil, []ResponseSearchByIPJSON{})
 }
 
 type ArgsUpdateProfile struct {
-	UserID      uint
 	DisplayName string
 	Password    string
 }
 
+// UpdateProfile godoc
+// @Summary      Update a game user's profile
+// @Description  Update game user profile data, such as display name and password
+// @Tags         AdminLogin
+// @Accept       json
+// @Produce      json
+// @Param        user_id  path  int  true  "User ID"
+// @Param        body     body  ArgsUpdateProfile  true  "User profile data"
+// @Success      200  {object}  restapi.ResponseJSON{data=restapi.UserJSON}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/user/{user_id}/profile [post]
 func UpdateProfile(c *gin.Context) {
 	if !CheckPrivilege(c, PrivUpdateProfiles) {
 		restapi.Error(c, 403, "insufficient privileges")
@@ -40,7 +52,7 @@ func UpdateProfile(c *gin.Context) {
 	var user models.User
 	var err error
 
-	user.ID = args.UserID
+	user.ID = restapi.ParamAsUint(c, "userid", 0)
 	if args.DisplayName != "" {
 		user.DisplayName, err = iso8859.EncodeAsBytes(args.DisplayName)
 		if err != nil {

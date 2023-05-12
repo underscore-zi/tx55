@@ -13,6 +13,14 @@ func init() {
 	restapi.Register(restapi.AuthLevelNone, "GET", "/lobby/list", getLobbyList, nil, []restapi.LobbyJSON{})
 }
 
+// getLobbyList godoc
+// @Summary      Retrieve lobby list
+// @Description  Retrieves all game lobbies and player counts
+// @Tags         Games
+// @Produce      json
+// @Success      200  {object}  restapi.ResponseJSON{data=[]restapi.LobbyJSON{}}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /lobby/list [get]
 func getLobbyList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

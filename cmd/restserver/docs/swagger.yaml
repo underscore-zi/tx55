@@ -1,0 +1,1102 @@
+basePath: /api/v1
+definitions:
+  admin.ArgsUpdateProfile:
+    properties:
+      displayName:
+        type: string
+      password:
+        type: string
+    type: object
+  restapi.ArgsLogin:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  restapi.GameJSON:
+    properties:
+      created_at:
+        type: string
+      current_round:
+        type: integer
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      lobby_id:
+        type: integer
+      options:
+        $ref: '#/definitions/restapi.GameOptionsJSON'
+      players:
+        items:
+          $ref: '#/definitions/restapi.GamePlayersJSON'
+        type: array
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  restapi.GameOptionsJSON:
+    properties:
+      auto_balance_count:
+        type: integer
+      auto_balanced:
+        type: boolean
+      blue_team:
+        $ref: '#/definitions/types.Team'
+      cap_minutes:
+        type: integer
+      cap_rounds:
+        type: integer
+      description:
+        type: string
+      dm_minutes:
+        type: integer
+      friend_fire:
+        type: boolean
+      ghosts:
+        type: boolean
+      has_password:
+        type: boolean
+      has_voice_chat:
+        type: boolean
+      idle_kick:
+        type: boolean
+      idle_kick_minutes:
+        type: integer
+      is_host_only:
+        type: boolean
+      max_players:
+        type: integer
+      name:
+        type: string
+      rating:
+        type: integer
+      rating_restriction:
+        $ref: '#/definitions/types.VSRatingRestriction'
+      red_team:
+        $ref: '#/definitions/types.Team'
+      res_minutes:
+        type: integer
+      res_rounds:
+        type: integer
+      rules:
+        items:
+          $ref: '#/definitions/restapi.GameRuleJSON'
+        type: array
+      rumble_roses:
+        type: boolean
+      sne_minutes:
+        type: integer
+      sne_rounds:
+        type: integer
+      tdm_minutes:
+        type: integer
+      tdm_rounds:
+        type: integer
+      tdm_tickets:
+        type: integer
+      team_kill_count:
+        type: integer
+      team_kill_kick:
+        type: boolean
+      unique_characters:
+        type: boolean
+      weapon_restriction:
+        $ref: '#/definitions/types.WeaponRestrictions'
+    type: object
+  restapi.GamePlayedJSON:
+    properties:
+      created_at:
+        type: string
+      deaths:
+        type: integer
+      deleted_at:
+        type: string
+      game_has_password:
+        type: boolean
+      game_host_id:
+        type: integer
+      game_id:
+        type: integer
+      game_name:
+        type: string
+      kills:
+        type: integer
+      points:
+        type: integer
+      was_host:
+        type: boolean
+      was_kicked:
+        type: boolean
+    type: object
+  restapi.GamePlayersJSON:
+    properties:
+      created_at:
+        type: string
+      deaths:
+        type: integer
+      deleted_at:
+        type: string
+      kills:
+        type: integer
+      ping:
+        type: integer
+      score:
+        type: integer
+      team:
+        $ref: '#/definitions/types.Team'
+      team_string:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/restapi.UserJSON'
+      user_id:
+        type: integer
+      was_kicked:
+        type: boolean
+    type: object
+  restapi.GameRuleJSON:
+    properties:
+      map:
+        $ref: '#/definitions/types.GameMap'
+      map_string:
+        type: string
+      mode:
+        $ref: '#/definitions/types.GameMode'
+      mode_string:
+        type: string
+    type: object
+  restapi.LobbyJSON:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      players:
+        type: integer
+    type: object
+  restapi.NewsJSON:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      title:
+        type: string
+    type: object
+  restapi.PlayerStatsJSON:
+    properties:
+      cqc_attacks:
+        type: integer
+      cqc_attacks_received:
+        type: integer
+      death_streak:
+        type: integer
+      deaths:
+        type: integer
+      head_shots:
+        type: integer
+      head_shots_received:
+        type: integer
+      infrared_goggle_uses:
+        $ref: '#/definitions/time.Duration'
+      kerotans_for_win:
+        description: KerotansForWin is the number of Gakos rescued when Mode is rescue
+        type: integer
+      kerotans_placed:
+        description: KerotansPlaced is the number of goals as snake when Mode is sneaking
+        type: integer
+      kill_streak:
+        type: integer
+      kills:
+        type: integer
+      kills_with_knife:
+        type: integer
+      kills_with_scorpion:
+        type: integer
+      map:
+        $ref: '#/definitions/types.GameMap'
+      map_string:
+        type: string
+      mode:
+        $ref: '#/definitions/types.GameMode'
+      mode_string:
+        type: string
+      period:
+        $ref: '#/definitions/types.PlayerStatsPeriod'
+      period_string:
+        type: string
+      play_time:
+        $ref: '#/definitions/time.Duration'
+      points:
+        type: integer
+      radio_uses:
+        type: integer
+      rank:
+        description: Rank will be the rank in the mode for the period. Though stats
+          are broken down by map also, the rank value will only consider mode.
+        type: integer
+      rolls:
+        type: integer
+      rounds_no_death:
+        type: integer
+      rounds_played:
+        type: integer
+      self_stuns:
+        type: integer
+      snake_frags:
+        type: integer
+      stuns:
+        type: integer
+      stuns_received:
+        type: integer
+      suicides:
+        type: integer
+      team_kills:
+        type: integer
+      team_stuns:
+        type: integer
+      team_wins:
+        type: integer
+      text_chat_uses:
+        type: integer
+      times_eaten:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  restapi.RankingEntryJSON:
+    properties:
+      display_name:
+        type: string
+      points:
+        type: integer
+      rank:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  restapi.ResponseJSON:
+    properties:
+      data: {}
+      success:
+        type: boolean
+    type: object
+  restapi.UserJSON:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      display_name:
+        type: string
+      emblem_text:
+        type: string
+      has_emblem:
+        type: boolean
+      id:
+        type: integer
+      overall_rank:
+        type: integer
+      updated_at:
+        type: string
+      weekly_rank:
+        type: integer
+    type: object
+  restapi.UserSettingsJSON:
+    properties:
+      equipment_switch_style:
+        type: string
+      fkeys:
+        items:
+          type: string
+        type: array
+      fpv_invert_horizontal:
+        type: boolean
+      fpv_invert_vertical:
+        type: boolean
+      fpv_rotation_speed:
+        type: integer
+      fpv_switch_orientation:
+        type: string
+      show_name_tags:
+        type: boolean
+      switch_speed:
+        type: integer
+      tpv_chase_camera:
+        type: boolean
+      tpv_invert_horizontal:
+        type: boolean
+      tpv_invert_vertical:
+        type: boolean
+      tpv_rotation_speed:
+        type: integer
+      weapon_switch_style:
+        type: string
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+  types.GameMap:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    type: integer
+    x-enum-varnames:
+    - MapLostForest
+    - MapGhostFactory
+    - MapCityUnderSiege
+    - MapKillhouseA
+    - MapKillhouseB
+    - MapKillhouseC
+    - MapSvyatogornyjEast
+    - MapMountainTop
+    - MapGraninyGorkiLab
+    - MapPillboxPurgatory
+    - MapHighIce
+    - MapBrownTown
+  types.GameMode:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    type: integer
+    x-enum-comments:
+      ModeOverall: Only used by the Rankings request
+    x-enum-varnames:
+    - ModeDeathmatch
+    - ModeTeamDeathmatch
+    - ModeRescue
+    - ModeCapture
+    - ModeSneaking
+    - ModeOverall
+  types.PlayerStatsPeriod:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - PeriodAllTime
+    - PeriodWeekly
+    - PeriodArchive
+  types.Team:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - TeamGRU
+    - TeamKGB
+    - TeamOcelot
+  types.VSRatingRestriction:
+    enum:
+    - 0
+    - 2
+    - 1
+    type: integer
+    x-enum-varnames:
+    - VSRatingRestrictionNone
+    - VSRatingRestrictionBelow
+    - VSRatingRestrictionAbove
+  types.WeaponRestrictions:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    type: integer
+    x-enum-varnames:
+    - WeaponRestrictionsNone
+    - WeaponRestrictionsNoPrimary
+    - WeaponRestrictionsNoSecondary
+    - WeaponRestrictionsNoSupport
+    - WeaponRestrictionsPrimaryOnly
+    - WeaponRestrictionsSecondaryOnly
+    - WeaponRestrictionsSupportOnly
+    - WeaponRestrictionsKnifeOnly
+  user.ArgsUpdateProfile:
+    properties:
+      display_name:
+        type: string
+      old_password:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8088
+info:
+  contact: {}
+  description: API for accessing MGO1 game and user data
+  title: Metal Gear Online 1 API
+  version: "0.1"
+paths:
+  /admin/user/{user_id}/profile:
+    post:
+      consumes:
+      - application/json
+      description: Update game user profile data, such as display name and password
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: User profile data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/admin.ArgsUpdateProfile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update a game user's profile
+      tags:
+      - AdminLogin
+  /games/{game_id}:
+    get:
+      description: Retrieves all game settings and complete player list along with
+        their stats overview and timestamps.
+      parameters:
+      - description: Game ID
+        in: path
+        name: game_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.GameJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve a Game by ID
+      tags:
+      - Games
+  /games/list:
+    get:
+      description: Retrieves all active games and current player list. The `user`
+        field of the GamePlayer object will be null.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.GameJSON'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve all currently active games
+      tags:
+      - Games
+  /lobby/list:
+    get:
+      description: Retrieves all active news lists, one may have the title "policy"
+        which is the terms of service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/restapi.NewsJSON'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve News List
+      tags:
+      - News
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login to a specific GameUser account using the in-game credentials
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/restapi.ArgsLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Login to a GameUser account
+      tags:
+      - GameUserLogin
+  /logout:
+    post:
+      description: Logout of any currently existing session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserJSON'
+              type: object
+      summary: Logout of a GameUser or Admin session
+      tags:
+      - GameUserLogin
+      - AdminLogin
+  /rankings/{period}/{page}:
+    get:
+      description: |-
+        Retrieves top players for a particular time-period and game-mode
+        - Period: all-time, weekly, archive
+        - Mode: Should be a game-mode (like cap, tdm, dm, etc.) or "all"
+      parameters:
+      - description: Period
+        in: path
+        name: period
+        required: true
+        type: string
+      - description: Page
+        in: path
+        name: page
+        type: integer
+      - description: Game Mode
+        in: query
+        name: mode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/restapi.RankingEntryJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve Player Rankings
+      tags:
+      - Rankings
+  /user/{user_id}:
+    get:
+      description: Provides the public profile of a game user (display name, last
+        seen, rankings, etc.)
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Game user's profile
+      tags:
+      - GameUser
+  /user/{user_id}/games/{page}:
+    get:
+      description: Retrieves a high-level summary of the games a user has played in.
+        Summary includes points, kills, deaths along with time-stamps.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Page
+        in: path
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/restapi.GamePlayedJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve summary of games a user has played in
+      tags:
+      - GameUser
+  /user/{user_id}/settings:
+    get:
+      description: Retrieves a the in-game settings for a particular user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserSettingsJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve user's in-game settings
+      tags:
+      - GameUser
+  /user/{user_id}/stats:
+    get:
+      description: Retrieves all stats generated by a particular user. Stats are split-up
+        by game mode, map, and period. So a user may not have stats generated for
+        certain combinations yet. But if there is a All-Time stat entry, there will
+        be a matching weekly one, even if it's empty.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/restapi.PlayerStatsJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Retrieve stats for a user
+      tags:
+      - GameUser
+  /user/profile:
+    post:
+      consumes:
+      - application/json
+      description: Updates the profile of the currently logged in user. You can either
+        provide just the new display name or just old and new password.
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.ArgsUpdateProfile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserSettingsJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update User Profile
+      tags:
+      - GameUserLogin
+  /user/search/{name}/{page}:
+    get:
+      description: Find users by portions of their display name
+      parameters:
+      - description: Name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Page
+        in: path
+        name: page
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/restapi.UserJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Search User by Display Name
+      tags:
+      - GameUser
+  /user/settings:
+    post:
+      consumes:
+      - application/json
+      description: Updates the in-game settings of the currently logged in user. ALl
+        settings must be provided.
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/restapi.UserSettingsJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserSettingsJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update User Settings
+      tags:
+      - GameUserLogin
+  /whoami:
+    get:
+      description: Provides the public profile of a the currently logged in user
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/restapi.UserJSON'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Public profile of the currently logged in game user
+      tags:
+      - GameUserLogin
+swagger: "2.0"

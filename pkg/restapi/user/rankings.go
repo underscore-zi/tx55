@@ -10,9 +10,23 @@ import (
 
 func init() {
 	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period", getRankings, nil, []restapi.RankingEntryJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period/:mode", getRankings, nil, []restapi.RankingEntryJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/rankings/:period/:page", getRankings, nil, []restapi.RankingEntryJSON{})
 }
 
+// getRankings godoc
+// @Summary      Retrieve Player Rankings
+// @Description  Retrieves top players for a particular time-period and game-mode
+// @Description   - Period: all-time, weekly, archive
+// @Description   - Mode: Should be a game-mode (like cap, tdm, dm, etc.) or "all"
+// @Tags         Rankings
+// @Produce      json
+// @Param        period  path  string  true   "Period"
+// @Param        page    path  int     false   "Page"
+// @Param        mode    query string  false  "Game Mode"
+// @Success      200  {object}  restapi.ResponseJSON{data=[]restapi.RankingEntryJSON{}}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      404  {object}  restapi.ResponseJSON{data=string}
+// @Router       /rankings/{period}/{page} [get]
 func getRankings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)

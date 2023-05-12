@@ -10,9 +10,20 @@ import (
 
 func init() {
 	restapi.Register(restapi.AuthLevelNone, "GET", "/games/list", getGamesList, nil, []restapi.GameJSON{})
-	restapi.Register(restapi.AuthLevelNone, "GET", "/game/:game_id", getGame, nil, restapi.GameJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/games/:game_id", getGame, nil, restapi.GameJSON{})
 }
 
+// getGame godoc
+// @Summary      Retrieve a Game by ID
+// @Description  Retrieves all game settings and complete player list along with their stats overview and timestamps.
+// @Tags         Games
+// @Produce      json
+// @Param        game_id  path  string  true   "Game ID"
+// @Success      200  {object}  restapi.ResponseJSON{data=restapi.GameJSON{}}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      404  {object}  restapi.ResponseJSON{data=string}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /games/{game_id} [get]
 func getGame(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)
@@ -41,6 +52,14 @@ func getGame(c *gin.Context) {
 	}
 }
 
+// getGame godoc
+// @Summary      Retrieve all currently active games
+// @Description  Retrieves all active games and current player list. The `user` field of the GamePlayer object will be null.
+// @Tags         Games
+// @Produce      json
+// @Success      200  {object}  restapi.ResponseJSON{data=restapi.GameJSON{}}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /games/list [get]
 func getGamesList(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	l := c.MustGet("logger").(*logrus.Logger)
