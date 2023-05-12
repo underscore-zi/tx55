@@ -17,7 +17,7 @@ func init() {
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/profile", UpdateProfile, ArgsUpdateProfile{}, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem, ArgsUpdateEmblem{}, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections, nil, []ResponseConnectionsJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/search_by_ip", SearchByIP, ArgsSearchByIP{}, []ResponseSearchByIPJSON{})
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/search_ip/:ip", SearchByIP, nil, []ResponseSearchByIPJSON{})
 }
 
 type ArgsUpdateProfile struct {
@@ -172,10 +172,6 @@ func ListUserConnections(c *gin.Context) {
 	restapi.Success(c, out)
 }
 
-type ArgsSearchByIP struct {
-	IP string `json:"ip" binding:"required"`
-}
-
 type ResponseSearchByIPJSON struct {
 	User        restapi.UserJSON        `json:"user"`
 	Connections ResponseConnectionsJSON `json:"connection"`
@@ -188,30 +184,30 @@ func SearchByIP(c *gin.Context) {
 	}
 	canSeeFullIPs := CheckPrivilege(c, PrivFullIPs)
 
-	var args ArgsSearchByIP
-	if err := c.ShouldBindJSON(&args); err != nil {
-		restapi.Error(c, 400, err.Error())
+	ip := c.Param("ip")
+	if ip == "" {
+		restapi.Error(c, 400, "missing ip")
 		return
 	}
 
 	if !canSeeFullIPs {
-		dotCount := strings.Count(args.IP, ".")
+		dotCount := strings.Count(ip, ".")
 		if dotCount > 3 {
 			restapi.Error(c, 400, "invalid IP")
 			return
 		} else if dotCount == 3 {
 			// We have a full-ip, but a user that isn't allowed to see full IPs
 			// so we need to limit their search to the first 3 octets
-			args.IP = args.IP[:strings.LastIndex(args.IP, ".")+1]
+			ip = ip[:strings.LastIndex(ip, ".")+1]
 		}
 	}
-	args.IP += "%" // Add wildcard to end of IP
+	ip += "%" // Add wildcard to end of IP
 
 	db := c.MustGet("db").(*gorm.DB)
 	var connections []models.Connection
-	if tx := db.Where("remote_addr LIKE ? or local_addr LIKE ?", args.IP, args.IP).Joins("User").Order("updated_at desc").Find(&connections); tx.Error != nil {
+	if tx := db.Where("remote_addr LIKE ? or local_addr LIKE ?", ip, ip).Joins("User").Order("updated_at desc").Find(&connections); tx.Error != nil {
 		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
-			"target_ip": args.IP,
+			"target_ip": ip,
 			"admin_id":  FetchUser(c),
 		}).Error("failed to search by IP")
 		restapi.Error(c, 500, tx.Error.Error())

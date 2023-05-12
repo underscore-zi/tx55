@@ -18,6 +18,8 @@ func init() {
 	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games", getUserGames, nil, []restapi.GameJSON{})
 	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/games/:page", getUserGames, nil, []restapi.GameJSON{})
 	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings, nil, restapi.UserSettingsJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name", SearchByName, nil, []restapi.UserJSON{})
+	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name/:page", SearchByName, nil, []restapi.UserJSON{})
 
 	restapi.Register(restapi.AuthLevelUser, "GET", "/whoami", whoAmI, nil, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelUser, "POST", "/user/profile", UpdateUserProfile, ArgsUpdateProfile{}, nil)
@@ -266,4 +268,41 @@ func UpdateUserSettings(c *gin.Context) {
 		return
 	}
 	restapi.Success(c, nil)
+}
+
+func SearchByName(c *gin.Context) {
+	var limit = 50
+	l := c.MustGet("logger").(*logrus.Logger)
+	db := c.MustGet("db").(*gorm.DB)
+
+	name := c.Param("name")
+	if name == "" {
+		restapi.Error(c, 400, "Missing name")
+		return
+	}
+
+	name, err := iso8859.Encode(name)
+	if err != nil {
+		restapi.Error(c, 400, "Name contains invalid characters")
+		return
+	}
+
+	page := restapi.ParamAsInt(c, "page", 1)
+	var users []models.User
+	if err := db.Debug().Where("CAST(display_name as CHAR(20) CHARACTER SET latin1) LIKE ?", "%"+name+"%").Limit(limit).Offset((page - 1) * limit).Find(&users).Error; err != nil {
+		l.WithError(err).WithFields(logrus.Fields{
+			"page":  page,
+			"limit": limit,
+			"name":  name,
+		}).Error("Error searching for users")
+		restapi.Error(c, 500, "Database error")
+		return
+	}
+
+	var out []restapi.UserJSON
+	for _, user := range users {
+		out = append(out, *restapi.ToUserJSON(&user))
+	}
+
+	restapi.Success(c, out)
 }

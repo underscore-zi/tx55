@@ -1,6 +1,8 @@
 package restapi
 
 import (
+	"github.com/gin-gonic/gin"
+	"strconv"
 	"time"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
@@ -201,4 +203,16 @@ func ToUserSettingsJSON(settings models.PlayerSettings) UserSettingsJSON {
 			types.BytesToString(settings.FKey11),
 		},
 	}
+}
+
+func ParamAsInt(c *gin.Context, name string, value int) int {
+	param := c.Param(name)
+	if param == "" {
+		return value
+	}
+	paramval, err := strconv.Atoi(param)
+	if err != nil {
+		return value
+	}
+	return paramval
 }
