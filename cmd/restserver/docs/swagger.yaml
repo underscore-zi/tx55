@@ -467,7 +467,7 @@ definitions:
       password:
         type: string
     type: object
-host: localhost:8088
+host: https://tx12.savemgo.com
 info:
   contact: {}
   description: API for accessing MGO1 game and user data

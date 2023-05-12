@@ -1803,7 +1803,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.1",
-	Host:             "localhost:8088",
+	Host:             "https://tx12.savemgo.com",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Metal Gear Online 1 API",
