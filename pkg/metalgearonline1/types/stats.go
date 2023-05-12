@@ -8,16 +8,28 @@ const (
 	PeriodAllTime PlayerStatsPeriod = 0
 	PeriodWeekly  PlayerStatsPeriod = 1
 	PeriodArchive PlayerStatsPeriod = 2
+	PeriodInvalid PlayerStatsPeriod = 255
 )
 
-func (p PlayerStatsPeriod) String() string {
+type PlayerStatsPeriodString string
+
+const (
+	PeriodAllTimeString PlayerStatsPeriodString = "all-time"
+	PeriodWeeklyString  PlayerStatsPeriodString = "weekly"
+	PeriodArchiveString PlayerStatsPeriodString = "archive"
+	PeriodInvalidString PlayerStatsPeriodString = "invalid"
+)
+
+func (p PlayerStatsPeriod) String() PlayerStatsPeriodString {
 	switch p {
 	case PeriodAllTime:
-		return "All Time"
+		return PeriodAllTimeString
 	case PeriodWeekly:
-		return "Weekly"
+		return PeriodWeeklyString
 	case PeriodArchive:
-		return "Archive"
+		return PeriodArchiveString
+	case PeriodInvalid:
+		return PeriodInvalidString
 	default:
 		return "Unknown"
 	}

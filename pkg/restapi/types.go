@@ -212,14 +212,14 @@ type GameOptionsJSON struct {
 }
 
 type PlayerStatsJSON struct {
-	UserID       uint                    `json:"user_id"`
-	UpdatedAt    time.Time               `json:"updated_at"`
-	Period       types.PlayerStatsPeriod `json:"period"`
-	PeriodString string                  `json:"period_string"`
-	Mode         types.GameMode          `json:"mode"`
-	ModeString   types.GameModeString    `json:"mode_string"`
-	Map          types.GameMap           `json:"map"`
-	MapString    types.GameMapString     `json:"map_string"`
+	UserID       uint                          `json:"user_id"`
+	UpdatedAt    time.Time                     `json:"updated_at"`
+	Period       types.PlayerStatsPeriod       `json:"period"`
+	PeriodString types.PlayerStatsPeriodString `json:"period_string"`
+	Mode         types.GameMode                `json:"mode"`
+	ModeString   types.GameModeString          `json:"mode_string"`
+	Map          types.GameMap                 `json:"map"`
+	MapString    types.GameMapString           `json:"map_string"`
 
 	// Rank will be the rank in the mode for the period. Though stats are broken down by map also, the rank value will only consider mode.
 	Rank uint32 `json:"rank"`

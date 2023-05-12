@@ -483,6 +483,12 @@ const docTemplate = `{
                 "summary": "Retrieve Player Rankings",
                 "parameters": [
                     {
+                        "enum": [
+                            "all-time",
+                            "weekly",
+                            "archive",
+                            "invalid"
+                        ],
                         "type": "string",
                         "description": "Period",
                         "name": "period",
@@ -496,6 +502,20 @@ const docTemplate = `{
                         "in": "path"
                     },
                     {
+                        "enum": [
+                            "deathmatch",
+                            "dm",
+                            "team deathmatch",
+                            "tdm",
+                            "rescue",
+                            "res",
+                            "capture",
+                            "cap",
+                            "sneaking",
+                            "sne",
+                            "overall",
+                            "all"
+                        ],
                         "type": "string",
                         "description": "Game Mode",
                         "name": "mode",
@@ -1531,7 +1551,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/types.PlayerStatsPeriod"
                 },
                 "period_string": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.PlayerStatsPeriodString"
                 },
                 "play_time": {
                     "$ref": "#/definitions/time.Duration"
@@ -1845,12 +1865,29 @@ const docTemplate = `{
             "enum": [
                 0,
                 1,
-                2
+                2,
+                255
             ],
             "x-enum-varnames": [
                 "PeriodAllTime",
                 "PeriodWeekly",
-                "PeriodArchive"
+                "PeriodArchive",
+                "PeriodInvalid"
+            ]
+        },
+        "types.PlayerStatsPeriodString": {
+            "type": "string",
+            "enum": [
+                "all-time",
+                "weekly",
+                "archive",
+                "invalid"
+            ],
+            "x-enum-varnames": [
+                "PeriodAllTimeString",
+                "PeriodWeeklyString",
+                "PeriodArchiveString",
+                "PeriodInvalidString"
             ]
         },
         "types.Team": {

@@ -20,9 +20,9 @@ func init() {
 // @Description   - Mode: Should be a game-mode (like cap, tdm, dm, etc.) or "all"
 // @Tags         Rankings
 // @Produce      json
-// @Param        period  path  string  true   "Period"
+// @Param        period  path  types.PlayerStatsPeriodString  true   "Period"
 // @Param        page    path  int     false   "Page"
-// @Param        mode    query string  false  "Game Mode"
+// @Param        mode    query types.GameModeString  false  "Game Mode"
 // @Success      200  {object}  restapi.ResponseJSON{data=[]restapi.RankingEntryJSON{}}
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}
 // @Failure      404  {object}  restapi.ResponseJSON{data=string}

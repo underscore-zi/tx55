@@ -231,7 +231,7 @@ definitions:
       period:
         $ref: '#/definitions/types.PlayerStatsPeriod'
       period_string:
-        type: string
+        $ref: '#/definitions/types.PlayerStatsPeriodString'
       play_time:
         $ref: '#/definitions/time.Duration'
       points:
@@ -473,11 +473,25 @@ definitions:
     - 0
     - 1
     - 2
+    - 255
     type: integer
     x-enum-varnames:
     - PeriodAllTime
     - PeriodWeekly
     - PeriodArchive
+    - PeriodInvalid
+  types.PlayerStatsPeriodString:
+    enum:
+    - all-time
+    - weekly
+    - archive
+    - invalid
+    type: string
+    x-enum-varnames:
+    - PeriodAllTimeString
+    - PeriodWeeklyString
+    - PeriodArchiveString
+    - PeriodInvalidString
   types.Team:
     enum:
     - 0
@@ -795,6 +809,11 @@ paths:
         - Mode: Should be a game-mode (like cap, tdm, dm, etc.) or "all"
       parameters:
       - description: Period
+        enum:
+        - all-time
+        - weekly
+        - archive
+        - invalid
         in: path
         name: period
         required: true
@@ -804,6 +823,19 @@ paths:
         name: page
         type: integer
       - description: Game Mode
+        enum:
+        - deathmatch
+        - dm
+        - team deathmatch
+        - tdm
+        - rescue
+        - res
+        - capture
+        - cap
+        - sneaking
+        - sne
+        - overall
+        - all
         in: query
         name: mode
         type: string

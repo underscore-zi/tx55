@@ -476,6 +476,12 @@
                 "summary": "Retrieve Player Rankings",
                 "parameters": [
                     {
+                        "enum": [
+                            "all-time",
+                            "weekly",
+                            "archive",
+                            "invalid"
+                        ],
                         "type": "string",
                         "description": "Period",
                         "name": "period",
@@ -489,6 +495,20 @@
                         "in": "path"
                     },
                     {
+                        "enum": [
+                            "deathmatch",
+                            "dm",
+                            "team deathmatch",
+                            "tdm",
+                            "rescue",
+                            "res",
+                            "capture",
+                            "cap",
+                            "sneaking",
+                            "sne",
+                            "overall",
+                            "all"
+                        ],
                         "type": "string",
                         "description": "Game Mode",
                         "name": "mode",
@@ -1524,7 +1544,7 @@
                     "$ref": "#/definitions/types.PlayerStatsPeriod"
                 },
                 "period_string": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.PlayerStatsPeriodString"
                 },
                 "play_time": {
                     "$ref": "#/definitions/time.Duration"
@@ -1838,12 +1858,29 @@
             "enum": [
                 0,
                 1,
-                2
+                2,
+                255
             ],
             "x-enum-varnames": [
                 "PeriodAllTime",
                 "PeriodWeekly",
-                "PeriodArchive"
+                "PeriodArchive",
+                "PeriodInvalid"
+            ]
+        },
+        "types.PlayerStatsPeriodString": {
+            "type": "string",
+            "enum": [
+                "all-time",
+                "weekly",
+                "archive",
+                "invalid"
+            ],
+            "x-enum-varnames": [
+                "PeriodAllTimeString",
+                "PeriodWeeklyString",
+                "PeriodArchiveString",
+                "PeriodInvalidString"
             ]
         },
         "types.Team": {
