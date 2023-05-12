@@ -13,7 +13,7 @@ import (
 
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
-	_ "tx55/cmd/restserver/docs"
+	"tx55/cmd/restserver/docs"
 	"tx55/pkg/configurations"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/restapi"
@@ -103,6 +103,9 @@ func main() {
 		return
 	}
 
+	if v, found := os.LookupEnv("SWAGGER_HOST"); found {
+		docs.SwaggerInfo.Host = v
+	}
 	server.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	if err := server.Engine.Run(fmt.Sprintf("%s:%d", config.Host, config.Port)); err != nil {
