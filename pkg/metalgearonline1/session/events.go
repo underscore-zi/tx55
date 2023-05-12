@@ -51,8 +51,8 @@ func (s *Session) publishEvent(e EventType, data interface{}) {
 
 func (s *Session) EventGameCreated(gameID uint, args *types.CreateGameOptions) {
 	type roundEntry struct {
-		Map  string
-		Mode string
+		Map  types.GameMapString
+		Mode types.GameModeString
 	}
 
 	var rounds []roundEntry
