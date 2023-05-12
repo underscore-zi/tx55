@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
+	"time"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/restapi"
 	"tx55/pkg/restapi/iso8859"
@@ -15,7 +16,8 @@ import (
 func init() {
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/profile", UpdateProfile, ArgsUpdateProfile{}, restapi.UserJSON{})
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem, ArgsUpdateEmblem{}, restapi.UserJSON{})
-	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserIPs, nil, []ConnectionInfoJSON{})
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections, nil, []ResponseConnectionsJSON{})
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/search_by_ip", SearchByIP, ArgsSearchByIP{}, []ResponseSearchByIPJSON{})
 }
 
 type ArgsUpdateProfile struct {
@@ -62,9 +64,9 @@ func UpdateProfile(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
 	if tx := db.Model(&user).Updates(user); tx.Error != nil {
-		c.MustGet("log").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
+		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
 			"target_user": user.ID,
-			"admin_id":    c.MustGet("admin_id"),
+			"admin_id":    FetchUserID(c),
 		}).Error("failed to update game user")
 		restapi.Error(c, 500, tx.Error.Error())
 		return
@@ -105,7 +107,7 @@ func UpdateEmblem(c *gin.Context) {
 		"has_emblem":  args.HasEmblem,
 		"emblem_text": emblemText,
 	}); tx.Error != nil {
-		c.MustGet("log").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
+		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
 			"target_user": args.UserID,
 			"admin_id":    c.MustGet("admin_id"),
 		}).Error("failed to update game user emblem")
@@ -113,12 +115,14 @@ func UpdateEmblem(c *gin.Context) {
 	restapi.Success(c, nil)
 }
 
-type ConnectionInfoJSON struct {
-	Remote string
-	Local  string
+type ResponseConnectionsJSON struct {
+	FirstUsed time.Time `json:"first_used"`
+	LastUsed  time.Time `json:"last_used"`
+	Remote    string    `json:"remote"`
+	Local     string    `json:"local"`
 }
 
-func ListUserIPs(c *gin.Context) {
+func ListUserConnections(c *gin.Context) {
 	if !CheckPrivilege(c, PrivSearchByIP) {
 		restapi.Error(c, 403, "insufficient privileges")
 		return
@@ -138,8 +142,8 @@ func ListUserIPs(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
 	var connections []models.Connection
-	if tx := db.Where("user_id = ?", uid).Find(&connections); tx.Error != nil {
-		c.MustGet("log").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
+	if tx := db.Where("user_id = ?", uid).Order("updated_at desc").Find(&connections); tx.Error != nil {
+		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
 			"target_user": uid,
 			"admin_id":    c.MustGet("admin_id"),
 		}).Error("failed to list user connections")
@@ -147,7 +151,7 @@ func ListUserIPs(c *gin.Context) {
 		return
 	}
 
-	var out []ConnectionInfoJSON
+	var out []ResponseConnectionsJSON
 	for _, conn := range connections {
 		remoteAddr := conn.RemoteAddr
 		localAddr := conn.LocalAddr
@@ -157,11 +161,79 @@ func ListUserIPs(c *gin.Context) {
 			localAddr = localAddr[:strings.LastIndex(localAddr, ".")+1] + "xxx"
 		}
 
-		out = append(out, ConnectionInfoJSON{
-			Remote: fmt.Sprintf("%s:%d", remoteAddr, conn.RemotePort),
-			Local:  fmt.Sprintf("%s:%d", localAddr, conn.LocalPort),
+		out = append(out, ResponseConnectionsJSON{
+			FirstUsed: conn.CreatedAt,
+			LastUsed:  conn.UpdatedAt,
+			Remote:    fmt.Sprintf("%s:%d", remoteAddr, conn.RemotePort),
+			Local:     fmt.Sprintf("%s:%d", localAddr, conn.LocalPort),
 		})
 	}
 
+	restapi.Success(c, out)
+}
+
+type ArgsSearchByIP struct {
+	IP string `json:"ip" binding:"required"`
+}
+
+type ResponseSearchByIPJSON struct {
+	User        restapi.UserJSON        `json:"user"`
+	Connections ResponseConnectionsJSON `json:"connection"`
+}
+
+func SearchByIP(c *gin.Context) {
+	if !CheckPrivilege(c, PrivSearchByIP) {
+		restapi.Error(c, 403, "insufficient privileges")
+		return
+	}
+	canSeeFullIPs := CheckPrivilege(c, PrivFullIPs)
+
+	var args ArgsSearchByIP
+	if err := c.ShouldBindJSON(&args); err != nil {
+		restapi.Error(c, 400, err.Error())
+		return
+	}
+
+	if !canSeeFullIPs {
+		dotCount := strings.Count(args.IP, ".")
+		if dotCount > 3 {
+			restapi.Error(c, 400, "invalid IP")
+			return
+		} else if dotCount == 3 {
+			// We have a full-ip, but a user that isn't allowed to see full IPs
+			// so we need to limit their search to the first 3 octets
+			args.IP = args.IP[:strings.LastIndex(args.IP, ".")+1]
+		}
+	}
+	args.IP += "%" // Add wildcard to end of IP
+
+	db := c.MustGet("db").(*gorm.DB)
+	var connections []models.Connection
+	if tx := db.Where("remote_addr LIKE ? or local_addr LIKE ?", args.IP, args.IP).Joins("User").Order("updated_at desc").Find(&connections); tx.Error != nil {
+		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
+			"target_ip": args.IP,
+			"admin_id":  FetchUser(c),
+		}).Error("failed to search by IP")
+		restapi.Error(c, 500, tx.Error.Error())
+		return
+	}
+
+	var out []ResponseSearchByIPJSON
+	for _, conn := range connections {
+		if !canSeeFullIPs {
+			conn.RemoteAddr = conn.RemoteAddr[:strings.LastIndex(conn.RemoteAddr, ".")+1] + "xxx"
+			conn.LocalAddr = conn.LocalAddr[:strings.LastIndex(conn.LocalAddr, ".")+1] + "xxx"
+		}
+
+		out = append(out, ResponseSearchByIPJSON{
+			User: *restapi.ToUserJSON(&conn.User),
+			Connections: ResponseConnectionsJSON{
+				FirstUsed: conn.CreatedAt,
+				LastUsed:  conn.UpdatedAt,
+				Remote:    fmt.Sprintf("%s:%d", conn.RemoteAddr, conn.RemotePort),
+				Local:     fmt.Sprintf("%s:%d", conn.LocalAddr, conn.LocalPort),
+			},
+		})
+	}
 	restapi.Success(c, out)
 }

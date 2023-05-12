@@ -20,11 +20,15 @@ func FetchUser(c *gin.Context) *User {
 	}
 
 	adminDB := c.MustGet("adminDB").(*gorm.DB)
-	session := sessions.Default(c)
 
 	var u User
-	u.ID = session.Get("admin_id").(uint)
+	u.ID = FetchUserID(c)
 	adminDB.Model(&u).Joins("Role").First(&u)
 	c.Set("admin_user", &u)
 	return &u
+}
+
+func FetchUserID(c *gin.Context) uint {
+	session := sessions.Default(c)
+	return session.Get("admin_id").(uint)
 }
