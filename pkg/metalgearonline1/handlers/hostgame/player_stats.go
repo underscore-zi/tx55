@@ -64,19 +64,46 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 }
 
 func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID uint, stats types.HostReportedStats) error {
-	sess.DB.Model(sess.User).Update("vs_rating", stats.VsRating)
-
 	updates := map[string]interface{}{
 		"kills":  gorm.Expr("kills + ?", stats.Kills),
 		"deaths": gorm.Expr("deaths + ?", stats.Deaths),
 		"score":  gorm.Expr("score + ?", stats.Points),
 	}
-
 	q := sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, UserID)
 	if rowCount := q.Updates(updates).RowsAffected; rowCount != 1 {
 		sess.Log.WithFields(sess.LogFields()).Warn("Attempting to update stats for a player that is not in the game")
 		return nil
 	}
+
+	// We always update the game stats but conditionally update player specific stats
+
+	if !sess.GameState.CollectStats {
+		return nil
+	} else if stats.VsRating == 0 {
+		// I suspect this happens when we shouldn't update a player's stats but I want to log it for now
+		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
+			"StatsUserID": UserID,
+			"Kills":       stats.Kills,
+			"Deaths":      stats.Deaths,
+			"Points":      stats.Points,
+			"PlayTime":    stats.PlayTime,
+			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
+		}).Warn("Stats with 0 VS Rating!")
+		return nil
+	} else if stats.Points < 0 || stats.Kills < 0 || stats.Deaths < 0 {
+		// Not entirely sure why this happens, but it sometimes happens during sneaking
+		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
+			"StatsUserID": UserID,
+			"Kills":       stats.Kills,
+			"Deaths":      stats.Deaths,
+			"Points":      stats.Points,
+			"PlayTime":    stats.PlayTime,
+			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
+		}).Warn("Stats with negative values!")
+		return nil
+	}
+
+	sess.DB.Model(sess.User).Update("vs_rating", stats.VsRating)
 
 	updates = map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),

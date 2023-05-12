@@ -6,16 +6,23 @@ import (
 	"tx55/pkg/metalgearonline1/types"
 )
 
-func (s *Session) StartHosting(id types.GameID, rules [15]types.GameRules) {
+func (s *Session) StartHosting(id types.GameID, args *types.CreateGameOptions) {
 	s.isHost = true
 	s.GameState = &HostSession{
 		GameID:       id,
-		Rules:        rules,
+		Rules:        args.Rules,
 		CurrentRound: 0,
 		Players: map[types.UserID]bool{
 			types.UserID(s.User.ID): true,
 		},
+		CollectStats:  true,
 		ParentSession: s,
+	}
+	if args.HasPassword {
+		// On the original server we also flipped this if someone was kicked, since we have more insight
+		// into the games now and can see if there is Kick abuse we can get away with only turning it off
+		// when the game is private
+		s.GameState.CollectStats = false
 	}
 }
 

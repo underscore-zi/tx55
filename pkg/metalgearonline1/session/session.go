@@ -13,6 +13,7 @@ type HostSession struct {
 	Rules         [15]types.GameRules
 	CurrentRound  byte
 	Players       map[types.UserID]bool
+	CollectStats  bool
 	Lock          sync.Mutex
 	ParentSession *Session
 }
