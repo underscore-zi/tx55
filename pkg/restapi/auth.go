@@ -60,6 +60,7 @@ func Login(c *gin.Context) {
 // @Produce      json
 // @Success      200  {object}  restapi.ResponseJSON{data=restapi.UserJSON{}{}}
 // @Router       /logout [post]
+// @Security ApiKeyAuth
 func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()

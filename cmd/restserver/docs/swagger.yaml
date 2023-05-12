@@ -1,10 +1,126 @@
 basePath: /api/v1
 definitions:
+  admin.ArgsChangePassword:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  admin.ArgsLogin:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  admin.ArgsUpdateBan:
+    properties:
+      ban_id:
+        type: integer
+      ban_type:
+        enum:
+        - IP
+        - User
+        type: string
+      expires_at:
+        type: string
+      reason:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - ban_type
+    - expires_at
+    - reason
+    - user_id
+    type: object
+  admin.ArgsUpdateEmblem:
+    properties:
+      emblem_text:
+        type: string
+      has_emblem:
+        type: boolean
+    required:
+    - emblem_text
+    - has_emblem
+    type: object
   admin.ArgsUpdateProfile:
     properties:
       displayName:
         type: string
       password:
+        type: string
+    type: object
+  admin.BanJSON:
+    properties:
+      ban_type:
+        type: string
+      created_by:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: integer
+      reason:
+        type: string
+      updated_by:
+        type: string
+      user:
+        $ref: '#/definitions/restapi.UserJSON'
+    type: object
+  admin.ResponseConnectionsJSON:
+    properties:
+      first_used:
+        type: string
+      last_used:
+        type: string
+      local:
+        type: string
+      remote:
+        type: string
+    type: object
+  admin.ResponseSearchByIPJSON:
+    properties:
+      connection:
+        $ref: '#/definitions/admin.ResponseConnectionsJSON'
+      user:
+        $ref: '#/definitions/restapi.UserJSON'
+    type: object
+  admin.Role:
+    properties:
+      all_privileges:
+        type: boolean
+      full_ips:
+        type: boolean
+      id:
+        type: integer
+      name:
+        type: string
+      read_bans:
+        type: boolean
+      search_by_ip:
+        type: boolean
+      update_bans:
+        type: boolean
+      update_profiles:
+        type: boolean
+    type: object
+  admin.User:
+    properties:
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/admin.Role'
+      role_id:
+        type: integer
+      username:
         type: string
     type: object
   restapi.ArgsLogin:
@@ -548,6 +664,286 @@ info:
   title: Metal Gear Online 1 API
   version: "0.1"
 paths:
+  /admin/bans/list:
+    get:
+      description: Lists all non-expired bans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/admin.BanJSON'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List Bans
+      tags:
+      - AdminLogin
+  /admin/bans/update:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Can be used to create a new ban or update an existing one.
+        If `ban_id` is set to 0, a new ban will be created.
+      parameters:
+      - description: Ban Information
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/admin.ArgsUpdateBan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/admin.BanJSON'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create/Update Ban
+      tags:
+      - AdminLogin
+  /admin/change_password:
+    post:
+      consumes:
+      - application/json
+      description: Change the password for the currently logged in administrative
+        user
+      parameters:
+      - description: User profile data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/admin.ArgsChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restapi.ResponseJSON'
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Change Password
+      tags:
+      - AdminLogin
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to an administrative session
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Account credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/admin.ArgsLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  $ref: '#/definitions/admin.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Admin Login
+      tags:
+      - AdminLogin
+  /admin/user/{user_id}/connections:
+    get:
+      description: Lists all public/private IPs the user has connected to the MGO1
+        server using
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/admin.ResponseConnectionsJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: List Connection History
+      tags:
+      - AdminLogin
+  /admin/user/{user_id}/emblem:
+    post:
+      consumes:
+      - application/json
+      description: Update game user's emblem status and text
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Emblem Data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/admin.ArgsUpdateEmblem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restapi.ResponseJSON'
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update Emblem
+      tags:
+      - AdminLogin
   /admin/user/{user_id}/profile:
     post:
       consumes:
@@ -604,7 +1000,56 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Update a game user's profile
+      security:
+      - ApiKeyAuth: []
+      summary: Update In-Game Profile
+      tags:
+      - AdminLogin
+  /admin/user/search_ip/{ip}:
+    get:
+      description: Lists all users who have connected using the given IP. The IP parameter
+        can be a prefix to search for.
+      parameters:
+      - description: IPv4
+        in: path
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/admin.ResponseSearchByIPJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Search for Users by IP history
       tags:
       - AdminLogin
   /games/{game_id}:
@@ -767,6 +1212,8 @@ paths:
                 data:
                   $ref: '#/definitions/restapi.UserJSON'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Logout of a GameUser or Admin session
       tags:
       - GameUserLogin
@@ -1098,6 +1545,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update User Profile
       tags:
       - GameUserLogin
@@ -1183,6 +1632,8 @@ paths:
                 data:
                   type: string
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update User Settings
       tags:
       - GameUserLogin
@@ -1220,4 +1671,9 @@ paths:
       summary: Public profile of the currently logged in game user
       tags:
       - GameUserLogin
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: X-API-TOKEN
+    type: apiKey
 swagger: "2.0"

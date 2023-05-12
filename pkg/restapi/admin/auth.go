@@ -18,6 +18,18 @@ type ArgsLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// Login godoc
+// @Summary      Admin Login
+// @Description  Login to an administrative session
+// @Tags         AdminLogin
+// @Accept       json
+// @Produce      json
+// @Param        user_id  path  int  true  "User ID"
+// @Param        body     body  ArgsLogin  true  "Account credentials"
+// @Success      200  {object}  restapi.ResponseJSON{data=User}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/login [post]
+// @Security ApiKeyAuth
 func Login(c *gin.Context) {
 	var args ArgsLogin
 	var user User
@@ -49,6 +61,18 @@ type ArgsChangePassword struct {
 	NewPassword string `json:"new_password" binding:"required"`
 }
 
+// ChangePassword godoc
+// @Summary      Change Password
+// @Description  Change the password for the currently logged in administrative user
+// @Tags         AdminLogin
+// @Accept       json
+// @Produce      json
+// @Param        body     body  ArgsChangePassword  true  "User profile data"
+// @Success      200  {object}  restapi.ResponseJSON{}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/change_password [post]
+// @Security ApiKeyAuth
 func ChangePassword(c *gin.Context) {
 	if !CheckPrivilege(c, PrivNone) {
 		restapi.Error(c, 403, "insufficient privileges")

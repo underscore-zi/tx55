@@ -14,18 +14,18 @@ import (
 
 func init() {
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/:userid/profile", UpdateProfile)
-	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/emblem", UpdateEmblem)
+	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/:userid/emblem", UpdateEmblem)
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections)
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/search_ip/:ip", SearchByIP)
 }
 
 type ArgsUpdateProfile struct {
-	DisplayName string
-	Password    string
+	DisplayName string `json:"display_name"`
+	Password    string `json:"password"`
 }
 
 // UpdateProfile godoc
-// @Summary      Update a game user's profile
+// @Summary      Update In-Game Profile
 // @Description  Update game user profile data, such as display name and password
 // @Tags         AdminLogin
 // @Accept       json
@@ -37,6 +37,7 @@ type ArgsUpdateProfile struct {
 // @Failure      403  {object}  restapi.ResponseJSON{data=string}
 // @Failure      500  {object}  restapi.ResponseJSON{data=string}
 // @Router       /admin/user/{user_id}/profile [post]
+// @Security ApiKeyAuth
 func UpdateProfile(c *gin.Context) {
 	if !CheckPrivilege(c, PrivUpdateProfiles) {
 		restapi.Error(c, 403, "insufficient privileges")
@@ -88,11 +89,23 @@ func UpdateProfile(c *gin.Context) {
 }
 
 type ArgsUpdateEmblem struct {
-	UserID     uint   `json:"userid" binding:"required"`
 	HasEmblem  bool   `json:"has_emblem" binding:"required"`
 	EmblemText string `json:"emblem_text" binding:"required"`
 }
 
+// UpdateEmblem godoc
+// @Summary      Update Emblem
+// @Description  Update game user's emblem status and text
+// @Tags         AdminLogin
+// @Accept       json
+// @Produce      json
+// @Param        user_id  path  int  true  "User ID"
+// @Param        body     body  ArgsUpdateEmblem  true  "Emblem Data"
+// @Success      200  {object}  restapi.ResponseJSON{}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/user/{user_id}/emblem [post]
+// @Security ApiKeyAuth
 func UpdateEmblem(c *gin.Context) {
 	if !CheckPrivilege(c, PrivUpdateProfiles) {
 		restapi.Error(c, 403, "insufficient privileges")
@@ -111,15 +124,21 @@ func UpdateEmblem(c *gin.Context) {
 		return
 	}
 
+	userID := restapi.ParamAsUint(c, "userid", 0)
+	if userID == 0 {
+		restapi.Error(c, 400, "invalid user id")
+		return
+	}
+
 	db := c.MustGet("db").(*gorm.DB)
 	if tx := db.Model(&models.User{
-		Model: gorm.Model{ID: args.UserID},
+		Model: gorm.Model{ID: userID},
 	}).Updates(map[string]interface{}{
 		"has_emblem":  args.HasEmblem,
 		"emblem_text": emblemText,
 	}); tx.Error != nil {
 		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
-			"target_user": args.UserID,
+			"target_user": userID,
 			"admin_id":    c.MustGet("admin_id"),
 		}).Error("failed to update game user emblem")
 	}
@@ -133,6 +152,18 @@ type ResponseConnectionsJSON struct {
 	Local     string    `json:"local"`
 }
 
+// ListUserConnections godoc
+// @Summary      List Connection History
+// @Description  Lists all public/private IPs the user has connected to the MGO1 server using
+// @Tags         AdminLogin
+// @Produce      json
+// @Param        user_id  path  int  true  "User ID"
+// @Success      200  {object}  restapi.ResponseJSON{data=[]ResponseConnectionsJSON}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/user/{user_id}/connections [get]
+// @Security ApiKeyAuth
 func ListUserConnections(c *gin.Context) {
 	if !CheckPrivilege(c, PrivSearchByIP) {
 		restapi.Error(c, 403, "insufficient privileges")
@@ -182,6 +213,17 @@ type ResponseSearchByIPJSON struct {
 	Connections ResponseConnectionsJSON `json:"connection"`
 }
 
+// SearchByIP godoc
+// @Summary      Search for Users by IP history
+// @Description  Lists all users who have connected using the given IP. The IP parameter can be a prefix to search for.
+// @Tags         AdminLogin
+// @Produce      json
+// @Param        ip  path  string  true  "IPv4"
+// @Success      200  {object}  restapi.ResponseJSON{data=[]ResponseSearchByIPJSON{}}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/user/search_ip/{ip} [get]
+// @Security ApiKeyAuth
 func SearchByIP(c *gin.Context) {
 	if !CheckPrivilege(c, PrivSearchByIP) {
 		restapi.Error(c, 403, "insufficient privileges")

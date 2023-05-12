@@ -5,6 +5,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RequireAPIKey just requires that the X-API-TOKEN header is set to some value.
+// The particular value does not matter as the intent is purely to determine if
+// the call is has the ability to set custom headers on a request.
+func RequireAPIKey(c *gin.Context) {
+	apiKey := c.GetHeader("X-API-TOKEN")
+	if apiKey == "" {
+		Error(c, 401, "unauthorized")
+		return
+	}
+	c.Next()
+}
+
 func GameLoginRequired(c *gin.Context) {
 	session := sessions.Default(c)
 	user := session.Get("user_id")

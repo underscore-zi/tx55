@@ -56,6 +56,9 @@ func migrate(config configurations.RestAPI) {
 // @description     API for accessing MGO1 game and user data
 // @host      https://tx12.savemgo.com
 // @BasePath  /api/v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-API-TOKEN
 func main() {
 	configFile := flag.String("config", "", "Path to config file")
 	shouldMigrate := flag.Bool("migrate", false, "Run database migrations")

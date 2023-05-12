@@ -24,6 +24,16 @@ type BanJSON struct {
 	ExpiresAt time.Time        `json:"expires_at"`
 }
 
+// ListBans godoc
+// @Summary      List Bans
+// @Description  Lists all non-expired bans
+// @Tags         AdminLogin
+// @Produce      json
+// @Success      200  {object}  restapi.ResponseJSON{data=[]BanJSON}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/bans/list [get]
+// @Security ApiKeyAuth
 func ListBans(c *gin.Context) {
 	if !CheckPrivilege(c, PrivReadBans) {
 		restapi.Error(c, 403, "insufficient privileges")
@@ -56,12 +66,25 @@ func ListBans(c *gin.Context) {
 
 type ArgsUpdateBan struct {
 	BanID     uint      `json:"ban_id"`
-	BanType   string    `json:"ban_type" binding:"required"`
+	BanType   string    `json:"ban_type" binding:"required" enums:"IP,User"`
 	UserID    uint      `json:"user_id" binding:"required"`
 	Reason    string    `json:"reason" binding:"required"`
 	ExpiresAt time.Time `json:"expires_at" binding:"required"`
 }
 
+// UpdateBans godoc
+// @Summary      Create/Update Ban
+// @Description  Can be used to create a new ban or update an existing one.
+// @Description  If `ban_id` is set to 0, a new ban will be created.
+// @Tags         AdminLogin
+// @Accept       json
+// @Produce      json
+// @Param        body     body  ArgsUpdateBan  true  "Ban Information"
+// @Success      200  {object}  restapi.ResponseJSON{data=[]BanJSON}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/bans/update [post]
+// @Security ApiKeyAuth
 func UpdateBans(c *gin.Context) {
 	if !CheckPrivilege(c, PrivUpdateBans) {
 		restapi.Error(c, 403, "insufficient privileges")

@@ -185,6 +185,7 @@ type ArgsUpdateProfile struct {
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}
 // @Failure      500  {object}  restapi.ResponseJSON{data=string}
 // @Router       /user/profile [post]
+// @Security ApiKeyAuth
 func UpdateUserProfile(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	session := sessions.Default(c)
@@ -288,6 +289,7 @@ func stringToSwitch(s string) types.GearSwitchMode {
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}
 // @Failure      500  {object}  restapi.ResponseJSON{data=string}
 // @Router       /user/settings [post]
+// @Security ApiKeyAuth
 func UpdateUserSettings(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	session := sessions.Default(c)

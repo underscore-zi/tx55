@@ -97,8 +97,9 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	_ = s.Engine.SetTrustedProxies(config.TrustedProxies)
 
 	unauthGroup := s.Engine.Group(config.ApiPrefix)
-	userGroup := s.Engine.Group(config.ApiPrefix, GameLoginRequired)
-	adminGroup := s.Engine.Group(config.ApiPrefix, AdminLoginRequired)
+
+	userGroup := s.Engine.Group(config.ApiPrefix, RequireAPIKey, GameLoginRequired)
+	adminGroup := s.Engine.Group(config.ApiPrefix, RequireAPIKey, AdminLoginRequired)
 
 	if config.Events.Enabled {
 		if len(config.Events.AccessTokens) == 0 {
