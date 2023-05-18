@@ -45,7 +45,7 @@ func (h LoginHandler) HandleWithCredentials(sess *session.Session, args *ArgsLog
 		return []types.Response{ResponseLoginError{ErrorCode: ErrInvalidCredentials}}, nil
 	}
 
-	if err := sess.DB.First(&models.Ban{}, "user_id = ? and type = ? and expires_at > NOW()", row.ID, models.UserBan).Error; err == nil {
+	if err := sess.DB.First(&models.Ban{}, "user_id = ? and (type = ? or type = ?) and expires_at > NOW()", row.ID, models.UserBan, models.IPBan).Error; err == nil {
 		// We do the ban check here, but it does technically allow a user who is already connected to a lobby
 		// to stay connected to that lobby. I think it's a fair trade-off to avoid having to do an extra query
 		// on every connection since the game connects/reconnects often
