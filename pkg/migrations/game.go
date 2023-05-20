@@ -59,7 +59,7 @@ func lobbiesTable(db *gorm.DB) (err error) {
 	Logger.Info("Checking for gate server in lobbies table")
 	var lobby models.Lobby
 	if err = db.Where("type = ?", types.LobbyTypeGate).First(&lobby).Error; err == gorm.ErrRecordNotFound {
-		Logger.Debug("Creating gate server in lobbies table")
+		Logger.Info("Creating gate server in lobbies table")
 
 		var ip string
 		if ip, err = GetExternalIP(); err != nil {
@@ -75,16 +75,17 @@ func lobbiesTable(db *gorm.DB) (err error) {
 		if err = db.Create(&lobby).Error; err != nil {
 			return
 		}
-		Logger.Debug("Gate server created")
+		Logger.Info("Gate server created")
 	} else if err != nil {
 		return
 	} else {
-		Logger.Debug("Gate server found")
+		Logger.Info("Gate server found")
 	}
 
 	Logger.Info("Checking for account server in lobbies table")
+	lobby = models.Lobby{}
 	if err = db.Where("type = ?", types.LobbyTypeAccount).First(&lobby).Error; err == gorm.ErrRecordNotFound {
-		Logger.Debug("Creating account server in lobbies table")
+		Logger.Info("Creating account server in lobbies table")
 
 		var ip string
 		if ip, err = GetExternalIP(); err != nil {
@@ -100,16 +101,17 @@ func lobbiesTable(db *gorm.DB) (err error) {
 		if err = db.Create(&lobby).Error; err != nil {
 			return
 		}
-		Logger.Debug("Account server created")
+		Logger.Info("Account server created")
 	} else if err != nil {
 		return
 	} else {
-		Logger.Debug("Account server found")
+		Logger.Info("Account server found")
 	}
 
 	Logger.Info("Checking for atleast one game server in lobbies table")
+	lobby = models.Lobby{}
 	if err = db.Where("type = ?", types.LobbyTypeGame).First(&lobby).Error; err == gorm.ErrRecordNotFound {
-		Logger.Debug("Creating game server in lobbies table")
+		Logger.Info("Creating game server in lobbies table")
 
 		var ip string
 		if ip, err = GetExternalIP(); err != nil {
@@ -126,11 +128,11 @@ func lobbiesTable(db *gorm.DB) (err error) {
 		if err = db.Create(&lobby).Error; err != nil {
 			return
 		}
-		Logger.Debug("Game server created")
+		Logger.Info("Game server created")
 	} else if err != nil {
 		return
 	} else {
-		Logger.Debug("Game server found")
+		Logger.Info("Game server found")
 	}
 	return
 }

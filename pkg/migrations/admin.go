@@ -22,7 +22,7 @@ func firstUserInit(db *gorm.DB) (err error) {
 	// Make sure we have a super-user role
 	Logger.Info("Checking for super-user role")
 	if err = db.First(&adminRole, "all_privileges = 1").Error; err == gorm.ErrRecordNotFound {
-		Logger.Debug("Creating new super-user role")
+		Logger.Info("Creating new super-user role")
 		adminRole.Name = "SuperUser"
 		adminRole.AllPrivileges = true
 		if err = db.Create(&adminRole).Error; err != nil {
