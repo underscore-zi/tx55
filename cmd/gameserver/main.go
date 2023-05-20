@@ -11,8 +11,6 @@ import (
 	"tx55/pkg/configurations"
 	"tx55/pkg/konamiserver"
 	"tx55/pkg/metalgearonline1"
-	"tx55/pkg/metalgearonline1/models"
-	"tx55/pkg/metalgearonline1/testclient"
 	"tx55/pkg/metalgearonline1/types"
 	// Handlers need to be imported to be registered
 	// annoying, but it allows for easy swapping out and testing
@@ -30,8 +28,6 @@ func main() {
 	l.SetLevel(logrus.InfoLevel)
 
 	configFile := flag.String("config", "", "Path to config file")
-	shouldMigrate := flag.Bool("migrate", false, "Run database migrations")
-	withTests := flag.Bool("test", false, "Run developer tests")
 	doTrace := flag.Bool("trace", false, "Display full packet traces")
 	flag.Parse()
 
@@ -54,13 +50,6 @@ func main() {
 	if err != nil {
 		l.WithError(err).Error("Unable to open database")
 		return
-	}
-
-	if *shouldMigrate {
-		if err := db.AutoMigrate(models.All...); err != nil {
-			l.WithError(err).Error("Error migrating database")
-			return
-		}
 	}
 
 	cfg := metalgearonline1.Config{
@@ -94,21 +83,7 @@ func main() {
 		l.WithField("events_endpoint", endpoint).Info("Sending events to external service")
 	}
 
-	if !*withTests {
-		if err := server.Start(); err != nil {
-			panic(err)
-		}
-	} else {
-		go func() {
-			if err := server.Start(); err != nil {
-				panic(err)
-			}
-		}()
-		l.Info("Starting Tests")
-		c := testclient.TestClient{Key: server.KonamiServer.Config.Key}
-		if err = c.Connect(cfg.Address); err != nil {
-			panic(err)
-		}
-		RunTests(&c, db)
+	if err := server.Start(); err != nil {
+		panic(err)
 	}
 }

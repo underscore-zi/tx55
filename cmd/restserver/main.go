@@ -10,14 +10,13 @@ import (
 	"log"
 	"os"
 	"time"
+	"tx55/pkg/migrations"
 
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"tx55/cmd/restserver/docs"
 	"tx55/pkg/configurations"
-	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/restapi"
-	"tx55/pkg/restapi/admin"
 	_ "tx55/pkg/restapi/admin"
 	"tx55/pkg/restapi/crons"
 	_ "tx55/pkg/restapi/user"
@@ -30,24 +29,24 @@ func migrate(config configurations.RestAPI) {
 		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
 	})
 	if err != nil {
-		l.WithError(err).Error("Unable to open database")
-		return
+		l.WithError(err).Fatal("Unable to open database")
 	}
-	if err = db.AutoMigrate(models.All...); err != nil {
-		l.WithError(err).Error("Unable to migrate database")
-		return
+
+	migrations.Logger = l
+	if err = migrations.MigrateModels(migrations.GameDBMigrationType, db); err != nil {
+		l.Fatal("Failed to migrate GameDB models")
 	}
 
 	admindb, err := config.AdminDatabase.Open(&gorm.Config{
 		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), config.Database.LogConfig.LoggerConfig()),
 	})
 	if err != nil {
-		l.WithError(err).Error("Unable to open admin database")
-		return
+		l.WithError(err).Fatal("Unable to open admin database")
 	}
-	if err = admindb.AutoMigrate(admin.AllModels...); err != nil {
-		l.WithError(err).Error("Unable to migrate admin database")
-		return
+
+	migrations.Logger = l
+	if err = migrations.MigrateModels(migrations.AdminDBMigrationType, admindb); err != nil {
+		l.Fatal("Failed to migrate AdminDB models")
 	}
 }
 
