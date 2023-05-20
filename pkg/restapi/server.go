@@ -51,10 +51,6 @@ func Register(level AuthLevel, method, endpoint string, handler gin.HandlerFunc)
 		endpoint: endpoint,
 		handler:  handler,
 	})
-	logrus.StandardLogger().WithFields(logrus.Fields{
-		"method":   method,
-		"endpoint": endpoint,
-	}).Info("Registered endpoint")
 }
 
 func NewServer(config configurations.RestAPI) (s *Server, err error) {
