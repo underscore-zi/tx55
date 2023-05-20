@@ -111,7 +111,7 @@ func hookLogin(p, _ *packet.Packet, _ chan packet.Packet) konamiserver.HookResul
 	// Now we have the base user information, do we need to create a transfer data?
 	gs := &models.GameOptions{}
 	u := &models.User{}
-	tx := GormDb.Where("username = ?", username).First(u)
+	tx := GormDb.Where("username LIKE ?", username).First(u)
 	saveGameSettings := false
 
 	if tx.Error == gorm.ErrRecordNotFound {

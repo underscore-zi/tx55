@@ -39,7 +39,12 @@ func (h LoginHandler) Handle(_ *session.Session, _ *packet.Packet) ([]types.Resp
 
 func (h LoginHandler) HandleWithCredentials(sess *session.Session, args *ArgsLoginCredentials) ([]types.Response, error) {
 	var row models.User
-	sess.DB.First(&row, "username = ?", types.BytesToString(args.Username[:]))
+	if tx := sess.DB.First(&row, "username LIKE ?", types.BytesToString(args.Username[:])); tx.Error != nil {
+		if tx.Error != gorm.ErrRecordNotFound {
+			sess.Log.WithError(tx.Error).Error("Failed to query user")
+			return []types.Response{ResponseLoginError{ErrorCode: ErrDatabaseError}}, nil
+		}
+	}
 
 	if row.ID == 0 || !row.CheckPassword(args.Password[:]) {
 		return []types.Response{ResponseLoginError{ErrorCode: ErrInvalidCredentials}}, nil

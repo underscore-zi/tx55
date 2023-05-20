@@ -38,7 +38,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	db.Model(&user).First(&user, "username = ?", args.Username)
+	db.Model(&user).First(&user, "username LIKE ?", args.Username)
 
 	if user.ID == 0 || !user.CheckRawPassword([]byte(args.Password)) {
 		Error(c, 400, "invalid credentials")

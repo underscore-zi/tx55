@@ -39,8 +39,8 @@ func RegisterAccount(c *gin.Context) {
 
 	log.WithFields(log.Fields{
 		"id":           newUser.ID,
-		"username":     newUser.Username,
-		"display_name": newUser.DisplayName,
+		"username":     args.Username,
+		"display_name": args.DisplayName,
 	}).Info("Registered user")
 
 	c.String(200, "0")
@@ -58,7 +58,7 @@ func DeleteAccount(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
 	var user models.User
-	if tx := db.Where("username = ?", args.Username).First(&user); tx.Error != nil {
+	if tx := db.Where("username LIKE ?", args.Username).First(&user); tx.Error != nil {
 		c.String(404, "User not found")
 		return
 	}
@@ -93,7 +93,7 @@ func ChangePassword(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
 	var user models.User
-	if tx := db.Where("username = ?", args.Username).First(&user); tx.Error != nil {
+	if tx := db.Where("username LIKE ?", args.Username).First(&user); tx.Error != nil {
 		c.String(404, "User not found")
 		return
 	}
