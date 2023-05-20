@@ -33,7 +33,7 @@ func (h NewsListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]type
 		news := ResponseNewsListEntry{
 			ID: uint32(entry.ID),
 		}
-		copy(news.Time[:], entry.Time.Format("2006-01-02 15:04:05"))
+		copy(news.Time[:], entry.CreatedAt.Format("2006-01-02 15:04:05"))
 		copy(news.Topic[:], entry.Topic)
 		copy(news.Body[:], entry.Body)
 		out = append(out, news)
