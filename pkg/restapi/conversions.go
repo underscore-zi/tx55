@@ -98,7 +98,12 @@ func ToGameJSON(game models.Game) GameJSON {
 		switch game.GameOptions.Rules[game.CurrentRound].Mode {
 		// TODO: Check if Sneaking does anything special with team joins
 		case types.ModeDeathmatch:
-			players[i].TeamString = player.Team.UniformString()
+			switch player.Team {
+			case types.TeamSpectator:
+				players[i].TeamString = player.Team.ColorString()
+			default:
+				players[i].TeamString = ""
+			}
 		default:
 			players[i].TeamString = player.Team.ColorString()
 		}

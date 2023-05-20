@@ -36,30 +36,20 @@ type User struct {
 
 // HashPassword will hash the password in the right format for MGO1 and then bcrypt it
 func (u *User) HashPassword(password []byte) ([]byte, error) {
-	hash := md5.New()
-	hash.Write(u.Username)
-	hash.Write(types.NONCE[:])
-	hash.Write(password)
-	sum := hash.Sum(nil)
-
+	sum := u.Md5Password(password)
 	return bcrypt.GenerateFromPassword(sum, bcrypt.DefaultCost)
 }
 
-func (u *User) Md5Password(password []byte) ([]byte, error) {
+func (u *User) Md5Password(password []byte) []byte {
 	hash := md5.New()
 	hash.Write(u.Username)
 	hash.Write(types.NONCE[:])
 	hash.Write(password)
-	return hash.Sum(nil), nil
+	return hash.Sum(nil)
 }
 
 func (u *User) CheckRawPassword(password []byte) bool {
-	hash := md5.New()
-	hash.Write(u.Username)
-	hash.Write(types.NONCE[:])
-	hash.Write(password)
-	password = hash.Sum(nil)
-	return u.CheckPassword(password)
+	return u.CheckPassword(u.Md5Password(password))
 }
 
 func (u *User) CheckPassword(password []byte) bool {

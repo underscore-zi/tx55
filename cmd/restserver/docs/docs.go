@@ -257,6 +257,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/ip/{ip}/{page}": {
+            "get": {
+                "description": "Find users by portions of their display name or username. The Display Name in this result will be in the form of ` + "`" + `Username (Display Name)` + "`" + `.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Search User by Display Name and Username",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "IP",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/restapi.UserJSON"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/admin/login": {
             "post": {
                 "security": [
@@ -306,6 +392,197 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/admin.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/roles/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the privielges granted by a particular role",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Manage Administrative Roles",
+                "parameters": [
+                    {
+                        "description": "New Role information",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.ArgsManageRoles"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/admin.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/search/{name}/{page}": {
+            "get": {
+                "description": "Find users by portions of their display name or username. The Display Name in this result will be in the form of ` + "`" + `Username (Display Name)` + "`" + `.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Search User by Display Name and Username",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/restapi.UserJSON"
+                                            }
                                         }
                                     }
                                 }
@@ -715,6 +992,203 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/users/list": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all administrative Users/Roles",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Get Users/Roles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/admin.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Change an Administrative User's username, password or role ID. If the UserID is 0, a new user will be created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Manage Administrative User",
+                "parameters": [
+                    {
+                        "description": "New user information",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.ArgsManageUsers"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/admin.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/whoami": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get the profile and role of the current administrative user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Profile of Current Admin User",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "date": {
+                                            "$ref": "#/definitions/admin.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/games/list": {
             "get": {
                 "description": "Retrieves all active games and current player list. The ` + "`" + `user` + "`" + ` field of the GamePlayer object will be null.",
@@ -981,7 +1455,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "ApiKey\tAuth": []
                     }
                 ],
                 "description": "Logout of any currently existing session",
@@ -1041,6 +1515,56 @@ const docTemplate = `{
                                             "items": {
                                                 "$ref": "#/definitions/restapi.NewsJSON"
                                             }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/policy": {
+            "get": {
+                "description": "Retrieves the terms of service page shown ingame",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "News"
+                ],
+                "summary": "Retrieve Policy",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/restapi.NewsJSON"
                                         }
                                     }
                                 }
@@ -1744,11 +2268,11 @@ const docTemplate = `{
         },
         "/whoami": {
             "get": {
-                "description": "Provides the public profile of a the currently logged in user",
+                "description": "Provides the public profile of a the currently logged in user. Also indicates their admin id if any",
                 "tags": [
                     "GameUserLogin"
                 ],
-                "summary": "Public profile of the currently logged in game user",
+                "summary": "Profile of the currently logged in game user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1839,6 +2363,37 @@ const docTemplate = `{
                 }
             }
         },
+        "admin.ArgsManageRoles": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "role": {
+                    "$ref": "#/definitions/admin.Role"
+                }
+            }
+        },
+        "admin.ArgsManageUsers": {
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "admin.ArgsUpdateBan": {
             "type": "object",
             "required": [
@@ -1871,10 +2426,6 @@ const docTemplate = `{
         },
         "admin.ArgsUpdateEmblem": {
             "type": "object",
-            "required": [
-                "emblem_text",
-                "has_emblem"
-            ],
             "properties": {
                 "emblem_text": {
                     "type": "string"
@@ -1887,7 +2438,7 @@ const docTemplate = `{
         "admin.ArgsUpdateProfile": {
             "type": "object",
             "properties": {
-                "displayName": {
+                "display_name": {
                     "type": "string"
                 },
                 "password": {
@@ -1960,6 +2511,15 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "manage_news": {
+                    "type": "boolean"
+                },
+                "manage_policy": {
+                    "type": "boolean"
+                },
+                "manage_users": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -2267,6 +2827,9 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"

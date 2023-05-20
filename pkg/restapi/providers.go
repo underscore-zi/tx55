@@ -10,10 +10,12 @@ import (
 // The particular value does not matter as the intent is purely to determine if
 // the call is has the ability to set custom headers on a request.
 func RequireAPIKey(c *gin.Context) {
-	apiKey := c.GetHeader("X-API-TOKEN")
-	if apiKey == "" {
-		Error(c, 401, "unauthorized")
-		return
+	if c.Request.Method == "POST" {
+		apiKey := c.GetHeader("X-API-TOKEN")
+		if apiKey == "" {
+			Error(c, 401, "unauthorized")
+			return
+		}
 	}
 	c.Next()
 }
@@ -54,7 +56,7 @@ func CORSMiddleware(config configurations.RestAPI) gin.HandlerFunc {
 		} else {
 			// Check if the origin is in our list of allowed origins
 			wasPresent := false
-			for _, allowed := range config.AllowCredentialOrigins {
+			for _, allowed := range config.AllowedCredentialOrigins {
 				if origin == allowed {
 					wasPresent = true
 					c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
@@ -64,11 +66,11 @@ func CORSMiddleware(config configurations.RestAPI) gin.HandlerFunc {
 					break
 				}
 			}
-			if !wasPresent && len(config.AllowOrigins) > 0 {
-				if len(config.AllowOrigins) == 1 && config.AllowOrigins[0] == "*" {
+			if !wasPresent && len(config.AllowedOrigins) > 0 {
+				if len(config.AllowedOrigins) == 1 && config.AllowedOrigins[0] == "*" {
 					c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 				} else {
-					for _, allowed := range config.AllowOrigins {
+					for _, allowed := range config.AllowedOrigins {
 						if origin == allowed {
 							c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 							break

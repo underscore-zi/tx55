@@ -282,9 +282,15 @@ type GamePlayedJSON struct {
 }
 
 type NewsJSON struct {
+	ID        uint      `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
+}
+
+type WhoAmIJSON struct {
+	User      *UserJSON `json:"user"`
+	AdminUser uint      `json:"admin_user"`
 }
 
 // Params

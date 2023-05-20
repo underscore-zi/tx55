@@ -53,7 +53,16 @@ func UpdateProfile(c *gin.Context) {
 	var user models.User
 	var err error
 
+	db := c.MustGet("db").(*gorm.DB)
 	user.ID = restapi.ParamAsUint(c, "userid", 0)
+	if args.Password != "" {
+		// If the password is being changed the User object needs to be filled in (username) for hash generation
+		if db.Model(&user).First(&user).Error != nil {
+			restapi.Error(c, 400, "invalid user id")
+			return
+		}
+	}
+
 	if args.DisplayName != "" {
 		user.DisplayName, err = iso8859.EncodeAsBytes(args.DisplayName)
 		if err != nil {
@@ -74,8 +83,7 @@ func UpdateProfile(c *gin.Context) {
 		}
 	}
 
-	db := c.MustGet("db").(*gorm.DB)
-	if tx := db.Model(&user).Updates(user); tx.Error != nil {
+	if tx := db.Model(&user).Updates(&user); tx.Error != nil {
 		c.MustGet("logger").(logrus.FieldLogger).WithError(tx.Error).WithFields(logrus.Fields{
 			"target_user": user.ID,
 			"admin_id":    FetchUserID(c),
@@ -89,8 +97,8 @@ func UpdateProfile(c *gin.Context) {
 }
 
 type ArgsUpdateEmblem struct {
-	HasEmblem  bool   `json:"has_emblem" binding:"required"`
-	EmblemText string `json:"emblem_text" binding:"required"`
+	HasEmblem  bool   `json:"has_emblem"`
+	EmblemText string `json:"emblem_text"`
 }
 
 // UpdateEmblem godoc

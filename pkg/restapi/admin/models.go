@@ -25,6 +25,9 @@ type Role struct {
 	SearchByIP     bool   `json:"search_by_ip"`
 	ReadBans       bool   `json:"read_bans"`
 	UpdateBans     bool   `json:"update_bans"`
+	ManageUsers    bool   `json:"manage_users"`
+	ManageNews     bool   `json:"manage_news"`
+	ManagePolicy   bool   `json:"manage_policy"`
 }
 
 func (u *User) CheckPassword(password []byte) bool {

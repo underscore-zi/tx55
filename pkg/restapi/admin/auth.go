@@ -11,6 +11,7 @@ import (
 func init() {
 	restapi.Register(restapi.AuthLevelNone, "POST", "/admin/login", Login)
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/change_password", ChangePassword)
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/whoami", WhoAmI)
 }
 
 type ArgsLogin struct {
@@ -28,6 +29,7 @@ type ArgsLogin struct {
 // @Param        body     body  ArgsLogin  true  "Account credentials"
 // @Success      200  {object}  restapi.ResponseJSON{data=User}
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      500  {object}  restapi.ResponseJSON{data=string}
 // @Router       /admin/login [post]
 // @Security ApiKeyAuth
 func Login(c *gin.Context) {
@@ -41,7 +43,11 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	adminDB.Model(&user).Joins("Role").First(&user, "username = ?", args.Username)
+	if err := adminDB.Model(&user).Joins("Role").First(&user, "username = ?", args.Username).Error; err != nil {
+		logrus.WithError(err).Error("failed to fetch admin user")
+		restapi.Error(c, 500, "database error")
+		return
+	}
 
 	if user.ID == 0 || !user.CheckPassword([]byte(args.Password)) {
 		restapi.Error(c, 400, "invalid credentials")
@@ -102,4 +108,19 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	restapi.Success(c, nil)
+}
+
+// WhoAmI godoc
+// @Summary      Profile of Current Admin User
+// @Description  Get the profile and role of the current administrative user
+// @Tags         AdminLogin
+// @Produce      json
+// @Success      200  {object}  restapi.ResponseJSON{date=User}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/whoami [post]
+// @Security ApiKeyAuth
+func WhoAmI(c *gin.Context) {
+	a := FetchUser(c)
+	restapi.Success(c, a)
 }

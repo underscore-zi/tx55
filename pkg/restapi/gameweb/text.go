@@ -9,7 +9,7 @@ import (
 
 func GetTextFile(c *gin.Context) {
 	filename := c.Param("filename")
-	if strings.HasPrefix(filename, "policy_") {
+	if strings.HasPrefix(filename, "policy") {
 		db := c.MustGet("db").(*gorm.DB)
 
 		var policy models.News

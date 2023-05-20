@@ -10,6 +10,9 @@ const (
 	PrivSearchByIP     Privilege = "search_by_ip"
 	PrivReadBans       Privilege = "read_bans"
 	PrivUpdateBans     Privilege = "update_bans"
+	PrivManageUsers    Privilege = "manage_users"
+	PrivManageNews     Privilege = "manage_news"
+	PrivManagePolicy   Privilege = "manage_policy"
 )
 
 func (u *User) HasPrivilege(p Privilege) bool {
@@ -32,6 +35,12 @@ func (u *User) HasPrivilege(p Privilege) bool {
 		return u.Role.FullIPs
 	case PrivSearchByIP:
 		return u.Role.SearchByIP
+	case PrivManageUsers:
+		return u.Role.ManageUsers
+	case PrivManageNews:
+		return u.Role.ManageNews
+	case PrivManagePolicy:
+		return u.Role.ManagePolicy
 	}
 
 	return false

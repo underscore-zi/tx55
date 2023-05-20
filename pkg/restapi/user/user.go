@@ -19,8 +19,8 @@ func init() {
 	restapi.Register(restapi.AuthLevelNone, "GET", "/user/:user_id/settings", getUserSettings)
 	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name", SearchByName)
 	restapi.Register(restapi.AuthLevelNone, "GET", "/user/search/:name/:page", SearchByName)
+	restapi.Register(restapi.AuthLevelNone, "GET", "/whoami", whoAmI)
 
-	restapi.Register(restapi.AuthLevelUser, "GET", "/whoami", whoAmI)
 	restapi.Register(restapi.AuthLevelUser, "POST", "/user/profile", UpdateUserProfile)
 	restapi.Register(restapi.AuthLevelUser, "POST", "/user/settings", UpdateUserSettings)
 }
@@ -53,21 +53,32 @@ func getUser(c *gin.Context) {
 }
 
 // whoAmI godoc
-// @Summary      Public profile of the currently logged in game user
-// @Description  Provides the public profile of a the currently logged in user
+// @Summary      Profile of the currently logged in game user
+// @Description  Provides the public profile of a the currently logged in user. Also indicates their admin id if any
 // @Tags         GameUserLogin
 // @Success      200  {object}  restapi.ResponseJSON{data=restapi.UserJSON}
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}
 // @Failure      404  {object}  restapi.ResponseJSON{data=string}
 // @Router       /whoami [get]
 func whoAmI(c *gin.Context) {
+	var out restapi.WhoAmIJSON
 	session := sessions.Default(c)
-	uid := session.Get("user_id").(uint)
 
-	db := c.MustGet("db").(*gorm.DB)
-	var user models.User
-	db.First(&user, uid)
-	restapi.Success(c, restapi.ToUserJSON(&user))
+	if uid, ok := session.Get("user_id").(uint); ok {
+		var user models.User
+		if err := c.MustGet("db").(*gorm.DB).First(&user, uid).Error; err != nil {
+			logrus.WithError(err).Error("Failed to fetch user")
+			restapi.Error(c, 500, "Failed to fetch user")
+			return
+		}
+		out.User = restapi.ToUserJSON(&user)
+	}
+
+	if aid, ok := session.Get("admin_id").(uint); ok {
+		out.AdminUser = aid
+	}
+
+	restapi.Success(c, out)
 }
 
 // getUserStats godoc
@@ -82,6 +93,7 @@ func whoAmI(c *gin.Context) {
 // @Router       /user/{user_id}/stats [get]
 func getUserStats(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
+	logger := c.MustGet("logger").(*logrus.Logger)
 	uid := restapi.ParamAsUint(c, "user_id", 0)
 	if uid == 0 {
 		restapi.Error(c, 400, "Invalid user id")
@@ -89,6 +101,9 @@ func getUserStats(c *gin.Context) {
 	}
 	var stats []models.PlayerStats
 	if err := db.Find(&stats, "user_id = ?", uid).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			logger.WithError(err).WithField("user_id", uid).Error("Failed to retrieve user stats")
+		}
 		restapi.Success(c, []restapi.PlayerStatsJSON{})
 	} else {
 		out := make([]restapi.PlayerStatsJSON, len(stats))
@@ -198,6 +213,7 @@ func UpdateUserProfile(c *gin.Context) {
 
 	var user models.User
 	user.ID = session.Get("user_id").(uint)
+
 	if args.DisplayName != "" {
 		if bs, err := iso8859.EncodeAsBytes(args.DisplayName); err != nil {
 			restapi.Error(c, 400, "Display name contains characters that can't be typed in-game")
@@ -224,7 +240,7 @@ func UpdateUserProfile(c *gin.Context) {
 			return
 		}
 
-		if args.OldPassword != "" {
+		if args.OldPassword == "" {
 			restapi.Error(c, 400, "Missing old password")
 			return
 		}
@@ -235,6 +251,7 @@ func UpdateUserProfile(c *gin.Context) {
 			return
 		}
 
+		db.Model(&user).First(&user)
 		if !user.CheckRawPassword(oldPassword) {
 			restapi.Error(c, 400, "Incorrect password")
 			return
@@ -243,7 +260,7 @@ func UpdateUserProfile(c *gin.Context) {
 		user.Password = newPassword
 	}
 
-	if tx := db.Updates(&user); tx.RowsAffected != 1 {
+	if tx := db.Model(&user).Updates(&user); tx.RowsAffected != 1 {
 		if tx.Error != nil {
 			log := c.MustGet("logger").(*logrus.Logger)
 			log.WithError(tx.Error).Error("Error updating user")
@@ -310,6 +327,7 @@ func UpdateUserSettings(c *gin.Context) {
 	}
 
 	settings.ID = oldSettings.ID
+	settings.Unknown = oldSettings.Unknown
 	settings.UserID = uid
 	settings.ShowNameTags = args.ShowNameTags
 	settings.SwitchSpeed = byte(args.SwitchSpeed) - 1
@@ -365,12 +383,6 @@ func SearchByName(c *gin.Context) {
 	name := c.Param("name")
 	if name == "" {
 		restapi.Error(c, 400, "Missing name")
-		return
-	}
-
-	name, err := iso8859.Encode(name)
-	if err != nil {
-		restapi.Error(c, 400, "Name contains invalid characters")
 		return
 	}
 

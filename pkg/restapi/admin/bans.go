@@ -1,9 +1,11 @@
 package admin
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"strings"
 	"time"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/restapi"
@@ -100,7 +102,6 @@ func UpdateBans(c *gin.Context) {
 	}
 
 	updatedBan := models.Ban{
-		Reason:    args.Reason,
 		ExpiresAt: args.ExpiresAt,
 		UserID:    args.UserID,
 	}
@@ -127,11 +128,32 @@ func UpdateBans(c *gin.Context) {
 			"ban_id":   args.BanID,
 			"ban_type": args.BanType,
 			"user_id":  args.UserID,
-			"reason":   args.Reason,
 			"admin_id": adminUser.ID,
 		}).Error("Error updating ban")
 		restapi.Error(c, 500, "Error updating ban")
 	} else {
+		updates := map[string]interface{}{}
+		var reason string
+		if args.BanID <= 0 {
+			reason = fmt.Sprintf("%s", args.Reason)
+		} else {
+			reason = fmt.Sprintf("\nUpdate: %s", args.Reason)
+		}
+
+		switch strings.ToLower(db.Dialector.Name()) {
+		case "sqlite3":
+			fallthrough
+		case "sqlite":
+			updates["reason"] = gorm.Expr("reason || ?", reason)
+		case "mssql":
+			fallthrough
+		case "postgres":
+			fallthrough
+		case "mysql":
+			updates["reason"] = gorm.Expr("CONCAT(reason, ?)", reason)
+		}
+
+		db.Model(&updatedBan).Updates(updates)
 		restapi.Success(c, nil)
 	}
 }

@@ -65,6 +65,9 @@ func getGamesList(c *gin.Context) {
 	l := c.MustGet("logger").(*logrus.Logger)
 
 	var games []models.Game
+	if c.Query("include_ended") == "true" {
+		db = db.Unscoped()
+	}
 	q := db.Joins("GameOptions").Preload("Players")
 	if err := q.Find(&games).Error; err != nil {
 		l.WithError(err).Error("Error getting games list")

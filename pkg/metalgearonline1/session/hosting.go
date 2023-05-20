@@ -57,19 +57,13 @@ func (hs *HostSession) RemovePlayer(id types.UserID) {
 }
 
 func (hs *HostSession) JoinTeam(id types.UserID, team types.Team) {
-	player := models.GamePlayers{
-		UserID: uint(id),
-		GameID: uint(hs.GameID),
-	}
-	hs.ParentSession.DB.Model(&player).Where(&player).Update("team", team)
+	query := hs.ParentSession.DB.Model(&models.GamePlayers{}).Where("user_id = ? and game_id = ?", uint(id), uint(hs.GameID))
+	query.Update("team", team)
 }
 
 func (hs *HostSession) KickPlayer(id types.UserID) {
-	player := models.GamePlayers{
-		UserID: uint(id),
-		GameID: uint(hs.GameID),
-	}
-	hs.ParentSession.DB.Model(&player).Where(&player).Update("was_kicked", true)
+	query := hs.ParentSession.DB.Model(&models.GamePlayers{}).Where("user_id = ? and game_id = ?", uint(id), uint(hs.GameID))
+	query.Update("was_kicked", true)
 	// Removing the player will happen when the host sends the player left message
 }
 
