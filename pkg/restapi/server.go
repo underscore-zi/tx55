@@ -85,7 +85,10 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	store := gormsessions.NewStore(sessionDB, true, []byte(config.SessionSecret))
 	s.Engine.Use(CORSMiddleware(config))
 	s.Engine.Use(sessions.Sessions("sessions", store))
+
 	engineLogger := logrus.StandardLogger()
+	engineLogger.SetLevel(config.LogLevel.LogrusLevel())
+
 	s.Engine.Use(ProvideContextVar("logger", engineLogger))
 	s.Engine.Use(ProvideContextVar("db", s.DB))
 	s.Engine.Use(ProvideContextVar("adminDB", s.AdminDB))

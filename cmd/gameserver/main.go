@@ -25,7 +25,6 @@ var l = logrus.StandardLogger()
 
 func main() {
 	var err error
-	l.SetLevel(logrus.InfoLevel)
 
 	configFile := flag.String("config", "", "Path to config file")
 	doTrace := flag.Bool("trace", false, "Display full packet traces")
@@ -43,6 +42,7 @@ func main() {
 		l.WithError(err).Fatal("Error loading config file")
 		return
 	}
+	l.SetLevel(serverConfig.LogLevel.LogrusLevel())
 
 	db, err := serverConfig.Database.Open(&gorm.Config{
 		Logger: logger.New(log.New(os.Stdout, "\r\n", 0), serverConfig.Database.LogConfig.LoggerConfig()),

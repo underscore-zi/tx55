@@ -3,6 +3,7 @@ package configurations
 import (
 	"database/sql"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -19,7 +20,25 @@ const (
 	Error  LogLevelOptions = "error"
 	Warn   LogLevelOptions = "warn"
 	Info   LogLevelOptions = "info"
+	Debug  LogLevelOptions = "debug"
 )
+
+func (l LogLevelOptions) LogrusLevel() logrus.Level {
+	switch l {
+	case Silent:
+		return logrus.PanicLevel
+	case Error:
+		return logrus.ErrorLevel
+	case Warn:
+		return logrus.WarnLevel
+	case Info:
+		return logrus.InfoLevel
+	case Debug:
+		return logrus.DebugLevel
+	default:
+		return logrus.InfoLevel
+	}
+}
 
 type DatabaseType string
 
@@ -113,6 +132,8 @@ func (cfg GormLoggingConfig) LoggerConfig() logger.Config {
 		gormLogConfig.LogLevel = logger.Warn
 	case Info:
 		gormLogConfig.LogLevel = logger.Info
+	case Debug:
+		panic("Debug logging is not supporting in GormLoggingConfig")
 	}
 	return gormLogConfig
 }

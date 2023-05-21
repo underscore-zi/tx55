@@ -25,6 +25,7 @@ type RestAPI struct {
 	AllowedCredentialOrigins []string
 	// AllowedOrigins is less privileged than the Credential origins. These origins can read responses but not send custom headers or cookies. If you want to allow all origins use a single entry of `*`.
 	AllowedOrigins []string
+	LogLevel       LogLevelOptions
 }
 
 type RestAPIEvents struct {

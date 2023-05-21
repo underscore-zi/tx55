@@ -11,6 +11,7 @@ type MetalGearOnline1 struct {
 	// LobbyID is the id in the lobbies table. It doesn't use any content from there but it will update the players count
 	LobbyID  uint
 	Database DatabaseConfig
+	LogLevel LogLevelOptions
 }
 
 func LoadTOML(filename string, v interface{}) error {
