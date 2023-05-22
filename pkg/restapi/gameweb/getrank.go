@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
+	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
 )
 
@@ -59,13 +60,24 @@ func PostGetRanks(c *gin.Context) {
 		}
 
 		if args.Pid > 0 {
-			var pidRank uint
-			tx := db.Raw(`SELECT `+rankCol+` FROM users WHERE id = ?`, args.Pid).Scan(&pidRank)
+			var user models.User
+			tx := db.First(&user, args.Pid)
 			if tx.Error != nil {
-				log.WithError(tx.Error).Error("Failed to get player rank")
-				c.String(500, "Failed to get pid rank")
+				log.WithError(tx.Error).Error("Failed to get player")
+				c.String(500, "Failed to get pid")
 				return
 			}
+
+			var pidRank uint
+			switch rankCol {
+			case "overall_rank":
+				pidRank = user.OverallRank
+			case "weekly_rank":
+				pidRank = user.WeeklyRank
+			case "vs_rating_rank":
+				pidRank = user.VsRatingRank
+			}
+
 			args.From = int(pidRank) - args.Records/2
 			if args.From < 0 {
 				args.From = 0
