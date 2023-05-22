@@ -141,14 +141,14 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		fallthrough
 	case "sqlite":
 		updates["kill_streak"] = gorm.Expr("MAX(kill_streak, ?)", stats.KillStreak)
-		updates["death_streak"] = gorm.Expr("MAX(death_streak, ?)", stats.KillStreak)
+		updates["death_streak"] = gorm.Expr("MAX(death_streak, ?)", stats.DeathStreak)
 	case "mssql":
 		fallthrough
 	case "postgres":
 		fallthrough
 	case "mysql":
 		updates["kill_streak"] = gorm.Expr("GREATEST(kill_streak, ?)", stats.KillStreak)
-		updates["death_streak"] = gorm.Expr("GREATEST(death_streak, ?)", stats.KillStreak)
+		updates["death_streak"] = gorm.Expr("GREATEST(death_streak, ?)", stats.DeathStreak)
 	default:
 		panic("unknown dialect: " + sess.DB.Dialector.Name())
 	}
