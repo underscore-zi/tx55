@@ -79,6 +79,7 @@ func PostGetRanks(c *gin.Context) {
 			  WHERE period = ?
 			  GROUP BY user_id
 			) t ON users.id = t.user_id
+			WHERE `+"`rank`"+` > 0 
 			ORDER BY %s ASC LIMIT ? OFFSET ?`, rankCol, rankCol)
 		queryArgs = append(queryArgs, args.Term, args.Records, args.From)
 	} else {
@@ -88,6 +89,7 @@ func PostGetRanks(c *gin.Context) {
                    WHERE period = ? AND mode = ?
 				   GROUP BY user_id
 				 ) t ON users.id = t.user_id
+				 WHERE ` + "`rank`" + ` > 0 
 				 ORDER BY t.rank ASC LIMIT ? OFFSET ?`
 		queryArgs = append(queryArgs, args.Term, args.Rule, args.Records, args.From)
 	}
