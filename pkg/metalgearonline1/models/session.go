@@ -11,7 +11,7 @@ func init() {
 }
 
 type Session struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key"`
+	ID        uuid.UUID `gorm:"primary_key"`
 	CreatedAt time.Time
 	UserID    uint
 	User      User
