@@ -388,7 +388,7 @@ func SearchByName(c *gin.Context) {
 
 	page := restapi.ParamAsInt(c, "page", 1)
 	var users []models.User
-	if err := db.Debug().Where("CAST(display_name as CHAR(20) CHARACTER SET latin1) LIKE ?", "%"+name+"%").Limit(limit).Offset((page - 1) * limit).Find(&users).Error; err != nil {
+	if err := db.Where("CAST(display_name as CHAR(20) CHARACTER SET latin1) LIKE ?", "%"+name+"%").Limit(limit).Offset((page - 1) * limit).Find(&users).Error; err != nil {
 		l.WithError(err).WithFields(logrus.Fields{
 			"page":  page,
 			"limit": limit,

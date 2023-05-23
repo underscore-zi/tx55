@@ -108,7 +108,7 @@ func SearchIP(c *gin.Context) {
 	}
 
 	var connections []models.Connection
-	q := db.Debug().Model(&models.Connection{}).Joins("User").Where("remote_addr LIKE ? or local_addr LIKE ?", ip+"%", ip+"%")
+	q := db.Model(&models.Connection{}).Joins("User").Where("remote_addr LIKE ? or local_addr LIKE ?", ip+"%", ip+"%")
 	q = q.Order("updated_at desc").Limit(limit).Offset((page - 1) * limit)
 	if err := q.Find(&connections).Error; err != nil {
 		l.WithError(err).WithFields(logrus.Fields{
