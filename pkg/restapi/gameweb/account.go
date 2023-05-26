@@ -29,6 +29,7 @@ func RegisterAccount(c *gin.Context) {
 	newUser.Username = []byte(args.Username)
 	newUser.Password = args.Password
 	newUser.DisplayName = []byte(args.DisplayName)
+	newUser.VsRating = 1000
 
 	db := c.MustGet("db").(*gorm.DB)
 	if tx := db.Create(&newUser); tx.Error != nil {
