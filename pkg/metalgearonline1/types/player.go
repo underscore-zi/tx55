@@ -42,7 +42,7 @@ type GameInfo struct {
 	IdleKickMinutes   uint16
 	TeamKillCount     uint16
 	_                 uint32             // Original SaveMGO server always sends 80L
-	Players           [8]GamePlayerStats `packet:"truncate"`
+	Players           [9]GamePlayerStats `packet:"truncate"`
 }
 
 type GamePlayerStats struct {
