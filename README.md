@@ -17,7 +17,7 @@ This is kind of the core object for the konamiserver, it consumes Packet structu
 On the serializing aspect, if using a structure to fill the payload, they must be binary serializable, that is, it must be a fixed and determinable sized structure. Using things like `uint32` not `int` and only using fixed size arrays. The only real violation of that is that it supports a custom encoding tag `packet:"truncate"` which can be used to indicate that a packet ends with a variable length array that should be truncated before sending. For example the `GameInfo` structure defined in the types package, and used when sending information about a game from the game list to a client. Ends with:
 
 ```go
-Players           [8]GamePlayerStats `packet:"truncate"`
+Players           [9]GamePlayerStats `packet:"truncate"`
 ```
 
 The client could send NULL bytes to fill the space, which is what the binary serializer will do but this tag lets it know to truncate it. This works by looking for the first item that is a zero value (as defined by the reflection library). So you cannot use this if you intend to send zero filled items. This can also only be used with the last item in a structure/packet payload.
