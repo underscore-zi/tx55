@@ -2,6 +2,7 @@ package session
 
 import (
 	"gorm.io/gorm"
+	"time"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
 )
@@ -9,12 +10,10 @@ import (
 func (s *Session) StartHosting(id types.GameID, args *types.CreateGameOptions) {
 	s.isHost = true
 	s.GameState = &HostSession{
-		GameID:       id,
-		Rules:        args.Rules,
-		CurrentRound: 0,
-		Players: map[types.UserID]bool{
-			types.UserID(s.User.ID): true,
-		},
+		GameID:        id,
+		Rules:         args.Rules,
+		CurrentRound:  0,
+		Players:       map[types.UserID]time.Time{},
 		CollectStats:  true,
 		ParentSession: s,
 	}
@@ -42,7 +41,8 @@ func (hs *HostSession) AddPlayer(id types.UserID) {
 
 	hs.Lock.Lock()
 	defer hs.Lock.Unlock()
-	hs.Players[id] = true
+	// Give them the zero time until they join a team
+	hs.Players[id] = time.Time{}
 }
 
 func (hs *HostSession) RemovePlayer(id types.UserID) {
@@ -59,6 +59,17 @@ func (hs *HostSession) RemovePlayer(id types.UserID) {
 func (hs *HostSession) JoinTeam(id types.UserID, team types.Team) {
 	query := hs.ParentSession.DB.Model(&models.GamePlayers{}).Where("user_id = ? and game_id = ?", uint(id), uint(hs.GameID))
 	query.Update("team", team)
+
+	switch team {
+	case types.TeamSpectator:
+		// If they join spectator, don't touch their updated at time
+		// this lets us track when they were last actually playing and we don't accidently count them as having
+		// played a round if they joined spectator at the start of it before being on a proper team
+	default:
+		hs.Lock.Lock()
+		hs.Players[id] = time.Now()
+		hs.Lock.Unlock()
+	}
 }
 
 func (hs *HostSession) KickPlayer(id types.UserID) {
@@ -82,5 +93,7 @@ func (hs *HostSession) NewRound(roundID byte) {
 		Model: gorm.Model{ID: uint(hs.GameID)},
 	})
 	md.Update("current_round", roundID)
+
 	hs.CurrentRound = roundID
+	hs.RoundStart = time.Now()
 }

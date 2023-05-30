@@ -4,15 +4,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"sync"
+	"time"
 	"tx55/pkg/metalgearonline1/models"
 	"tx55/pkg/metalgearonline1/types"
 )
 
 type HostSession struct {
-	GameID        types.GameID
-	Rules         [15]types.GameRules
-	CurrentRound  byte
-	Players       map[types.UserID]bool
+	GameID       types.GameID
+	Rules        [15]types.GameRules
+	CurrentRound byte
+	RoundStart   time.Time
+	// Players tracks when they were last actually playing in the match
+	// by tracking the time of their last non-spectator team-selection.
+	Players       map[types.UserID]time.Time
 	CollectStats  bool
 	Lock          sync.Mutex
 	ParentSession *Session
