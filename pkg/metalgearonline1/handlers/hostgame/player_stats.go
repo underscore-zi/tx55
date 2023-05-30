@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"reflect"
@@ -64,6 +65,11 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 }
 
 func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID uint, stats types.HostReportedStats) error {
+	if _, found := sess.GameState.Players[types.UserID(UserID)]; !found {
+		return fmt.Errorf("player %d not found in game", UserID)
+	}
+
+	// Update the overview stats for the game listing
 	updates := map[string]interface{}{
 		"kills":  gorm.Expr("kills + ?", stats.Kills),
 		"deaths": gorm.Expr("deaths + ?", stats.Deaths),
@@ -75,23 +81,22 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		return nil
 	}
 
-	// We always update the game stats but conditionally update player specific stats
-
+	// If stats are disabled for this game don't process the the rest
 	if !sess.GameState.CollectStats {
 		return nil
-	} else if stats.VsRating == 0 {
-		// I suspect this happens when we shouldn't update a player's stats but I want to log it for now
-		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
-			"StatsUserID": UserID,
-			"Kills":       stats.Kills,
-			"Deaths":      stats.Deaths,
-			"Points":      stats.Points,
-			"PlayTime":    stats.PlayTime,
-			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
-		}).Warn("Stats with 0 VS Rating!")
+	}
+
+	hasZeroRating := stats.VsRating == 0
+	hasNegativeValues := stats.Points < 0 || stats.Kills < 0 || stats.Deaths < 0
+	hasNoPlayTime := stats.PlayTime == 0
+	hasJoinedTeam := sess.GameState.Players[types.UserID(UserID)].After(sess.GameState.RoundStart)
+
+	if hasZeroRating || hasNegativeValues {
+		// Not sure why these happen, but they happen rarely enough that we just won't save these stats
 		return nil
-	} else if stats.Points < 0 || stats.Kills < 0 || stats.Deaths < 0 {
-		// Not entirely sure why this happens, but it sometimes happens during sneaking
+	}
+
+	if hasNoPlayTime {
 		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
 			"StatsUserID": UserID,
 			"Kills":       stats.Kills,
@@ -99,12 +104,27 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 			"Points":      stats.Points,
 			"PlayTime":    stats.PlayTime,
 			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
-		}).Warn("Stats with negative values!")
+			"UpdatedAt":   sess.GameState.Players[types.UserID(UserID)],
+			"RoundStart":  sess.GameState.RoundStart,
+		}).Warn("Stats with no play time!")
+		return nil
+	}
+
+	if !hasJoinedTeam {
+		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
+			"StatsUserID": UserID,
+			"Kills":       stats.Kills,
+			"Deaths":      stats.Deaths,
+			"Points":      stats.Points,
+			"PlayTime":    stats.PlayTime,
+			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
+			"UpdatedAt":   sess.GameState.Players[types.UserID(UserID)],
+			"RoundStart":  sess.GameState.RoundStart,
+		}).Warn("Player never joined a team")
 		return nil
 	}
 
 	sess.DB.Model(sess.User).Update("vs_rating", stats.VsRating)
-
 	updates = map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),
 		"deaths":               gorm.Expr("deaths + ?", stats.Deaths),
