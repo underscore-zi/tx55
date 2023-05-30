@@ -51,12 +51,8 @@ func ClearWeeklyStats(db *gorm.DB) {
 
 func AwardChampion(db *gorm.DB) {
 	emblemText := "Champion"
-	// First clear the old oldChampion
-	db.Model(&models.User{}).Where("emblem_text = ?", emblemText).Updates(map[string]interface{}{
-		"has_emblem":  false,
-		"emblem_text": "",
-	})
 
+	// Find and clear the old chamption
 	var oldChampion, newChampion models.User
 	if err := db.Model(&models.User{}).Where("emblem_text = ?", emblemText).First(&oldChampion).Error; err != nil {
 		l.WithError(err).Error("failed to find oldChampion")
@@ -67,7 +63,7 @@ func AwardChampion(db *gorm.DB) {
 		})
 	}
 
-	// Now find the new champion
+	// Now find the new champion, but don't give it to the same user who had it last week
 	if err := db.Model(&models.User{}).Order("weekly_rank desc").Where("id != ? AND NOT has_emblem", oldChampion.ID).First(&newChampion).Error; err != nil {
 		l.WithError(err).Error("failed to find a new champion")
 		return
