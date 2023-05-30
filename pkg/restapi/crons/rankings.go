@@ -42,7 +42,6 @@ func ClearWeeklyStats(db *gorm.DB) {
 		"rolls":                0,
 		"infrared_goggle_uses": 0,
 		"play_time":            0,
-		"unknown3":             0,
 	}
 	tx := db.Model(&models.PlayerStats{}).Where("period = ?", types.PeriodWeekly).Updates(updates)
 	if tx.Error != nil {
