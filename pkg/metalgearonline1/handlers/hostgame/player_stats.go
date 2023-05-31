@@ -110,17 +110,7 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		return nil
 	}
 
-	if !hasJoinedTeam {
-		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
-			"StatsUserID": UserID,
-			"Kills":       stats.Kills,
-			"Deaths":      stats.Deaths,
-			"Points":      stats.Points,
-			"PlayTime":    stats.PlayTime,
-			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
-			"UpdatedAt":   sess.GameState.Players[types.UserID(UserID)],
-			"RoundStart":  sess.GameState.RoundStart,
-		}).Warn("Player never joined a team")
+	if !hasJoinedTeam && stats.Points == 0 {
 		return nil
 	}
 
