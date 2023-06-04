@@ -77,10 +77,11 @@ func (h PlayerStatsHandler) playerOverview(sess *session.Session, args *ArgsGetP
 
 func (h PlayerStatsHandler) playerStats(sess *session.Session, args *ArgsGetPlayerStats) []types.Response {
 	var out []types.Response
+	var l = sess.LogEntry().WithField("player_id", args.UserID)
 
 	all, weekly, err := models.GetPlayerStats(sess.DB, args.UserID)
 	if err != nil {
-		sess.Log.WithError(err).WithField("player_is", args.UserID).Error("failed to get player stats")
+		l.WithError(err).Error("failed to get player stats")
 	}
 	out = append(out, ResponsePlayerStats{
 		Stats: all,

@@ -26,7 +26,7 @@ func (h CreateGameSettingsHandler) ArgumentTypes() []reflect.Type {
 func (h CreateGameSettingsHandler) Handle(sess *session.Session, _ *packet.Packet) ([]types.Response, error) {
 	var latest models.GameOptions
 	if tx := sess.DB.Model(&models.GameOptions{}).Where("user_id = ?", sess.User.ID).Order("id desc").First(&latest); tx.Error != nil {
-		sess.Log.WithError(tx.Error).WithFields(sess.LogFields()).Error("failed to get latest game options")
+		sess.LogEntry().WithError(tx.Error).Error("failed to get prior game options")
 	}
 	return []types.Response{ResponseCreateGameSettings{Options: latest.CreateGameOptions()}}, nil
 }

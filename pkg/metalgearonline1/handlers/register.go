@@ -111,11 +111,11 @@ func Handle(sess *session.Session, packet *packet.Packet) ([]types.Response, err
 	}
 
 	if len(handler.ArgumentTypes()) > 0 {
-		sess.Log.WithFields(log.Fields{
+		sess.LogEntry().WithFields(log.Fields{
 			"type":    (*packet).Type(),
 			"handler": reflect.TypeOf(handler).String(),
 			"len":     (*packet).Length(),
-		}).Info("No argument-specific handler found")
+		}).Error("No argument-specific handler found")
 	}
 
 	return handler.Handle(sess, packet)

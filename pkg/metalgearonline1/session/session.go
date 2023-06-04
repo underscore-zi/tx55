@@ -44,6 +44,10 @@ func (s *Session) IsHost() bool {
 	return s.GameState != nil && s.GameState.GameID > 0
 }
 
+func (s *Session) LogEntry() *logrus.Entry {
+	return s.Log.WithFields(s.LogFields())
+}
+
 func (s *Session) LogFields() logrus.Fields {
 	f := logrus.Fields{
 		"id": s.ID,
@@ -51,16 +55,15 @@ func (s *Session) LogFields() logrus.Fields {
 	}
 	if s.IsLoggedIn() && s.LobbyID > 0 {
 		f["state"] = "in-lobby"
-		f["lobby"] = s.LobbyID
-		f["user"] = string(s.User.Username)
 		f["user_id"] = s.User.ID
-	} else {
-		f["state"] = "unconnected"
-	}
 
-	if s.IsHost() {
-		f["state"] = "hosting"
-		f["game"] = s.GameState.GameID
+		if s.IsHost() {
+			f["state"] = "hosting"
+			f["game_id"] = s.GameState.GameID
+		}
+
+	} else {
+		f["state"] = ""
 	}
 	return f
 }

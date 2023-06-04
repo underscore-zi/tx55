@@ -29,7 +29,7 @@ func (h GetNotificationsHandler) Handle(sess *session.Session, _ *packet.Packet)
 
 	var notifications []models.Notification
 	if tx := sess.DB.Where("user_id = ?", sess.User.ID).Find(&notifications); tx.Error != nil {
-		sess.Log.WithFields(sess.LogFields()).WithError(tx.Error).Error("failed to get notifications")
+		sess.LogEntry().WithError(tx.Error).Error("failed to get notifications")
 		return out, tx.Error
 	}
 

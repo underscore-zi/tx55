@@ -48,18 +48,7 @@ func (h HostPlayerStatsHandler) HandleArgs(sess *session.Session, args *ArgsHost
 		return
 	}
 
-	// Do the update, or create the stats as needed
-	if args.Stats.Points < 0 || args.Stats.Kills < 0 || args.Stats.Deaths < 0 {
-		sess.Log.WithFields(logrus.Fields{
-			"StatsUserID": args.UserID,
-			"Kills":       args.Stats.Kills,
-			"Deaths":      args.Stats.Deaths,
-			"Points":      args.Stats.Points,
-		}).Info("Stats with negative values!")
-	} else {
-		go func() { _ = h.updatePlayerStats(sess, uint(args.UserID), args.Stats) }()
-	}
-
+	go func() { _ = h.updatePlayerStats(sess, uint(args.UserID), args.Stats) }()
 	out = append(out, ResponseHostPlayerStats{ErrorCode: 0})
 	return
 }
@@ -69,6 +58,16 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		return fmt.Errorf("player %d not found in game", UserID)
 	}
 
+	l := sess.LogEntry().WithFields(logrus.Fields{
+		"stats_user_id": UserID,
+		"mode":          sess.GameState.Rules[sess.GameState.CurrentRound].Mode,
+		"map":           sess.GameState.Rules[sess.GameState.CurrentRound].Map,
+		"kills":         stats.Kills,
+		"deaths":        stats.Deaths,
+		"points":        stats.Points,
+		"vs_rating":     stats.VsRating,
+	})
+
 	// Update the overview stats for the game listing
 	updates := map[string]interface{}{
 		"kills":  gorm.Expr("kills + ?", stats.Kills),
@@ -77,7 +76,7 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 	}
 	q := sess.DB.Model(&models.GamePlayers{}).Where("game_id = ? AND user_id = ?", sess.GameState.GameID, UserID)
 	if rowCount := q.Updates(updates).RowsAffected; rowCount != 1 {
-		sess.Log.WithFields(sess.LogFields()).Warn("Attempting to update stats for a player that is not in the game")
+		l.Error("Attempting to update stats for a player that is not in the game")
 		return nil
 	}
 
@@ -93,24 +92,22 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 
 	if hasZeroRating || hasNegativeValues {
 		// Not sure why these happen, but they happen rarely enough that we just won't save these stats
+		l.Debug("Ignoring stats with zero rating or negative values")
 		return nil
 	}
 
 	if hasNoPlayTime {
-		sess.Log.WithFields(sess.LogFields()).WithFields(logrus.Fields{
-			"StatsUserID": UserID,
-			"Kills":       stats.Kills,
-			"Deaths":      stats.Deaths,
-			"Points":      stats.Points,
-			"PlayTime":    stats.PlayTime,
-			"Mode":        sess.GameState.Rules[sess.GameState.CurrentRound].Mode.String(),
-			"UpdatedAt":   sess.GameState.Players[types.UserID(UserID)],
-			"RoundStart":  sess.GameState.RoundStart,
+		l.WithFields(logrus.Fields{
+			"play_time":   stats.PlayTime,
+			"updated_at":  sess.GameState.Players[types.UserID(UserID)],
+			"round_start": sess.GameState.RoundStart,
 		}).Warn("Stats with no play time!")
 		return nil
 	}
 
 	if !hasJoinedTeam && stats.Points == 0 {
+		// Trying to detect when someone just spectates the entire round so we don't count it as a round played
+		l.Debug("Ignoring stats with no points and no team join")
 		return nil
 	}
 
@@ -177,11 +174,7 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 	}
 
 	if tx.RowsAffected < 2 {
-		sess.Log.WithFields(logrus.Fields{
-			"user_id": UserID,
-			"map":     currentRules.Map,
-			"mode":    currentRules.Mode,
-		}).Info("Creating new stats for user")
+		l.Info("Creating new stats for user")
 
 		newStats := models.PlayerStats{
 			UserID: UserID,
@@ -201,6 +194,8 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		newStats.FromHostReportedStats(stats)
 		sess.DB.Create(&newStats)
 	}
+
+	l.Info("Updated user stats")
 	return nil
 }
 

@@ -36,7 +36,7 @@ func (hs *HostSession) AddPlayer(id types.UserID) {
 		Model: gorm.Model{ID: uint(hs.GameID)},
 	})
 	if err := md.Association("Players").Append(&models.GamePlayers{UserID: uint(id)}); err != nil {
-		hs.ParentSession.Log.WithError(err).Error("Failed to add player to game")
+		hs.ParentSession.LogEntry().WithError(err).Error("Failed to add player to game")
 	}
 
 	hs.Lock.Lock()
@@ -48,7 +48,7 @@ func (hs *HostSession) AddPlayer(id types.UserID) {
 func (hs *HostSession) RemovePlayer(id types.UserID) {
 	md := hs.ParentSession.DB.Model(&models.GamePlayers{})
 	if err := md.Delete(&models.GamePlayers{}, "game_id = ? AND user_id = ?", hs.GameID, id).Error; err != nil {
-		hs.ParentSession.Log.WithError(err).Error("Failed to remove player from game")
+		hs.ParentSession.LogEntry().WithError(err).Error("Failed to remove player from game")
 	}
 
 	hs.Lock.Lock()
@@ -80,11 +80,11 @@ func (hs *HostSession) KickPlayer(id types.UserID) {
 
 func (hs *HostSession) StopGame() {
 	if err := hs.ParentSession.DB.Where("game_id = ?", hs.GameID).Delete(&models.GamePlayers{}).Error; err != nil {
-		hs.ParentSession.Log.WithError(err).Error("Failed to remove players from game")
+		hs.ParentSession.LogEntry().WithError(err).Error("Failed to remove players from game")
 	}
 
 	if err := hs.ParentSession.DB.Delete(&models.Game{}, uint(hs.GameID)).Error; err != nil {
-		hs.ParentSession.Log.WithError(err).Error("Failed to remove game")
+		hs.ParentSession.LogEntry().WithError(err).Error("Failed to remove game")
 	}
 }
 

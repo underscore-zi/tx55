@@ -24,6 +24,7 @@ func (s *Session) publishEvent(e EventType, data interface{}) {
 		return
 	}
 
+	var l = s.LogEntry().WithField("event", e)
 	jsonData, err := json.Marshal(map[string]interface{}{
 		"event": e,
 		"lobby": s.LobbyID,
@@ -31,19 +32,19 @@ func (s *Session) publishEvent(e EventType, data interface{}) {
 	})
 
 	if err != nil {
-		s.Log.WithError(err).WithField("event", e).Error("failed to marshal event data")
+		l.WithError(err).Error("failed to marshal event data")
 		return
 	}
 
 	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		s.Log.WithError(err).WithField("event", e).Error("failed to post event data")
+		l.WithError(err).Error("failed to post event data")
 		return
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
-		s.Log.WithField("event", e).WithField("status_code", resp.StatusCode).Error("failed to post event data")
+		l.WithField("status_code", resp.StatusCode).Error("failed to post event data")
 	}
 
 	return

@@ -23,7 +23,7 @@ func (c *GameClient) OnConnected(conn net.Conn, out chan packet.Packet) (err err
 	c.Session.IP = conn.RemoteAddr().(*net.TCPAddr).IP.String()
 
 	if c.Server.IsBannedIP(c.Session.IP) {
-		c.Session.Log.WithFields(c.Session.LogFields()).Info("Banned IP, closing connection")
+		c.Session.LogEntry().Info("Banned IP, closing connection")
 		return errors.New("banned ip")
 	}
 
@@ -32,7 +32,7 @@ func (c *GameClient) OnConnected(conn net.Conn, out chan packet.Packet) (err err
 
 func (c *GameClient) OnDisconnected() {
 	if c.Session.User != nil {
-		c.Session.Log.WithFields(c.Session.LogFields()).Info("Disconnected")
+		c.Session.LogEntry().Info("Disconnected")
 	}
 
 	if c.Session.IsHost() {
@@ -45,8 +45,7 @@ func (c *GameClient) OnDisconnected() {
 
 func (c *GameClient) OnPacket(p *packet.Packet, out chan packet.Packet) error {
 	cmd := types.PacketType((*p).Type())
-
-	entry := c.Session.Log.WithFields(c.Session.LogFields()).WithField("cmd", cmd.String())
+	entry := c.Session.LogEntry().WithField("cmd", cmd.String())
 
 	// Ping packets are too frequent to log
 	if cmd > 0x0010 && cmd != types.ClientHostPingInformation && c.Session.IP != "127.0.0.1" {
@@ -56,17 +55,11 @@ func (c *GameClient) OnPacket(p *packet.Packet, out chan packet.Packet) error {
 	}
 
 	replies, err := handlers.Handle(c.Session, p)
-
+	entry.WithField("replies", len(replies))
 	if err != nil {
-		c.Session.Log.WithFields(log.Fields{
-			"cmd":     cmd.String(),
-			"replies": len(replies),
-		}).WithFields(c.Session.LogFields()).WithError(err).Error("handler error")
+		entry.WithError(err).Error("handler error")
 	} else if cmd > 0x0010 && cmd != types.ClientHostPingInformation {
-		c.Session.Log.WithFields(log.Fields{
-			"cmd":     cmd.String(),
-			"replies": len(replies),
-		}).WithFields(c.Session.LogFields()).Debug("handler success")
+		entry.Debug("handler success")
 	}
 
 	if len(replies) > 0 {
@@ -74,20 +67,13 @@ func (c *GameClient) OnPacket(p *packet.Packet, out chan packet.Packet) error {
 			p, err := types.ToPacket(reply)
 
 			if err != nil {
-				c.Session.Log.WithFields(log.Fields{
-					"cmd":         types.PacketType(p.Type()).String(),
-					"reply":       i,
-					"reply_count": len(replies),
+				entry.WithFields(log.Fields{
+					"reply_index": i,
 					"len":         p.Length(),
-				}).WithFields(c.Session.LogFields()).WithError(err).Error("failed to marshal reply")
+				}).WithError(err).Error("failed to marshal reply")
 			} else {
 				if cmd > 0x100 && c.Session.IP != "127.0.0.1" {
-					c.Session.Log.WithFields(log.Fields{
-						"cmd":         types.PacketType(p.Type()).String(),
-						"reply":       i,
-						"reply_count": len(replies),
-						"len":         p.Length(),
-					}).WithFields(c.Session.LogFields()).Debug("sending")
+					entry.Debug("sending")
 				}
 				out <- p
 			}

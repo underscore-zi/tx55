@@ -41,7 +41,7 @@ func (h LoginHandler) HandleWithCredentials(sess *session.Session, args *ArgsLog
 	var row models.User
 	if tx := sess.DB.First(&row, "username LIKE ?", types.BytesToString(args.Username[:])); tx.Error != nil {
 		if tx.Error != gorm.ErrRecordNotFound {
-			sess.Log.WithError(tx.Error).Error("Failed to query user")
+			sess.LogEntry().WithError(tx.Error).Error("Failed to query user")
 			return []types.Response{ResponseLoginError{ErrorCode: ErrDatabaseError}}, nil
 		}
 	}
