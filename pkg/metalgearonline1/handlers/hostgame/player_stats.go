@@ -114,7 +114,10 @@ func (h HostPlayerStatsHandler) updatePlayerStats(sess *session.Session, UserID 
 		return nil
 	}
 
-	sess.DB.Model(sess.User).Update("vs_rating", stats.VsRating)
+	sess.DB.Model(&models.User{
+		Model: gorm.Model{ID: UserID},
+	}).Update("vs_rating", stats.VsRating)
+
 	updates = map[string]interface{}{
 		"kills":                gorm.Expr("kills + ?", stats.Kills),
 		"deaths":               gorm.Expr("deaths + ?", stats.Deaths),
