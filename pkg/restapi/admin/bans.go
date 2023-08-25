@@ -44,7 +44,7 @@ func ListBans(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 
 	var bans []models.Ban
-	q := db.Joins("User").Where("expires_at > ?", time.Now())
+	q := db.Unscoped().Joins("User").Where("expires_at > ?", time.Now())
 	if err := q.Find(&bans).Error; err != nil {
 		c.MustGet("logger").(*logrus.Logger).WithError(err).Error("Error getting bans list")
 		restapi.Error(c, 500, "Error getting bans list")
