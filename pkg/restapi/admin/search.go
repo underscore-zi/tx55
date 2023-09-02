@@ -75,7 +75,7 @@ type ConnectionJSON struct {
 // @Produce      json
 // @Param        name  path  string  true  "IP"
 // @Param        page  path  string  false  "Page"
-// @Success      200  {object}  restapi.ResponseJSON{data=[]restapi.UserJSON{}}
+// @Success      200  {object}  restapi.ResponseJSON{data=[]admin.ConnectionJSON{}}
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}
 // @Failure      403  {object}  restapi.ResponseJSON{data=string}
 // @Router       /admin/ip/{ip}/{page} [get]

@@ -25,7 +25,6 @@ type ArgsLogin struct {
 // @Tags         AdminLogin
 // @Accept       json
 // @Produce      json
-// @Param        user_id  path  int  true  "User ID"
 // @Param        body     body  ArgsLogin  true  "Account credentials"
 // @Success      200  {object}  restapi.ResponseJSON{data=User}
 // @Failure      400  {object}  restapi.ResponseJSON{data=string}

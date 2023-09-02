@@ -17,6 +17,7 @@ func init() {
 	restapi.Register(restapi.AuthLevelAdmin, "POST", "/admin/user/:userid/emblem", UpdateEmblem)
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/connections", ListUserConnections)
 	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/search_ip/:ip", SearchByIP)
+	restapi.Register(restapi.AuthLevelAdmin, "GET", "/admin/user/:userid/shared_accounts", SharedAccounts)
 }
 
 type ArgsUpdateProfile struct {
@@ -286,5 +287,82 @@ func SearchByIP(c *gin.Context) {
 			},
 		})
 	}
+	restapi.Success(c, out)
+}
+
+type SharedAccountsJSON struct {
+	U1_ID          uint   `json:"u1_id"`
+	U1_username    string `json:"u1_username"`
+	U1_displayname string `json:"u1_display_name"`
+
+	U2_ID          uint   `json:"u2_id"`
+	U2_username    string `json:"u2_username"`
+	U2_displayname string `json:"u2_display_name"`
+
+	RemoteAddr string `json:"remote_addr"`
+}
+
+// SharedAccounts godoc
+// @Summary      Get a list of shared accounts
+// @Description  Lists all users who have an IP in common with this user
+// @Tags         AdminLogin
+// @Produce      json
+// @Param        user_id  path  uint  true  "User ID"
+// @Success      200  {object}  restapi.ResponseJSON{data=[]admin.SharedAccountsJSON{}}
+// @Failure      400  {object}  restapi.ResponseJSON{data=string}
+// @Failure      403  {object}  restapi.ResponseJSON{data=string}
+// @Router       /admin/user/{user_id}/shared_accounts [get]
+// @Security ApiKeyAuth
+func SharedAccounts(c *gin.Context) {
+	if !CheckPrivilege(c, PrivSearchByIP) {
+		restapi.Error(c, 403, "Insufficient privileges")
+		return
+	}
+	fullIps := CheckPrivilege(c, PrivFullIPs)
+	uid := restapi.ParamAsUint(c, "userid", 0)
+
+	l := c.MustGet("logger").(*logrus.Logger)
+	db := c.MustGet("db").(*gorm.DB)
+
+	type Row struct {
+		U1_ID          uint
+		U1_username    []byte
+		U1_displayname []byte
+
+		U2_ID          uint
+		U2_username    []byte
+		U2_displayname []byte
+
+		RemoteAddr string
+	}
+
+	var rows []Row
+	query := "SELECT u1.id as \"U1_ID\", u1.username as \"U1_username\", u1.display_name as \"U1_displayname\",\n       u2.id as \"U2_ID\", u2.username as \"U2_username\", u2.display_name as \"U2_displayname\",\n       c.remote_addr as \"RemoteAddr\"\nFROM users u1\nJOIN connections c ON u1.id = c.user_id\nJOIN users u2 ON u2.id != u1.id\nAND u2.id IN (\n    SELECT DISTINCT u3.id\n    FROM users u3\n    JOIN connections c3 ON u3.id = c3.user_id\n    WHERE c3.remote_addr = c.remote_addr\n) WHERE u1.id = ?\n"
+	if err := db.Unscoped().Raw(query, uid).Scan(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
+		l.WithError(err).WithFields(logrus.Fields{
+			"uid": uid,
+		}).Error("Error searching for duplicate accounts")
+		restapi.Error(c, 500, "Database error")
+	}
+
+	var out []SharedAccountsJSON
+	for _, row := range rows {
+		acc := SharedAccountsJSON{
+			U1_ID:      row.U1_ID,
+			U2_ID:      row.U2_ID,
+			RemoteAddr: row.RemoteAddr,
+		}
+		acc.U1_username, _ = iso8859.DecodeBytes(row.U1_username)
+		acc.U1_displayname, _ = iso8859.DecodeBytes(row.U1_displayname)
+		acc.U2_username, _ = iso8859.DecodeBytes(row.U2_username)
+		acc.U2_displayname, _ = iso8859.DecodeBytes(row.U2_displayname)
+
+		if !fullIps {
+			acc.RemoteAddr = acc.RemoteAddr[:strings.LastIndex(acc.RemoteAddr, ".")+1] + "xxx"
+		}
+
+		out = append(out, acc)
+	}
+
 	restapi.Success(c, out)
 }

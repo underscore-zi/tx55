@@ -92,6 +92,21 @@ definitions:
       user:
         $ref: '#/definitions/restapi.UserJSON'
     type: object
+  admin.ConnectionJSON:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      last_used:
+        type: string
+      local_addr:
+        type: string
+      remote_addr:
+        type: string
+      user:
+        $ref: '#/definitions/restapi.UserJSON'
+    type: object
   admin.ResponseConnectionsJSON:
     properties:
       first_used:
@@ -134,6 +149,23 @@ definitions:
         type: boolean
       update_profiles:
         type: boolean
+    type: object
+  admin.SharedAccountsJSON:
+    properties:
+      remote_addr:
+        type: string
+      u1_display_name:
+        type: string
+      u1_id:
+        type: integer
+      u1_username:
+        type: string
+      u2_display_name:
+        type: string
+      u2_id:
+        type: integer
+      u2_username:
+        type: string
     type: object
   admin.User:
     properties:
@@ -848,7 +880,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/restapi.UserJSON'
+                    $ref: '#/definitions/admin.ConnectionJSON'
                   type: array
               type: object
         "400":
@@ -878,11 +910,6 @@ paths:
       - application/json
       description: Login to an administrative session
       parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
       - description: Account credentials
         in: body
         name: body
@@ -1182,6 +1209,52 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update In-Game Profile
+      tags:
+      - AdminLogin
+  /admin/user/{user_id}/shared_accounts:
+    get:
+      description: Lists all users who have an IP in common with this user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/admin.SharedAccountsJSON'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.ResponseJSON'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a list of shared accounts
       tags:
       - AdminLogin
   /admin/user/search_ip/{ip}:

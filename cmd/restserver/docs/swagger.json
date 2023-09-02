@@ -289,7 +289,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/restapi.UserJSON"
+                                                "$ref": "#/definitions/admin.ConnectionJSON"
                                             }
                                         }
                                     }
@@ -355,13 +355,6 @@
                 ],
                 "summary": "Admin Login",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "Account credentials",
                         "name": "body",
@@ -966,6 +959,91 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/user/{user_id}/shared_accounts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Lists all users who have an IP in common with this user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AdminLogin"
+                ],
+                "summary": "Get a list of shared accounts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/admin.SharedAccountsJSON"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/restapi.ResponseJSON"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "allOf": [
                                 {
@@ -2465,6 +2543,29 @@
                 }
             }
         },
+        "admin.ConnectionJSON": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_used": {
+                    "type": "string"
+                },
+                "local_addr": {
+                    "type": "string"
+                },
+                "remote_addr": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/restapi.UserJSON"
+                }
+            }
+        },
         "admin.ResponseConnectionsJSON": {
             "type": "object",
             "properties": {
@@ -2528,6 +2629,32 @@
                 },
                 "update_profiles": {
                     "type": "boolean"
+                }
+            }
+        },
+        "admin.SharedAccountsJSON": {
+            "type": "object",
+            "properties": {
+                "remote_addr": {
+                    "type": "string"
+                },
+                "u1_display_name": {
+                    "type": "string"
+                },
+                "u1_id": {
+                    "type": "integer"
+                },
+                "u1_username": {
+                    "type": "string"
+                },
+                "u2_display_name": {
+                    "type": "string"
+                },
+                "u2_id": {
+                    "type": "integer"
+                },
+                "u2_username": {
+                    "type": "string"
                 }
             }
         },
