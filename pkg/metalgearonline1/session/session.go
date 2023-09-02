@@ -31,9 +31,10 @@ type Session struct {
 	//ActiveConnection gets filled in with user controlled data when they first connect to a game lobby
 	ActiveConnection models.Connection
 
-	isHost  bool
-	LobbyID types.LobbyID
-	Log     logrus.FieldLogger
+	isHost    bool
+	LobbyID   types.LobbyID
+	Log       logrus.FieldLogger
+	SharedIds []uint
 }
 
 func (s *Session) IsLoggedIn() bool {
@@ -87,4 +88,7 @@ func (s *Session) Login(user *models.User) {
 		// We could insert custom defaults here, or just let the game do it
 		// in the future it might be fun to set some custom F-keys for the user
 	}
+
+	// Fetch the list of shared accounts once on login instead of on whenever we need to expand blocklists
+	s.SharedIds = s.User.SharedAccounts(s.DB)
 }

@@ -100,3 +100,10 @@ func (u *User) PlayerOverview() *types.PlayerOverview {
 	o.FillEmblem(u.HasEmblem, u.EmblemText)
 	return &o
 }
+
+func (u *User) SharedAccounts(db *gorm.DB) []uint {
+	query := "SELECT DISTINCT u2.id AS common_user_id\nFROM users u1\nJOIN connections c1 ON u1.id = c1.user_id\nJOIN connections c2 ON c1.remote_addr = c2.remote_addr AND c1.user_id <> c2.user_id\nJOIN users u2 ON c2.user_id = u2.id\nWHERE u1.id = ?;"
+	var out []uint
+	db.Raw(query, u.ID).Scan(&out)
+	return out
+}

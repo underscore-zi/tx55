@@ -72,6 +72,29 @@ func (h PlayerStatsHandler) playerOverview(sess *session.Session, args *ArgsGetP
 		}
 	}
 
+	// Expand the blocklist to catches alternate accounts
+	// we do this by getting all the IDs that have an IP in common with this session's user
+	// then if one of the alts is in the blocklist we replace it with the current user's ID
+	// This only really matters for the stats request when joining a game, as it'll trip the
+	// blocklist check. Normally you can't reach this without a session, but add the check anyway.
+	if len(sess.SharedIds) > 0 {
+		alts := make(map[types.UserID]bool)
+		for _, alt := range sess.SharedIds {
+			alts[types.UserID(alt)] = true
+		}
+
+		match := -1
+		for i, id := range overview.BlockedList {
+			if alts[id] {
+				match = i
+				break
+			}
+		}
+		if match > -1 {
+			overview.BlockedList[match] = types.UserID(user.ID)
+		}
+	}
+
 	return overview
 }
 
