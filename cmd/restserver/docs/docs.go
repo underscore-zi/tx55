@@ -2641,25 +2641,16 @@ const docTemplate = `{
         "admin.SharedAccountsJSON": {
             "type": "object",
             "properties": {
+                "display_name": {
+                    "type": "string"
+                },
                 "remote_addr": {
                     "type": "string"
                 },
-                "u1_display_name": {
-                    "type": "string"
-                },
-                "u1_id": {
+                "user_id": {
                     "type": "integer"
                 },
-                "u1_username": {
-                    "type": "string"
-                },
-                "u2_display_name": {
-                    "type": "string"
-                },
-                "u2_id": {
-                    "type": "integer"
-                },
-                "u2_username": {
+                "username": {
                     "type": "string"
                 }
             }

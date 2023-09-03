@@ -291,15 +291,10 @@ func SearchByIP(c *gin.Context) {
 }
 
 type SharedAccountsJSON struct {
-	U1_ID          uint   `json:"u1_id"`
-	U1_username    string `json:"u1_username"`
-	U1_displayname string `json:"u1_display_name"`
-
-	U2_ID          uint   `json:"u2_id"`
-	U2_username    string `json:"u2_username"`
-	U2_displayname string `json:"u2_display_name"`
-
-	RemoteAddr string `json:"remote_addr"`
+	UID         uint   `json:"user_id"`
+	UserName    string `json:"username"`
+	DisplayName string `json:"display_name"`
+	RemoteAddr  string `json:"remote_addr"`
 }
 
 // SharedAccounts godoc
@@ -325,19 +320,14 @@ func SharedAccounts(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 
 	type Row struct {
-		U1_ID          uint
-		U1_username    []byte
-		U1_displayname []byte
-
-		U2_ID          uint
-		U2_username    []byte
-		U2_displayname []byte
-
-		RemoteAddr string
+		ID          uint
+		Username    []byte
+		DisplayName []byte
+		RemoteAddr  string
 	}
 
 	var rows []Row
-	query := "SELECT u1.id as \"U1_ID\", u1.username as \"U1_username\", u1.display_name as \"U1_displayname\",\n       u2.id as \"U2_ID\", u2.username as \"U2_username\", u2.display_name as \"U2_displayname\",\n       c.remote_addr as \"RemoteAddr\"\nFROM users u1\nJOIN connections c ON u1.id = c.user_id\nJOIN users u2 ON u2.id != u1.id\nAND u2.id IN (\n    SELECT DISTINCT u3.id\n    FROM users u3\n    JOIN connections c3 ON u3.id = c3.user_id\n    WHERE c3.remote_addr = c.remote_addr\n) WHERE u1.id = ?\n"
+	query := "SELECT DISTINCT u2.id, u2.username, u2.display_name, c.remote_addr\nFROM users u1\nJOIN connections c ON u1.id = c.user_id\nJOIN users u2 ON u2.id != u1.id\nAND u2.id IN (\n    SELECT DISTINCT u3.id\n    FROM users u3\n    JOIN connections c3 ON u3.id = c3.user_id\n    WHERE c3.remote_addr = c.remote_addr\n) WHERE u1.id = ? \n"
 	if err := db.Unscoped().Raw(query, uid).Scan(&rows).Error; err != nil && err != gorm.ErrRecordNotFound {
 		l.WithError(err).WithFields(logrus.Fields{
 			"uid": uid,
@@ -348,14 +338,11 @@ func SharedAccounts(c *gin.Context) {
 	var out []SharedAccountsJSON
 	for _, row := range rows {
 		acc := SharedAccountsJSON{
-			U1_ID:      row.U1_ID,
-			U2_ID:      row.U2_ID,
+			UID:        row.ID,
 			RemoteAddr: row.RemoteAddr,
 		}
-		acc.U1_username, _ = iso8859.DecodeBytes(row.U1_username)
-		acc.U1_displayname, _ = iso8859.DecodeBytes(row.U1_displayname)
-		acc.U2_username, _ = iso8859.DecodeBytes(row.U2_username)
-		acc.U2_displayname, _ = iso8859.DecodeBytes(row.U2_displayname)
+		acc.UserName, _ = iso8859.DecodeBytes(row.Username)
+		acc.DisplayName, _ = iso8859.DecodeBytes(row.DisplayName)
 
 		if !fullIps {
 			acc.RemoteAddr = acc.RemoteAddr[:strings.LastIndex(acc.RemoteAddr, ".")+1] + "xxx"
