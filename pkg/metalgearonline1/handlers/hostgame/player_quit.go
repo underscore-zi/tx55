@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/session"
@@ -39,6 +40,11 @@ func (h HostPlayerLeaveHandler) HandleArgs(sess *session.Session, args *ArgsHost
 	go sess.GameState.RemovePlayer(args.UserID)
 	sess.EventGamePlayerLeft(args.UserID)
 	out = append(out, ResponseHostPlayerLeave{ErrorCode: 0, UserID: args.UserID})
+
+	sess.LogEntry().WithFields(logrus.Fields{
+		"player_id": args.UserID,
+	}).Info("quit game")
+
 	return
 }
 

@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/session"
@@ -39,6 +40,10 @@ func (h HostPlayerJoinHandler) HandleArgs(sess *session.Session, args *ArgsHostP
 	go sess.GameState.AddPlayer(args.UserID)
 	sess.EventGamePlayerJoined(args.UserID)
 	out = append(out, ResponseHostPlayerJoin{ErrorCode: 0, UserID: args.UserID})
+
+	sess.LogEntry().WithFields(logrus.Fields{
+		"player_id": args.UserID,
+	}).Info("connected to host")
 
 	return
 }

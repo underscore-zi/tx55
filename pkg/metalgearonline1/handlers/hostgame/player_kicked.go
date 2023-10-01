@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/session"
@@ -38,6 +39,11 @@ func (h HostPlayerKickedHandler) HandleArgs(sess *session.Session, args *ArgsHos
 
 	go sess.GameState.KickPlayer(args.UserID)
 	out = append(out, ResponseHostPlayerKicked{ErrorCode: 0, UserID: args.UserID})
+
+	sess.LogEntry().WithFields(logrus.Fields{
+		"player_id": args.UserID,
+	}).Info("kicked")
+
 	return
 }
 

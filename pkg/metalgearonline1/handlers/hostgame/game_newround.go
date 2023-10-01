@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/session"
@@ -39,6 +40,15 @@ func (h HostNewRoundHandler) HandleArgs(sess *session.Session, args *ArgsHostNew
 	go sess.GameState.NewRound(args.RoundID)
 	sess.EventGameNewRound(args.RoundID)
 	out = append(out, ResponseHostNewRound{ErrorCode: 0})
+
+	sess.LogEntry().WithFields(logrus.Fields{
+		"round_id": args.RoundID,
+		"map_id":   sess.GameState.Rules[args.RoundID].Map,
+		"map":      sess.GameState.Rules[args.RoundID].Map.String(),
+		"mode":     sess.GameState.Rules[args.RoundID].Mode.String(),
+		"mode_id":  sess.GameState.Rules[args.RoundID].Mode,
+	}).Info("new round")
+
 	return
 }
 

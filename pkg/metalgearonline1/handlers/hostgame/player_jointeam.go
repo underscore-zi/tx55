@@ -1,6 +1,7 @@
 package hostgame
 
 import (
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"tx55/pkg/metalgearonline1/handlers"
 	"tx55/pkg/metalgearonline1/session"
@@ -38,6 +39,13 @@ func (h HostPlayerJoinTeam) HandleArgs(sess *session.Session, args *ArgsHostPlay
 
 	go sess.GameState.JoinTeam(args.UserID, args.TeamID)
 	out = append(out, ResponseHostPlayerJoinTeam{ErrorCode: 0, UserID: args.UserID})
+
+	sess.LogEntry().WithFields(logrus.Fields{
+		"player_id":  args.UserID,
+		"team_id":    args.TeamID,
+		"team_color": args.TeamID.ColorString(),
+	}).Info("joined team")
+
 	return
 }
 
