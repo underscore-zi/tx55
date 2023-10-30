@@ -150,8 +150,11 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	gamewebGroup.POST("/reguser/deluser.html", gameweb.DeleteAccount)
 	gamewebGroup.POST("/reguser/chgpswd.html", gameweb.ChangePassword)
 
-	if os.Getenv("MGS4_DL_PROXY") != "" {
-		s.Engine.Any("/mgs4/*any", ReverseProxy())
+	// MGO1 overloads the "savemgo.com" domain and points it to this server, however anyone using our DNS
+	// for the MGS4 downloads will want to resolve the "real" savemgo.com domain. So this sets up a reverse proxy
+	// to the true server
+	if os.Getenv("MGS4_DL_HOST") != "" {
+		s.Engine.Any("/mgs4/*any", MGS4DownloadProxy())
 	}
 
 	return
@@ -175,7 +178,7 @@ func notImplemented(c *gin.Context) {
 	Success(c, "Not implemented")
 }
 
-func ReverseProxy() gin.HandlerFunc {
+func MGS4DownloadProxy() gin.HandlerFunc {
 	target := os.Getenv("MGS4_DL_HOST")
 	return func(c *gin.Context) {
 		director := func(req *http.Request) {
