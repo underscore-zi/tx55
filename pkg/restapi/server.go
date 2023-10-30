@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
+	"net/http"
+	"net/http/httputil"
 	"os"
 	"tx55/pkg/configurations"
 	"tx55/pkg/restapi/events"
@@ -148,6 +150,10 @@ func NewServer(config configurations.RestAPI) (s *Server, err error) {
 	gamewebGroup.POST("/reguser/deluser.html", gameweb.DeleteAccount)
 	gamewebGroup.POST("/reguser/chgpswd.html", gameweb.ChangePassword)
 
+	if os.Getenv("MGS4_DL_PROXY") != "" {
+		s.Engine.Any("/mgs4/*any", ReverseProxy())
+	}
+
 	return
 }
 
@@ -167,4 +173,17 @@ func Error(c *gin.Context, code int, message string) {
 
 func notImplemented(c *gin.Context) {
 	Success(c, "Not implemented")
+}
+
+func ReverseProxy() gin.HandlerFunc {
+	target := os.Getenv("MGS4_DL_HOST")
+	return func(c *gin.Context) {
+		director := func(req *http.Request) {
+			req.URL.Host = target
+			req.URL.Scheme = "http"
+			req.Host = target
+		}
+		proxy := &httputil.ReverseProxy{Director: director}
+		proxy.ServeHTTP(c.Writer, c.Request)
+	}
 }
