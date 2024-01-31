@@ -25,13 +25,25 @@ func RegisterAccount(c *gin.Context) {
 		return
 	}
 
+	db := c.MustGet("db").(*gorm.DB)
+
+	// Do not allow registering the same username even if it was deleted
+	var existingUser models.User
+	if tx := db.Unscoped().Where("username LIKE ?", args.Username).First(&existingUser); tx.Error == nil {
+		log.WithFields(log.Fields{
+			"id":       existingUser.ID,
+			"username": existingUser.Username,
+		}).Info("User already exists")
+		c.String(400, "User already exists")
+		return
+	}
+
 	var newUser models.User
 	newUser.Username = []byte(args.Username)
 	newUser.Password = args.Password
 	newUser.DisplayName = []byte(args.DisplayName)
 	newUser.VsRating = 1000
 
-	db := c.MustGet("db").(*gorm.DB)
 	if tx := db.Create(&newUser); tx.Error != nil {
 		log.WithError(tx.Error).Error("Failed to save user")
 		c.String(500, "Database error")
