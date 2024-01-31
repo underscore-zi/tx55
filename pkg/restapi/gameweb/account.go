@@ -32,7 +32,7 @@ func RegisterAccount(c *gin.Context) {
 	if tx := db.Unscoped().Where("username LIKE ?", args.Username).First(&existingUser); tx.Error == nil {
 		log.WithFields(log.Fields{
 			"id":       existingUser.ID,
-			"username": existingUser.Username,
+			"username": string(existingUser.Username),
 		}).Info("User already exists")
 		c.String(400, "User already exists")
 		return
@@ -75,6 +75,7 @@ func DeleteAccount(c *gin.Context) {
 		c.String(404, "User not found")
 		return
 	}
+
 	if !user.CheckRawPassword([]byte(args.Password)) {
 		c.String(404, "User not found")
 		return
@@ -87,7 +88,7 @@ func DeleteAccount(c *gin.Context) {
 
 	log.WithFields(log.Fields{
 		"id":       user.ID,
-		"username": user.Username,
+		"username": string(user.Username),
 	}).Info("Deleted user")
 
 	c.String(200, "0")
@@ -123,7 +124,7 @@ func ChangePassword(c *gin.Context) {
 
 	log.WithFields(log.Fields{
 		"id":       user.ID,
-		"username": user.Username,
+		"username": string(user.Username),
 	}).Info("Changed password")
 
 	c.String(200, "0")
