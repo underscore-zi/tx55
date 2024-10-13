@@ -89,17 +89,18 @@ func ManageUsers(c *gin.Context) {
 				return
 			}
 		} else {
+			var updates User;
 			if args.Username != "" {
-				user.Username = args.Username
+				updates.Username = args.Username
 			}
 			if args.Password != "" {
-				user.Password = args.Password
+				updates.Password = args.Password
 			}
 			if args.RoleID > 0 {
-				user.RoleID = args.RoleID
+				updates.RoleID = args.RoleID
 			}
 			// save the updated user
-			if tx := adminDB.Model(&user).Updates(&user); tx.Error != nil {
+			if tx := adminDB.Model(&user).Updates(&updates); tx.Error != nil {
 				restapi.Error(c, 400, tx.Error.Error())
 				return
 			}
