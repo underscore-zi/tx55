@@ -66,6 +66,10 @@ func lobbiesTable(db *gorm.DB) (err error) {
 			return
 		}
 
+		if ip == "" {
+			Logger.Fatal("External IP is required for gate server record creation")
+		}
+
 		lobby = models.Lobby{
 			Name: "gate-server",
 			Type: types.LobbyTypeGate,
@@ -92,6 +96,10 @@ func lobbiesTable(db *gorm.DB) (err error) {
 			return
 		}
 
+		if ip == "" {
+			Logger.Fatal("External IP is required for account server record creation")
+		}
+
 		lobby = models.Lobby{
 			Name: "account-server",
 			Type: types.LobbyTypeAccount,
@@ -116,6 +124,10 @@ func lobbiesTable(db *gorm.DB) (err error) {
 		var ip string
 		if ip, err = GetExternalIP(); err != nil {
 			return
+		}
+
+		if ip == "" {
+			Logger.Fatal("External IP is required for game server record creation")
 		}
 
 		lobby = models.Lobby{
