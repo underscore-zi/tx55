@@ -134,7 +134,7 @@ func lobbiesTable(db *gorm.DB) (err error) {
 			Name: "SNAKE",
 			Type: types.LobbyTypeGame,
 			IP:   ip,
-			Port: 5732,
+			Port: 5731,
 		}
 
 		if err = db.Create(&lobby).Error; err != nil {
