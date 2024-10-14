@@ -57,7 +57,7 @@ type ResponseNewsListEntry struct {
 	Unknown byte
 	Time    [19]byte
 	Topic   [64]byte
-	Body    [2048]byte `packet:"truncate"`
+	Body    [512]byte `packet:"truncate"`
 }
 
 func (r ResponseNewsListEntry) Type() types.PacketType { return types.ServerNewsListEntry }
