@@ -28,7 +28,7 @@ func (h NewsListHandler) Handle(sess *session.Session, _ *packet.Packet) ([]type
 	var entries []models.News
 	out = append(out, ResponseNewsListStart{})
 
-	_ = sess.DB.Where("topic != ?", "policy").Find(&entries)
+	_ = sess.DB.Where("topic != ?", "policy").Order("created_at DESC").Find(&entries)
 	for _, entry := range entries {
 		news := ResponseNewsListEntry{
 			ID: uint32(entry.ID),
@@ -57,7 +57,7 @@ type ResponseNewsListEntry struct {
 	Unknown byte
 	Time    [19]byte
 	Topic   [64]byte
-	Body    [512]byte `packet:"truncate"`
+	Body    [2048]byte `packet:"truncate"`
 }
 
 func (r ResponseNewsListEntry) Type() types.PacketType { return types.ServerNewsListEntry }
