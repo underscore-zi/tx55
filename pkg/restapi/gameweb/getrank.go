@@ -130,7 +130,13 @@ func PostGetRanks(c *gin.Context) {
 
 	// Not sure what the second to last number is in each of these rows
 	for _, row := range rows {
-		builder.WriteString(fmt.Sprintf("%d,%d,%s,%d,%d,%d,0,%d\n", row.Rank, row.UserID, row.DisplayName, row.Kills, row.Deaths, row.Points, row.VsRating))
+		// The game generally supports 16byte long names...except here it breaks
+		name := row.DisplayName
+		if len(name) >= 16 {
+			name = name[:15]
+		}
+
+		builder.WriteString(fmt.Sprintf("%d,%d,%s,%d,%d,%d,0,%d\n", row.Rank, row.UserID, name, row.Kills, row.Deaths, row.Points, row.VsRating))
 	}
 	builder.WriteString("\n")
 	c.String(200, builder.String())
